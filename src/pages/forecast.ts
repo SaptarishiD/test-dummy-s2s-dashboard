@@ -151,11 +151,11 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     <section class="india-sheet">
       <header class="india-sheet__header">
         <div>
-          <span class="india-sheet__brand">Atmosphere 42 · India outlook</span>
+          <span class="india-sheet__brand">Atmosphere 42 · India S2S forecast prototype</span>
           <h1 id="india-product-title">Weekly-mean rainfall anomaly</h1>
           <p>28 July 2026 forecast start <i>•</i> 26–27 July daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
         </div>
-        <span class="india-experimental">Experimental</span>
+        <span class="india-experimental">Experimental prototype</span>
       </header>
 
       <div class="india-toolbar">
@@ -172,7 +172,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
 
       <footer class="india-sheet__footer">
         <p id="india-baseline-note"></p>
-        <span>Research guidance · Not an operational warning</span>
+        <span>Experimental S2S guidance · Not an operational warning</span>
       </footer>
     </section>
   `;

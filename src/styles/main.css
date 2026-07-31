@@ -2753,6 +2753,8 @@ a {
   text-transform: uppercase;
   background: #fff0dc;
   border: 1px solid #efc38c;
+  border-radius: 2px;
+  white-space: nowrap;
 }
 
 .india-toolbar {

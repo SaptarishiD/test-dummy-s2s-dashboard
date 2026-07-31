@@ -162,9 +162,9 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand" href="#forecast" aria-label="Atmosphere 42 home">
+      <a class="brand" href="#forecast" aria-label="Atmosphere 42 experimental S2S forecast prototype home">
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>Atmosphere 42</strong><small>Global Outlook Lab</small></span>
+        <span><strong>Atmosphere 42</strong><small>Experimental S2S Prototype</small></span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#forecast" data-route="forecast">Global</a>
@@ -179,7 +179,7 @@ function shell(): string {
     <footer class="site-footer">
       <div>
         <strong>Atmosphere 42</strong>
-        <span>Validated static prototype · Research use only</span>
+        <span>Experimental S2S forecast prototype · Research use only</span>
       </div>
       <p>100 members · 42 days · Native 1.5° grid · Natural Earth geography</p>
     </footer>

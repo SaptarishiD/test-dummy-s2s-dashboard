@@ -248,14 +248,14 @@ export function renderGlobalPage(
       <div class="global-stage-shade" aria-hidden="true"></div>
 
       <div class="global-title">
-        <span class="global-eyebrow"><b>Experimental</b> · research ensemble · not operational</span>
+        <span class="global-eyebrow"><b>Experimental prototype</b> · S2S ensemble guidance · not operational</span>
         <h1>Global outlook</h1>
-        <p>42 daily fields · 100 members · Week 1 to Week 6</p>
+        <p>42-day ensemble guidance · 100 members · Weeks 1–6</p>
       </div>
 
       <aside class="global-facts" aria-label="Forecast issue and integrity facts">
         <div><span>Initialized</span><strong>28 Jul 2026 · 00 UTC</strong></div>
-        <div><span>Product</span><strong class="experimental-text">Experimental ensemble mean</strong></div>
+        <div><span>Product</span><strong class="experimental-text">Experimental S2S prototype</strong></div>
         <div><span>Integrity</span><strong class="integrity-ok" id="integrity-status">✓ Active layer SHA-256 verified</strong></div>
       </aside>
 
@@ -329,7 +329,7 @@ export function renderGlobalPage(
         <button class="speed-button" id="speed-button" type="button" aria-label="Change animation speed">1×</button>
       </div>
 
-      <p class="global-disclaimer">Experimental research product · Daily model fields · Long leads are broad guidance, not deterministic local forecasts</p>
+      <p class="global-disclaimer">Experimental S2S forecast prototype · Long leads show broad guidance, not deterministic local forecasts</p>
     </section>
   `;
 
