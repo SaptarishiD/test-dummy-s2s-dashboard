@@ -166,23 +166,25 @@ export class ForecastMap {
   }
 
   private addGraticules(svg: SVGSVGElement): void {
-    for (const longitude of [60, 70, 80, 90]) {
+    for (const longitude of [70, 80, 90, 100]) {
+      const x = longitude === 100 ? MAP_SIZE - 1 : mapX(longitude);
       const line = svgElement("line");
-      line.setAttribute("x1", String(mapX(longitude)));
-      line.setAttribute("x2", String(mapX(longitude)));
+      line.setAttribute("x1", String(x));
+      line.setAttribute("x2", String(x));
       line.setAttribute("y1", "0");
       line.setAttribute("y2", String(MAP_SIZE));
       line.setAttribute("class", "map-graticule");
       svg.append(line);
 
       const label = svgElement("text");
-      label.setAttribute("x", String(mapX(longitude) + 5));
+      label.setAttribute("x", String(longitude === 100 ? x - 5 : x + 5));
       label.setAttribute("y", String(MAP_SIZE - 10));
       label.setAttribute("class", "map-coordinate");
+      if (longitude === 100) label.setAttribute("text-anchor", "end");
       label.textContent = `${longitude}°E`;
       svg.append(label);
     }
-    for (const latitude of [0, 10, 20, 30, 40]) {
+    for (const latitude of [10, 20, 30]) {
       const line = svgElement("line");
       line.setAttribute("x1", "0");
       line.setAttribute("x2", String(MAP_SIZE));
@@ -191,14 +193,12 @@ export class ForecastMap {
       line.setAttribute("class", "map-graticule");
       svg.append(line);
 
-      if (latitude < 40) {
-        const label = svgElement("text");
-        label.setAttribute("x", "8");
-        label.setAttribute("y", String(mapY(latitude) - 7));
-        label.setAttribute("class", "map-coordinate");
-        label.textContent = latitude === 0 ? "0°" : `${latitude}°N`;
-        svg.append(label);
-      }
+      const label = svgElement("text");
+      label.setAttribute("x", "8");
+      label.setAttribute("y", String(mapY(latitude) - 7));
+      label.setAttribute("class", "map-coordinate");
+      label.textContent = `${latitude}°N`;
+      svg.append(label);
     }
   }
 
