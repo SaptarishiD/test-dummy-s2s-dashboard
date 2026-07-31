@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T02:38:20.270875+00:00",
+  "generated_at": "2026-07-31T03:09:17.692484+00:00",
   "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public-data file except manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -16,8 +16,8 @@
     },
     {
       "path": "data/global/metadata.json",
-      "size_bytes": 104798,
-      "sha256": "df28d4214276d5f4d401b518ca9381f1b8c93d989ccece701030f7c44a06c029"
+      "size_bytes": 125379,
+      "sha256": "531145876e31646c3830d10f720a727c91f1494f47d3cc8e2b7961041da97f67"
     },
     {
       "path": "data/global/mslp-spread.bin",
@@ -43,6 +43,11 @@
       "path": "data/global/olr.bin",
       "size_bytes": 2439360,
       "sha256": "6be5885bf500b7bee8cd3f22cb12742d351c6471519844007252aa977b05b507"
+    },
+    {
+      "path": "data/global/precipitation-anomaly.bin",
+      "size_bytes": 2439360,
+      "sha256": "221d12145e76e2f50167e9f3daa3c144470a76f44a9845c095ef39493287a3ed"
     },
     {
       "path": "data/global/precipitation-spread.bin",
@@ -75,6 +80,11 @@
       "sha256": "48797cc5bd1184ac75c0884769c3490970d476adfe076d7396fd0fee46154fb5"
     },
     {
+      "path": "data/global/temperature-anomaly.bin",
+      "size_bytes": 2439360,
+      "sha256": "7085533282b3d4a608418efe19e074b18ea7834ff50c7ae77b272a61e0a68746"
+    },
+    {
       "path": "data/global/temperature-spread.bin",
       "size_bytes": 2439360,
       "sha256": "4f19398525cf6d8dd1fdfcc1b91452121d23605350fe035b3e889a9fb6a6575f"
@@ -105,6 +115,11 @@
       "sha256": "a214fedb16de9dc4e7063b1b4b9800886d120481d64d2c9a892898e703545e49"
     },
     {
+      "path": "data/global/z500-anomaly.bin",
+      "size_bytes": 2439360,
+      "sha256": "d4c56a905caf5fe066d3b75a11822c49dd48abb6620f7ac536d5cbb5844c986d"
+    },
+    {
       "path": "data/global/z500-spread.bin",
       "size_bytes": 2439360,
       "sha256": "f3d7993fb8ffa50ab504c0c52262db9bbd1e9dae6f884157b3654c6960f2cf5c"
@@ -116,8 +131,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 600,
-      "sha256": "f46e6ebea69cae7f6148f51d24ef588dfd39b31baec2644b5da7000a47fe6b2a"
+      "size_bytes": 691,
+      "sha256": "855c64520c9f71c5d48c26509ccbcda033580e95fa63e2e24924b86110b65555"
     },
     {
       "path": "data/india-admin.json",
@@ -137,7 +152,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 5542,
-      "sha256": "8466293b4ec79d956ded9ad21c1e137ab4b88b0f71f4002abff332f9936ddfe6"
+      "sha256": "d116c3f3c81b480ca60694cb7c177df3269fd672111a7d58985cc789d2b3d33b"
     },
     {
       "path": "data/world-countries.geojson",

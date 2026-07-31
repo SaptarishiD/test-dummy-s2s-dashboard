@@ -516,6 +516,11 @@ def main() -> int:
                     "tcwv",
                     "olr",
                 ],
+                "anomaly_variables": [
+                    "precipitation",
+                    "temperature",
+                    "z500",
+                ],
             },
             "available_issues": [
                 {

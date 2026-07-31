@@ -29,8 +29,10 @@ The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized
 FuXi climatology and audited IMERG Final climatology are currently
 season-limited; both cover this issue, while full-year automation remains a
-pipeline milestone. Global anomalies are not published because this climatology
-covers India only, not the complete 121 × 240 grid.
+pipeline milestone. The India climatology does not extend beyond its 27 × 27
+grid. The global viewer uses a separate exact-28-July, lead-matched 2002–2021
+model climatology for
+precipitation, 2 m temperature, and Z500 anomalies on the full global grid.
 
 ## Rebuild and validate
 
@@ -61,11 +63,12 @@ npm run dev
 
 The global contract stores little-endian `uint16` binary arrays in lead-day,
 latitude, longitude order: eight ensemble means, eight population standard
-deviations, and separate U/V component means for 850 hPa wind. A one-byte
+deviations, three signed anomaly fields, and separate U/V component means for
+850 hPa wind. A one-byte
 ocean mask limits SST display support. `metadata.json` locks dimensions,
 quantization, units, legends, valid periods, file sizes, and SHA-256 hashes.
 The default precipitation layer loads first; other fields load and verify
-lazily when selected. The complete optional global payload is about 44 MB
+lazily when selected. The complete optional global payload is about 51 MB
 before HTTP compression.
 
 Country boundaries and labels use Natural Earth. `india-admin.json` is a

@@ -16,6 +16,8 @@ export type GlobalVariableKey =
   | "olr"
   | "tcwv";
 
+export type GlobalDisplayMode = "absolute" | "anomaly";
+
 export interface LegendDefinition {
   boundaries: number[];
   colors: string[];
@@ -184,6 +186,26 @@ export interface GlobalVariableDefinition extends GlobalBinaryDefinition {
     statistic: string;
   };
   spread: GlobalSpreadDefinition;
+  anomaly?: GlobalAnomalyDefinition;
+  legend: LegendDefinition;
+}
+
+export interface GlobalAnomalyDefinition extends GlobalBinaryDefinition {
+  label: string;
+  short_label: string;
+  units: string;
+  description: string;
+  baseline: {
+    name: string;
+    source_file: string;
+    source_sha256: string;
+    initialization_slot: string;
+    hindcast_years: number[];
+    years: 20;
+    native_members_per_year: 51;
+    lead_days: 42;
+    weighting: string;
+  };
   legend: LegendDefinition;
 }
 
@@ -233,6 +255,7 @@ export interface GlobalMetadata {
 export interface GlobalForecastData {
   metadata: GlobalMetadata;
   fields: Partial<Record<GlobalVariableKey, Uint16Array>>;
+  anomalies: Partial<Record<GlobalVariableKey, Uint16Array>>;
   spreads: Partial<Record<GlobalVariableKey, Uint16Array>>;
   vectors: Partial<
     Record<GlobalVariableKey, { u: Uint16Array; v: Uint16Array }>

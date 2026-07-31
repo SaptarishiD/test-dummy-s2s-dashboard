@@ -140,8 +140,10 @@ without weakening the original India validation case.
   state/UT focus layer.
 - Use one shaded field plus multiple compatible overlays so simultaneous
   layers remain interpretable.
-- Publish global anomalies only after a matched 20-year full-world,
-  lead-dependent model climatology is complete.
+- Publish global TP, T2M, and Z500 anomalies against the exact 28 July,
+  2002–2021, lead-matched full-world model climatology.
+- Require 20 complete years × 51 members × 42 leads and independent native-file
+  spot recalculation before enabling each anomaly control.
 - Treat OLR and 850 hPa wind as MJO context only; do not publish an MJO
   phase/index without a matched climatology, anomaly/filter, and EOF contract.
 - Cross-fade daily maps for presentation only; do not describe the visual

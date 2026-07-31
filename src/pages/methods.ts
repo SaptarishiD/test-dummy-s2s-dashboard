@@ -118,9 +118,10 @@ export function renderMethodsPage(container: HTMLElement, data: AppData): void {
       <span class="chapter-number">14</span>
       <div>
         <span class="eyebrow">Global anomaly gate</span>
-        <h2>Possible, but not from the India-only climate</h2>
-        <p class="large-copy">The available 2002–2021 lead-matched model climatology covers the 27 × 27 India grid for rainfall and temperature. It cannot be stretched across the globe or exchanged between variables.</p>
-        <p>The global explorer therefore publishes absolute fields only. Its controls permit one shaded field plus multiple compatible contour and vector overlays. Global anomalies will unlock after a 20-year, 121 × 240, lead- and calendar-matched climatology passes the same publication checks.</p>
+        <h2>Exact-date model anomalies</h2>
+        <p class="large-copy">Global precipitation, 2 m temperature, and Z500 anomalies subtract the native 2002–2021 model climatology for the exact 28 July initialization and identical lead day on the complete 121 × 240 grid.</p>
+        <p>Every one of the 20 years contains 51 native members and 42 leads. Members receive equal weight within each year, then the 20 yearly means receive equal weight. An independent audit checked all 42,840 files and recalculated selected cells directly from the native reforecasts.</p>
+        <p>SST, OLR, TCWV, wind, and MSLP remain absolute-only because no equally audited matched global baseline is currently published for those fields.</p>
       </div>
     </section>
 

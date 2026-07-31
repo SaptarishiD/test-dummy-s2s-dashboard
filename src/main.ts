@@ -55,6 +55,7 @@ async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecast
     return buffer;
   };
   const fields: GlobalForecastData["fields"] = {};
+  const anomalies: GlobalForecastData["anomalies"] = {};
   const spreads: GlobalForecastData["spreads"] = {};
   const vectors: GlobalForecastData["vectors"] = {};
   const loading: Partial<Record<GlobalVariableKey, Promise<void>>> = {};
@@ -77,6 +78,14 @@ async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecast
       ]);
       fields[key] = new Uint16Array(meanBuffer);
       spreads[key] = new Uint16Array(spreadBuffer);
+      if (definition.anomaly) {
+        const anomalyBuffer = await fetchBinary(
+          definition.anomaly.path,
+          definition.anomaly.size_bytes,
+          definition.anomaly.sha256,
+        );
+        anomalies[key] = new Uint16Array(anomalyBuffer);
+      }
       if (definition.vector) {
         const [uBuffer, vBuffer] = await Promise.all([
           fetchBinary(
@@ -108,6 +117,7 @@ async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecast
   const result: GlobalForecastData = {
     metadata,
     fields,
+    anomalies,
     spreads,
     vectors,
     oceanMask: new Uint8Array(oceanMaskBuffer),
