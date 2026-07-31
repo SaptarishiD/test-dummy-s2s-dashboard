@@ -311,18 +311,7 @@ export interface IndiaAdminData {
   }>;
 }
 
-export interface IssueIndexData {
-  latest_successful_issue: string;
-  available_issues: Array<{
-    id: string;
-    initialization: string;
-    status: "green" | "warning";
-    forecast: string;
-  }>;
-}
-
 export interface AppData {
-  index: IssueIndexData;
   forecast: ForecastData;
   global: GlobalForecastData;
   validation: ValidationData;

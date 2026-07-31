@@ -2771,30 +2771,6 @@ a {
   gap: 6px;
 }
 
-.india-date-select {
-  display: grid;
-  flex: 0 0 auto;
-  gap: 4px;
-}
-
-.india-date-select span {
-  color: #68758a;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.india-date-select select {
-  min-height: 38px;
-  padding: 7px 30px 7px 10px;
-  color: #173f8a;
-  font: 800 10px/1.2 inherit;
-  background: #fff;
-  border: 1px solid #8ea7d0;
-  border-radius: 2px;
-}
-
 .india-product-tabs button,
 .india-range-tabs button {
   min-height: 38px;

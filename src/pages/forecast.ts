@@ -135,7 +135,7 @@ function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
 }
 
 export function renderForecastPage(container: HTMLElement, data: AppData): void {
-  const { forecast, validation, index } = data;
+  const { forecast, validation } = data;
   if (!validation.presentation_allowed) {
     container.innerHTML = `
       <section class="blocked-state">
@@ -153,18 +153,12 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         <div>
           <span class="india-sheet__brand">Atmosphere 42 · India S2S forecast prototype</span>
           <h1 id="india-product-title">Weekly-mean rainfall anomaly</h1>
-          <p>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} forecast start <i>•</i> ${forecast.issue.input_days.map((day) => friendlyDate(day)).join("–")} daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
+          <p>28 July 2026 forecast start <i>•</i> 26–27 July daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
         </div>
         <span class="india-experimental">Experimental prototype</span>
       </header>
 
       <div class="india-toolbar">
-        <label class="india-date-select">
-          <span>Initialization</span>
-          <select id="india-date-select" aria-label="Forecast initialization date">
-            ${index.available_issues.map((issue) => `<option value="${issue.id}" ${issue.initialization === forecast.issue.initialization ? "selected" : ""}>${friendlyDate(issue.initialization.slice(0, 10), true)}${issue.id === "20260728" ? " · 100 members" : " · 5 members"}</option>`).join("")}
-          </select>
-        </label>
         <div class="india-product-tabs" id="india-product-tabs" aria-label="India forecast field"></div>
         <div class="india-range-tabs" aria-label="Displayed forecast weeks">
           <button type="button" data-range="0" class="is-active">Weeks 1–4</button>
@@ -187,14 +181,6 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
   let rangeStart = 0;
   const productTabs = container.querySelector<HTMLDivElement>("#india-product-tabs")!;
   const panelGrid = container.querySelector<HTMLDivElement>("#india-panel-grid")!;
-
-  container.querySelector<HTMLSelectElement>("#india-date-select")!.addEventListener("change", (event) => {
-    const issue = (event.currentTarget as HTMLSelectElement).value;
-    const url = new URL(window.location.href);
-    url.searchParams.set("issue", issue);
-    url.hash = "india";
-    window.location.assign(url);
-  });
 
   PRODUCT_ORDER.forEach((productKey) => {
     const product = PRESENTATION_PRODUCTS[productKey];
@@ -262,10 +248,9 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     legend.style.setProperty("--legend-over", product.legend.over);
     legend.replaceChildren(createLegend(product));
     container.querySelector("#india-visual-note")!.textContent =
-      `${product.description.replace("100-member", `${forecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
-    const alignment = forecast.issue.climatology_alignment;
+      `${product.description}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
-      ? `Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (${alignment.left_slot}/${alignment.right_slot} interpolation).`
+      ? "Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (0725/0728 interpolation)."
       : "Experimental initialization from operational analysis and short-range forecast proxy inputs.";
   }
 

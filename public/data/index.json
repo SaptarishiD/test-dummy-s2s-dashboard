@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_at": "2026-07-30T23:40:19.069182+00:00",
-  "latest_successful_issue": "20260731",
+  "latest_successful_issue": "20260728",
   "global_viewer": {
     "issue": "20260728",
     "status": "experimental",
@@ -29,18 +29,6 @@
       "initialization": "2026-07-28T00:00:00Z",
       "status": "warning",
       "forecast": "forecasts/20260728.json"
-    },
-    {
-      "id": "20260730",
-      "initialization": "2026-07-30T00:00:00Z",
-      "status": "warning",
-      "forecast": "forecasts/20260730.json"
-    },
-    {
-      "id": "20260731",
-      "initialization": "2026-07-31T00:00:00Z",
-      "status": "warning",
-      "forecast": "forecasts/20260731.json"
     }
   ]
 }
