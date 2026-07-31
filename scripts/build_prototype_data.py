@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -13,6 +14,12 @@ from typing import Any
 import numpy as np
 import shapefile
 import xarray as xr
+PROJ_DATA = Path(sys.prefix) / "share" / "proj"
+if PROJ_DATA.is_dir():
+    os.environ.setdefault("PROJ_DATA", str(PROJ_DATA))
+import pyproj
+if PROJ_DATA.is_dir():
+    pyproj.datadir.set_data_dir(str(PROJ_DATA))
 from pyproj import CRS, Transformer
 from shapely import contains_xy
 from shapely.geometry import mapping, shape
@@ -276,10 +283,12 @@ def build_fields(
         week_end_exclusive = list(
             forecast.forecast_period_end.values[6::7].astype("datetime64[D]")
         )
+        model_state_day = forecast.model_state_time.values.astype("datetime64[D]")
+        target_month_day = np.datetime_as_string(model_state_day, unit="D")[5:].replace("-", "")
 
     with xr.open_dataset(climatology_path) as climatology:
         left, right, right_weight = climatology_bracket(
-            climatology.init_slot.values, "0727"
+            climatology.init_slot.values, target_month_day
         )
         rain_left = climatology.tp_ensemble_mean.sel(init_slot=left).values
         rain_right = climatology.tp_ensemble_mean.sel(init_slot=right).values
@@ -313,7 +322,7 @@ def build_fields(
     }
     diagnostics = {
         "alignment": {
-            "target_model_state_calendar_day": "0727",
+            "target_model_state_calendar_day": target_month_day,
             "left_slot": left,
             "right_slot": right,
             "right_weight": right_weight,
@@ -397,20 +406,30 @@ def main() -> int:
         if validation["overall_status"] == "warning"
         else "green"
     )
+    with xr.open_dataset(args.forecast) as source:
+        initialization_day = source.forecast_reference_time.values.astype("datetime64[D]")
+        model_state_day = source.model_state_time.values.astype("datetime64[D]")
+        issue_id = np.datetime_as_string(initialization_day, unit="D").replace("-", "")
+        initialization = np.datetime_as_string(initialization_day, unit="D") + "T00:00:00Z"
+        model_state_time = np.datetime_as_string(model_state_day, unit="D") + "T00:00:00Z"
+        input_days = [
+            np.datetime_as_string(model_state_day - np.timedelta64(1, "D"), unit="D"),
+            np.datetime_as_string(model_state_day, unit="D"),
+        ]
+        members = int(source.sizes["member"])
+        lead_days = int(source.sizes["lead_day"])
+        input_source = str(source.attrs.get("input_source", "Experimental operational proxy inputs"))
     forecast_payload = {
         "schema_version": 1,
         "generated_at": utc_now(),
         "issue": {
-            "initialization": FUXI_FORECAST.initialization + "Z",
-            "information_cutoff": FUXI_FORECAST.information_cutoff + "Z",
-            "model_state_time": FUXI_FORECAST.model_state_time + "Z",
-            "input_days": ["2026-07-26", "2026-07-27"],
-            "input_source": (
-                "NCEP operational GFS 1.0° analyses and 0–6 h forecasts, "
-                "aggregated to two UTC daily proxy inputs"
-            ),
-            "members": FUXI_FORECAST.members,
-            "lead_days": FUXI_FORECAST.lead_days,
+            "initialization": initialization,
+            "information_cutoff": initialization,
+            "model_state_time": model_state_time,
+            "input_days": input_days,
+            "input_source": input_source,
+            "members": members,
+            "lead_days": lead_days,
             "status": status,
             "scientific_status": (
                 "Experimental GFS-proxy initialization; no matched "
@@ -441,7 +460,7 @@ def main() -> int:
     }
     args.output_dir.mkdir(parents=True, exist_ok=True)
     forecast_dir = args.output_dir / "forecasts"
-    write_json(forecast_dir / "20260728.json", forecast_payload)
+    write_json(forecast_dir / f"{issue_id}.json", forecast_payload)
     write_json(
         args.output_dir / "india-outline.json",
         {

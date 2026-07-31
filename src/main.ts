@@ -126,7 +126,9 @@ async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecast
 }
 
 async function loadData(): Promise<AppData> {
+  const requestedIssue = new URLSearchParams(window.location.search).get("issue") ?? "20260728";
   const [
+    index,
     forecast,
     globalMetadata,
     validation,
@@ -137,7 +139,8 @@ async function loadData(): Promise<AppData> {
     indiaAdmin,
   ] =
     await Promise.all([
-    fetchJson<AppData["forecast"]>("./data/forecasts/20260728.json"),
+    fetchJson<AppData["index"]>("./data/index.json"),
+    fetchJson<AppData["forecast"]>(`./data/forecasts/${requestedIssue}.json`),
     fetchJson<GlobalMetadata>("./data/global/metadata.json"),
     fetchJson<AppData["validation"]>("./data/validation.json"),
     fetchJson<AppData["sources"]>("./data/sources.json"),
@@ -148,6 +151,7 @@ async function loadData(): Promise<AppData> {
   ]);
   const global = await fetchGlobalData(globalMetadata);
   return {
+    index,
     forecast,
     global,
     validation,
@@ -181,7 +185,7 @@ function shell(): string {
         <strong>Atmosphere 42</strong>
         <span>Experimental S2S forecast prototype · Research use only</span>
       </div>
-      <p>100 members · 42 days · Native 1.5° grid · Natural Earth geography</p>
+      <p>42 forecast days · Native 1.5° grid · Natural Earth geography</p>
     </footer>
   `;
 }
@@ -193,6 +197,13 @@ function renderRoute(data: AppData): void {
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("global-route", route === "forecast");
   document.body.classList.toggle("india-route", route === "india");
+  const statusDate = route === "forecast"
+    ? data.global.metadata.issue.initialization
+    : data.forecast.issue.initialization;
+  const statusLabel = new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
+  }).format(new Date(statusDate));
+  document.querySelector<HTMLElement>(".header-status span:last-child")!.textContent = statusLabel;
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
     .forEach((link) => {
