@@ -17,7 +17,8 @@ The prototype publishes one 100-member, 42-day forecast on the native 27 × 27,
 - weekly-mean 2-metre temperature;
 - weekly-mean temperature model anomaly.
 
-It also provides source validation and methods pages. Wind, ERPAS controls,
+Validation and methods remain in the tested data contract and repository
+documentation rather than public navigation. Wind, ERPAS controls,
 raw-member controls, login, a database, a backend server, and a scheduler are
 deliberately excluded.
 
@@ -149,7 +150,7 @@ without weakening the original India validation case.
 - Cross-fade daily maps for presentation only; do not describe the visual
   transition as an additional forecast time.
 - Keep the global interface model-neutral while retaining exact provenance in
-  Methods and source code.
+  repository documentation and source code.
 - Preserve the validated India product under a separate navigation route.
 
 ## Next milestones

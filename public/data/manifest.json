@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T03:09:17.692484+00:00",
+  "generated_at": "2026-07-31T09:57:02.685599+00:00",
   "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public-data file except manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -152,7 +152,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 5542,
-      "sha256": "d116c3f3c81b480ca60694cb7c177df3269fd672111a7d58985cc789d2b3d33b"
+      "sha256": "e0c297a575cbbec0bbec535d643080ce110aeef27c0063f69dc54e33d8180d46"
     },
     {
       "path": "data/world-countries.geojson",

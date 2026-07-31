@@ -1,8 +1,6 @@
 import "./styles/main.css";
 import { renderForecastPage } from "./pages/forecast";
 import { renderGlobalPage } from "./pages/global";
-import { renderMethodsPage } from "./pages/methods";
-import { renderValidationPage } from "./pages/validation";
 import type {
   AppData,
   GlobalForecastData,
@@ -10,9 +8,9 @@ import type {
   GlobalVariableKey,
 } from "./types";
 
-type Route = "forecast" | "india" | "validation" | "methods";
+type Route = "forecast" | "india";
 
-const ROUTES = new Set<Route>(["forecast", "india", "validation", "methods"]);
+const ROUTES = new Set<Route>(["forecast", "india"]);
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -170,9 +168,7 @@ function shell(): string {
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#forecast" data-route="forecast">Global</a>
-        <a href="#india" data-route="india">India case</a>
-        <a href="#validation" data-route="validation">Validation</a>
-        <a href="#methods" data-route="methods">Methods</a>
+        <a href="#india" data-route="india">India</a>
       </nav>
       <div class="header-status">
         <span class="live-dot" aria-hidden="true"></span>
@@ -196,6 +192,7 @@ function renderRoute(data: AppData): void {
   routeCleanup = undefined;
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("global-route", route === "forecast");
+  document.body.classList.toggle("india-route", route === "india");
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
     .forEach((link) => {
@@ -207,8 +204,6 @@ function renderRoute(data: AppData): void {
   content.replaceChildren();
   if (route === "forecast") routeCleanup = renderGlobalPage(content, data);
   if (route === "india") renderForecastPage(content, data);
-  if (route === "validation") renderValidationPage(content, data);
-  if (route === "methods") renderMethodsPage(content, data);
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 

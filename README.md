@@ -22,8 +22,7 @@ behind the India export had already been removed, so its exact stochastic draws
 could not be reused.
 
 The forecast interface uses the neutral product name **Atmosphere 42**. Model
-identity remains in this repository and the Methods page for scientific
-provenance.
+identity and scientific provenance remain in this repository.
 
 The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized
@@ -79,9 +78,15 @@ The India forecast JSON stores latitude and longitude vectors, a support mask,
 six week records, and flattened row-major fields. Every displayed field
 contains exactly `latitude.length × longitude.length` finite values.
 
+The India presentation follows the supplied four-panel PDF structure: one
+shared fixed legend, exact reference colour levels, surrounding-country and
+India administrative outlines, and selectable Weeks 1–4 or Weeks 3–6 for all
+four products. Interpolation is visual only; hover values remain native-grid
+values.
+
 The site has no backend. Hash navigation keeps the GitHub Pages deployment
 portable, and a failed validation status blocks forecast rendering while
-leaving the validation and methods pages available.
+the scientific checks remain internal to the publication workflow.
 
 ## Deployment
 

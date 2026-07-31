@@ -2,9 +2,11 @@ import { colorFor, formatValue } from "../lib/color";
 import type {
   ForecastData,
   ForecastWeek,
+  IndiaAdminData,
   OutlineData,
   ProductDefinition,
   ProductKey,
+  WorldCountriesData,
 } from "../types";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -13,6 +15,7 @@ const LON_MIN = 59.25;
 const LON_MAX = 99.75;
 const LAT_MIN = -0.75;
 const LAT_MAX = 39.75;
+const VISUAL_GRID_SIZE = 162;
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
   tag: K,
@@ -58,16 +61,22 @@ export class ForecastMap {
   private readonly container: HTMLElement;
   private readonly forecast: ForecastData;
   private readonly outline: OutlineData;
+  private readonly world: WorldCountriesData;
+  private readonly indiaAdmin: IndiaAdminData;
   private readonly tooltip: HTMLDivElement;
 
   constructor(
     container: HTMLElement,
     forecast: ForecastData,
     outline: OutlineData,
+    world: WorldCountriesData,
+    indiaAdmin: IndiaAdminData,
   ) {
     this.container = container;
     this.forecast = forecast;
     this.outline = outline;
+    this.world = world;
+    this.indiaAdmin = indiaAdmin;
     this.tooltip = document.createElement("div");
     this.tooltip.className = "map-tooltip";
     this.tooltip.hidden = true;
@@ -94,10 +103,66 @@ export class ForecastMap {
     ocean.setAttribute("height", String(MAP_SIZE));
     ocean.setAttribute("class", "map-ocean");
     svg.append(ocean);
+    this.addInterpolatedField(svg, productKey, week, product);
+    this.addWorldBoundaries(svg);
     this.addGraticules(svg);
-    this.addCells(svg, productKey, week, product);
+    this.addInteractiveCells(svg, productKey, week, product);
     this.addOutline(svg);
+    this.addIndiaAdmin(svg);
     this.container.prepend(svg);
+  }
+
+  private addInterpolatedField(
+    svg: SVGSVGElement,
+    productKey: ProductKey,
+    week: ForecastWeek,
+    product: ProductDefinition,
+  ): void {
+    const values = week.fields[productKey];
+    const { latitude, longitude } = this.forecast.grid;
+    const canvas = document.createElement("canvas");
+    canvas.width = VISUAL_GRID_SIZE;
+    canvas.height = VISUAL_GRID_SIZE;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas rendering is unavailable");
+
+    const sample = (row: number, column: number): number => {
+      const safeRow = Math.max(0, Math.min(latitude.length - 1, row));
+      const safeColumn = Math.max(0, Math.min(longitude.length - 1, column));
+      return values[safeRow * longitude.length + safeColumn];
+    };
+
+    for (let y = 0; y < VISUAL_GRID_SIZE; y += 1) {
+      const lat = LAT_MAX - ((y + 0.5) / VISUAL_GRID_SIZE) * (LAT_MAX - LAT_MIN);
+      const row = (latitude[0] - lat) / this.forecast.grid.spacing_degrees;
+      const row0 = Math.floor(row);
+      const rowWeight = row - row0;
+      for (let x = 0; x < VISUAL_GRID_SIZE; x += 1) {
+        const lon = LON_MIN + ((x + 0.5) / VISUAL_GRID_SIZE) * (LON_MAX - LON_MIN);
+        const column = (lon - longitude[0]) / this.forecast.grid.spacing_degrees;
+        const column0 = Math.floor(column);
+        const columnWeight = column - column0;
+        const top =
+          sample(row0, column0) * (1 - columnWeight) +
+          sample(row0, column0 + 1) * columnWeight;
+        const bottom =
+          sample(row0 + 1, column0) * (1 - columnWeight) +
+          sample(row0 + 1, column0 + 1) * columnWeight;
+        const value = top * (1 - rowWeight) + bottom * rowWeight;
+        context.fillStyle = colorFor(value, product.legend);
+        context.fillRect(x, y, 1, 1);
+      }
+    }
+
+    const image = svgElement("image");
+    image.setAttribute("x", "0");
+    image.setAttribute("y", "0");
+    image.setAttribute("width", String(MAP_SIZE));
+    image.setAttribute("height", String(MAP_SIZE));
+    image.setAttribute("preserveAspectRatio", "none");
+    image.setAttribute("href", canvas.toDataURL("image/png"));
+    image.setAttribute("class", "map-raster");
+    svg.append(image);
   }
 
   private addGraticules(svg: SVGSVGElement): void {
@@ -137,27 +202,26 @@ export class ForecastMap {
     }
   }
 
-  private addCells(
+  private addInteractiveCells(
     svg: SVGSVGElement,
     productKey: ProductKey,
     week: ForecastWeek,
     product: ProductDefinition,
   ): void {
     const values = week.fields[productKey];
-    const { latitude, longitude, india_mask: mask } = this.forecast.grid;
+    const { latitude, longitude } = this.forecast.grid;
     const cellSize = mapX(LON_MIN + 1.5) - mapX(LON_MIN);
 
     latitude.forEach((lat, latIndex) => {
       longitude.forEach((lon, lonIndex) => {
         const flatIndex = latIndex * longitude.length + lonIndex;
-        if (!mask[flatIndex]) return;
         const value = values[flatIndex];
         const cell = svgElement("rect");
         cell.setAttribute("x", String(mapX(lon - 0.75)));
         cell.setAttribute("y", String(mapY(lat + 0.75)));
         cell.setAttribute("width", String(cellSize + 0.3));
         cell.setAttribute("height", String(cellSize + 0.3));
-        cell.setAttribute("fill", colorFor(value, product.legend));
+        cell.setAttribute("fill", "transparent");
         cell.setAttribute("class", "map-cell");
         cell.setAttribute("tabindex", "0");
         cell.setAttribute(
@@ -194,6 +258,20 @@ export class ForecastMap {
     });
   }
 
+  private addWorldBoundaries(svg: SVGSVGElement): void {
+    this.world.features.forEach((feature) => {
+      if (!feature.geometry) return;
+      const path = svgElement("path");
+      path.setAttribute(
+        "d",
+        geometryPath(feature.geometry.type, feature.geometry.coordinates),
+      );
+      path.setAttribute("class", "map-world-outline");
+      path.setAttribute("fill-rule", "evenodd");
+      svg.append(path);
+    });
+  }
+
   private addOutline(svg: SVGSVGElement): void {
     const geometry = this.outline.geometry;
     if (geometry.coordinates) {
@@ -206,5 +284,18 @@ export class ForecastMap {
       path.setAttribute("fill-rule", "evenodd");
       svg.append(path);
     }
+  }
+
+  private addIndiaAdmin(svg: SVGSVGElement): void {
+    this.indiaAdmin.features.forEach((feature) => {
+      const path = svgElement("path");
+      path.setAttribute(
+        "d",
+        geometryPath(feature.geometry.type, feature.geometry.coordinates),
+      );
+      path.setAttribute("class", "map-india-admin");
+      path.setAttribute("fill-rule", "evenodd");
+      svg.append(path);
+    });
   }
 }
