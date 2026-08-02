@@ -16,9 +16,9 @@
       "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
     },
     {
-      "path": "SCDLDS_India_Experimental_Forecast_ERA5_20260715.pdf",
-      "size_bytes": 4161811,
-      "sha256": "61cfc5948928d47e427985fcb4b93eff10ce31384bc1dfbd3a841fab050fea0a"
+      "path": "S2S_Research_India_Forecast_ERA5_20260715.pdf",
+      "size_bytes": 3972002,
+      "sha256": "a9ebc233621292fab5ba1722562b02a1836622e9bfde98c49e8f2d869d525adf"
     }
   ]
 }

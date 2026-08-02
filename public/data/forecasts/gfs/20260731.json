@@ -27,8 +27,8 @@
       "india_netcdf": "downloads/gfs/20260731/india-weekly.nc",
       "india_summary_csv": "downloads/gfs/20260731/india-summary.csv",
       "manifest": "downloads/gfs/20260731/manifest.json",
-      "india_pdf": "downloads/gfs/20260731/SCDLDS_India_Experimental_Forecast_GFS_20260731.pdf",
-      "india_pdf_sha256": "e95eea8bf4f49e6c20f1fa2da0128465a3aac821da41f18fafb18def0d1a5766"
+      "india_pdf": "downloads/gfs/20260731/S2S_Research_India_Forecast_GFS_20260731.pdf",
+      "india_pdf_sha256": "31213b05ca94e123d16a2eb33d211b2d447dcdcb7cb74166bcc98cdd178dba8f"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0730",

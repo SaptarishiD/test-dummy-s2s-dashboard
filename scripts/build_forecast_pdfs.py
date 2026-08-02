@@ -19,6 +19,7 @@ import numpy as np  # noqa: E402
 from matplotlib.backends.backend_pdf import PdfPages  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.colors import BoundaryNorm, ListedColormap  # noqa: E402
+from matplotlib.patches import FancyBboxPatch  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
@@ -198,11 +199,12 @@ def build_pdf(
     output_root = PUBLIC / "downloads" / source_id / issue_id
     output_root.mkdir(parents=True, exist_ok=True)
     output = output_root / (
-        f"SCDLDS_India_Experimental_Forecast_{source_id.upper()}_{issue_id}.pdf"
+        f"S2S_Research_India_Forecast_{source_id.upper()}_{issue_id}.pdf"
     )
     for pattern in (
         "Atmosphere42_India_*.pdf",
         "SCDLDS_India_Experimental_Forecast_*.pdf",
+        "S2S_Research_India_Forecast_*.pdf",
     ):
         for stale_pdf in output_root.glob(pattern):
             if stale_pdf != output:
@@ -219,12 +221,9 @@ def build_pdf(
         if members < 100
         else "Experimental research guidance · not an operational warning"
     )
-    ashoka_logo = plt.imread(PUBLIC / "brand" / "ashoka-university.png")
-    centre_logo = plt.imread(PUBLIC / "brand" / "scdlds-centre.png")
-
     metadata = {
-        "Title": f"SCDLDS India experimental forecast · {source_id.upper()} · {issue_id}",
-        "Author": "Safexpress Centre for Data, Learning and Decision Sciences, Ashoka University",
+        "Title": f"S2S Research India experimental forecast · {source_id.upper()} · {issue_id}",
+        "Author": "S2S Research",
         "Subject": "Experimental India subseasonal forecast guidance, Weeks 1–6",
         "Keywords": "India, S2S, rainfall, temperature, anomaly, experimental",
     }
@@ -248,18 +247,39 @@ def build_pdf(
                 wspace=0.08,
                 hspace=0.18,
             )
-            ashoka_axes = figure.add_axes((0.055, 0.915, 0.042, 0.058))
-            ashoka_axes.imshow(ashoka_logo)
-            ashoka_axes.axis("off")
-            centre_axes = figure.add_axes((0.102, 0.915, 0.145, 0.058))
-            centre_axes.imshow(centre_logo)
-            centre_axes.axis("off")
+            mark_axes = figure.add_axes((0.055, 0.92, 0.033, 0.05))
+            mark_axes.set_xlim(0, 1)
+            mark_axes.set_ylim(0, 1)
+            mark_axes.add_patch(
+                FancyBboxPatch(
+                    (0, 0),
+                    1,
+                    1,
+                    boxstyle="round,pad=0,rounding_size=0.2",
+                    facecolor="#173f8a",
+                    edgecolor="none",
+                )
+            )
+            wave_x = np.linspace(0.18, 0.82, 60)
+            for base in (0.72, 0.56, 0.40, 0.24):
+                wave_y = base + 0.055 * np.sin(np.pi * (wave_x - 0.18) / 0.64)
+                mark_axes.plot(wave_x, wave_y, color="white", linewidth=1.5)
+            mark_axes.scatter([0.18], [0.72], s=14, color="#d55a3a", zorder=3)
+            mark_axes.axis("off")
             figure.text(
-                0.255,
+                0.095,
                 0.943,
-                "EXPERIMENTAL FORECASTING",
+                "S2S RESEARCH",
+                color="#173f8a",
+                fontsize=12,
+                fontweight="bold",
+            )
+            figure.text(
+                0.215,
+                0.943,
+                "EXPERIMENTAL SUBSEASONAL FORECASTING",
                 color="#a63f2d",
-                fontsize=10,
+                fontsize=9.5,
                 fontweight="bold",
             )
             figure.text(

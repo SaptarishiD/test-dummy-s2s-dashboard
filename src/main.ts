@@ -17,7 +17,7 @@ import type {
 type Route = "forecast" | "india";
 
 const ROUTES = new Set<Route>(["forecast", "india"]);
-const PUBLIC_DATA_VERSION = "20260802-scdlds2";
+const PUBLIC_DATA_VERSION = "20260802-s2s1";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -196,12 +196,11 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand brand--official" href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noopener noreferrer" aria-label="Open the official SCDLDS Ashoka University website">
-        <img class="brand-logo brand-logo--ashoka" src="./brand/ashoka-university.png" alt="" />
-        <span class="brand-divider" aria-hidden="true"></span>
-        <span class="brand-centre">
-          <img class="brand-logo brand-logo--centre" src="./brand/scdlds-centre.png" alt="" />
-          <small>Experimental Forecasting</small>
+      <a class="brand" href="./#india" aria-label="S2S Research forecast home">
+        <img class="brand-logo" src="./brand/s2s-research-mark.svg" alt="" />
+        <span class="brand-copy">
+          <strong>S2S Research</strong>
+          <small>Experimental Subseasonal Forecasting</small>
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
@@ -216,8 +215,8 @@ function shell(): string {
     <main id="content" tabindex="-1"></main>
     <footer class="site-footer">
       <div>
-        <strong>Safexpress Centre for Data, Learning and Decision Sciences</strong>
-        <span>Ashoka University · Experimental S2S research guidance</span>
+        <strong>S2S Research</strong>
+        <span>Experimental subseasonal forecast guidance</span>
       </div>
       <p>Research use only · Not an operational weather forecast or warning</p>
     </footer>

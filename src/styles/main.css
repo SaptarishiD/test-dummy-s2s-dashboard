@@ -110,49 +110,33 @@ a {
   gap: 10px;
   align-items: center;
   width: max-content;
-  min-height: 58px;
-  padding: 4px 12px 4px 8px;
-  background: #fff;
-  border: 1px solid rgb(16 45 60 / 14%);
-  border-radius: 9px;
-  box-shadow: 0 4px 18px rgb(0 0 0 / 10%);
   text-decoration: none;
 }
 
 .brand-logo {
   display: block;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
 }
 
-.brand-logo--ashoka {
-  width: 46px;
-  height: 45px;
-}
-
-.brand-divider {
-  width: 1px;
-  height: 42px;
-  background: #d8dde5;
-}
-
-.brand-centre {
+.brand-copy {
   display: grid;
-  gap: 1px;
-  align-items: center;
+  line-height: 1.05;
 }
 
-.brand-logo--centre {
-  width: 144px;
-  height: 44px;
+.brand-copy strong {
+  color: #fff;
+  font-size: 15px;
+  letter-spacing: 0.03em;
 }
 
-.brand-centre small {
-  color: #9f302d;
-  font-size: 7px;
-  font-weight: 850;
-  letter-spacing: 0.15em;
-  line-height: 1;
-  text-align: center;
+.brand-copy small {
+  margin-top: 5px;
+  color: #a9c4cb;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -2518,23 +2502,16 @@ a {
   .global-route .brand {
     flex: 0 0 auto;
     justify-self: auto;
-    min-height: 42px;
-    padding: 3px 7px 3px 5px;
     gap: 6px;
   }
 
-  .global-route .brand-logo--ashoka {
-    width: 31px;
+  .global-route .brand-logo {
+    width: 30px;
     height: 30px;
   }
 
-  .global-route .brand-divider {
-    height: 29px;
-  }
-
-  .global-route .brand-logo--centre {
-    width: 96px;
-    height: 30px;
+  .global-route .brand-copy strong {
+    font-size: 12px;
   }
 
   .global-route .site-nav {

@@ -1,8 +1,7 @@
-# SCDLDS Experimental Forecasting
+# S2S Research
 
-A static, source-aware India S2S research forecast interface from the
-Safexpress Centre for Data, Learning and Decision Sciences (SCDLDS), Ashoka
-University, with a separate global viewer in beta. India is the default page. It separates
+A static, source-aware India subseasonal research forecast interface with a
+separate global viewer in beta. India is the default page. It separates
 near-real-time GFS-proxy initializations from delayed ERA5 reference
 initializations, exposes the available issue dates and ensemble sizes, and
 provides compact issue-level downloads.
@@ -36,15 +35,9 @@ generated from the same frozen input as the earlier India case. The raw members
 behind the India export had already been removed, so its exact stochastic draws
 could not be reused.
 
-The public interface is institutionally identified as **SCDLDS, Ashoka
-University · Experimental Forecasting**. Model identity and scientific
-provenance remain in this repository.
-
-The Ashoka University and Safexpress Centre marks in `public/brand/` are
-unmodified local copies of the lockup served by the official
-[SCDLDS website](https://scdlds.ashoka.edu.in/). They are institutional brand
-assets, remain the property of their respective owners, and are not covered by
-any source-code licence for this prototype.
+The public interface uses the neutral identity **S2S Research · Experimental
+Subseasonal Forecasting**. Model identity and scientific provenance remain in
+this repository.
 
 The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized
