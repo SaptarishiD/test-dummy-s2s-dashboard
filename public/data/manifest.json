@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T11:41:57.419417+00:00",
-  "deployed_commit": "pdf-candidate",
+  "generated_at": "2026-08-02T12:07:54.493802+00:00",
+  "deployed_commit": "pdf-cache-fix",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {

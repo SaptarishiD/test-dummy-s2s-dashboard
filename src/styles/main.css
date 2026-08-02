@@ -2906,12 +2906,14 @@ a {
 }
 
 .india-run-actions .india-pdf-download {
+  display: inline-block;
   padding: 10px 16px;
   color: #fff;
   font-size: 9px;
   letter-spacing: 0.04em;
   background: #173f8a;
   border-color: #173f8a;
+  border-radius: 3px;
 }
 
 .india-run-actions .india-pdf-download::before {
@@ -2921,6 +2923,13 @@ a {
 
 .india-run-actions .india-pdf-download:hover {
   background: #0f2f6d;
+}
+
+.india-run-actions button.india-pdf-download:disabled {
+  color: #68758a;
+  cursor: not-allowed;
+  background: #e8edf5;
+  border-color: #c6d0df;
 }
 
 .india-matched-run {

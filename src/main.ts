@@ -17,6 +17,7 @@ import type {
 type Route = "forecast" | "india";
 
 const ROUTES = new Set<Route>(["forecast", "india"]);
+const PUBLIC_DATA_VERSION = "20260802-pdf1";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -28,7 +29,10 @@ function currentRoute(): Route {
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
-  const response = await fetch(path);
+  const separator = path.includes("?") ? "&" : "?";
+  const response = await fetch(
+    `${path}${separator}v=${encodeURIComponent(PUBLIC_DATA_VERSION)}`,
+  );
   if (!response.ok) {
     throw new Error(`${path} returned ${response.status}`);
   }
