@@ -28,7 +28,7 @@
       "india_summary_csv": "downloads/gfs/20260722/india-summary.csv",
       "manifest": "downloads/gfs/20260722/manifest.json",
       "india_pdf": "downloads/gfs/20260722/SCDLDS_India_Experimental_Forecast_GFS_20260722.pdf",
-      "india_pdf_sha256": "1365e7440207a6b6b2fb2f7e7e8b83f17beace7651aa3eda3351d1d4052954c8"
+      "india_pdf_sha256": "1a2704da1f2faf3362d389b3add1fef3592e27fc5b733bacdad5bf9cc62f2a4b"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0721",

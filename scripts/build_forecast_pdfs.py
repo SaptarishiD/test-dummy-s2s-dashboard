@@ -219,6 +219,8 @@ def build_pdf(
         if members < 100
         else "Experimental research guidance · not an operational warning"
     )
+    ashoka_logo = plt.imread(PUBLIC / "brand" / "ashoka-university.png")
+    centre_logo = plt.imread(PUBLIC / "brand" / "scdlds-centre.png")
 
     metadata = {
         "Title": f"SCDLDS India experimental forecast · {source_id.upper()} · {issue_id}",
@@ -241,22 +243,28 @@ def build_pdf(
             figure.subplots_adjust(
                 left=0.055,
                 right=0.965,
-                top=0.80,
+                top=0.77,
                 bottom=0.14,
                 wspace=0.08,
                 hspace=0.18,
             )
+            ashoka_axes = figure.add_axes((0.055, 0.915, 0.042, 0.058))
+            ashoka_axes.imshow(ashoka_logo)
+            ashoka_axes.axis("off")
+            centre_axes = figure.add_axes((0.102, 0.915, 0.145, 0.058))
+            centre_axes.imshow(centre_logo)
+            centre_axes.axis("off")
             figure.text(
-                0.055,
-                0.955,
-                "SCDLDS  ·  ASHOKA UNIVERSITY  ·  EXPERIMENTAL FORECASTING",
+                0.255,
+                0.943,
+                "EXPERIMENTAL FORECASTING",
                 color="#a63f2d",
-                fontsize=12,
+                fontsize=10,
                 fontweight="bold",
             )
             figure.text(
                 0.055,
-                0.902,
+                0.875,
                 definition["title"],
                 color="#172033",
                 fontsize=25,
@@ -264,7 +272,7 @@ def build_pdf(
             )
             figure.text(
                 0.055,
-                0.855,
+                0.828,
                 (
                     f"Initialized {friendly_day(initialization)} · {source_label} · "
                     f"{members}-member ensemble mean · Weeks 1–6"

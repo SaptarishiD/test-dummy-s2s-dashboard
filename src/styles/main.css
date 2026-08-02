@@ -107,48 +107,53 @@ a {
 
 .brand {
   display: inline-flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   width: max-content;
+  min-height: 58px;
+  padding: 4px 12px 4px 8px;
+  background: #fff;
+  border: 1px solid rgb(16 45 60 / 14%);
+  border-radius: 9px;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 10%);
   text-decoration: none;
 }
 
-.brand > span:last-child {
+.brand-logo {
+  display: block;
+  object-fit: contain;
+}
+
+.brand-logo--ashoka {
+  width: 46px;
+  height: 45px;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 42px;
+  background: #d8dde5;
+}
+
+.brand-centre {
   display: grid;
-  line-height: 1.05;
+  gap: 1px;
+  align-items: center;
 }
 
-.brand strong {
-  font-size: 15px;
-  letter-spacing: 0.02em;
+.brand-logo--centre {
+  width: 144px;
+  height: 44px;
 }
 
-.brand small {
-  margin-top: 5px;
-  color: #afc5c8;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.brand-mark {
-  position: relative;
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  color: #fff;
-  background: #b94a32;
-  border: 1px solid rgb(255 255 255 / 38%);
-  border-radius: 9px;
-}
-
-.brand-mark b {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 21px;
-  font-weight: 700;
+.brand-centre small {
+  color: #9f302d;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.15em;
   line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .site-nav {
@@ -2513,15 +2518,23 @@ a {
   .global-route .brand {
     flex: 0 0 auto;
     justify-self: auto;
+    min-height: 42px;
+    padding: 3px 7px 3px 5px;
+    gap: 6px;
   }
 
-  .global-route .brand-mark {
-    width: 29px;
+  .global-route .brand-logo--ashoka {
+    width: 31px;
+    height: 30px;
+  }
+
+  .global-route .brand-divider {
     height: 29px;
   }
 
-  .global-route .brand strong {
-    font-size: 12px;
+  .global-route .brand-logo--centre {
+    width: 96px;
+    height: 30px;
   }
 
   .global-route .site-nav {

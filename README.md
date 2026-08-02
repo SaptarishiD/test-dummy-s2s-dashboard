@@ -40,6 +40,12 @@ The public interface is institutionally identified as **SCDLDS, Ashoka
 University · Experimental Forecasting**. Model identity and scientific
 provenance remain in this repository.
 
+The Ashoka University and Safexpress Centre marks in `public/brand/` are
+unmodified local copies of the lockup served by the official
+[SCDLDS website](https://scdlds.ashoka.edu.in/). They are institutional brand
+assets, remain the property of their respective owners, and are not covered by
+any source-code licence for this prototype.
+
 The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized
 FuXi climatology and audited IMERG Final climatology are currently

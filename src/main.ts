@@ -17,7 +17,7 @@ import type {
 type Route = "forecast" | "india";
 
 const ROUTES = new Set<Route>(["forecast", "india"]);
-const PUBLIC_DATA_VERSION = "20260802-scdlds1";
+const PUBLIC_DATA_VERSION = "20260802-scdlds2";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -196,9 +196,13 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand" href="./#india" aria-label="SCDLDS Ashoka University experimental forecast home">
-        <span class="brand-mark" aria-hidden="true"><b>S</b></span>
-        <span><strong>SCDLDS · Ashoka University</strong><small>Experimental Forecasting</small></span>
+      <a class="brand brand--official" href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noopener noreferrer" aria-label="Open the official SCDLDS Ashoka University website">
+        <img class="brand-logo brand-logo--ashoka" src="./brand/ashoka-university.png" alt="" />
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-centre">
+          <img class="brand-logo brand-logo--centre" src="./brand/scdlds-centre.png" alt="" />
+          <small>Experimental Forecasting</small>
+        </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">India Forecasts</a>
