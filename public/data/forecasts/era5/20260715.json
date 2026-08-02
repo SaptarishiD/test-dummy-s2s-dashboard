@@ -27,8 +27,8 @@
       "india_netcdf": "downloads/era5/20260715/india-weekly.nc",
       "india_summary_csv": "downloads/era5/20260715/india-summary.csv",
       "manifest": "downloads/era5/20260715/manifest.json",
-      "india_pdf": "downloads/era5/20260715/S2S_Research_India_Forecast_ERA5_20260715.pdf",
-      "india_pdf_sha256": "a9ebc233621292fab5ba1722562b02a1836622e9bfde98c49e8f2d869d525adf"
+      "india_pdf": "downloads/era5/20260715/S2S_Research_India_Weeks1-4_ERA5_20260715.pdf",
+      "india_pdf_sha256": "19fb4ca92137500e9e5dd3e43ad1f5c88b45eba87f97c0bc003b34806bde9fe7"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0714",

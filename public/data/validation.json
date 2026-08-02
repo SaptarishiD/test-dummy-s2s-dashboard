@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T12:51:58.579888+00:00",
+  "generated_at": "2026-08-02T13:06:55.776831+00:00",
   "overall_status": "warning",
   "presentation_allowed": true,
   "checks": [
@@ -168,7 +168,7 @@
       "summary": "Public JSON is finite and free of internal paths, credentials, and raw assets.",
       "details": {
         "json_files_scanned": 18,
-        "bytes_scanned": 4130272
+        "bytes_scanned": 4129760
       }
     }
   ],

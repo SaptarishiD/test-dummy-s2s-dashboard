@@ -109,6 +109,9 @@ download; the machine-readable derivatives remain part of the checked data
 contract. Raw initial conditions and ensemble-member fields are never
 published.
 
+Each PDF contains four product pages with a 2 × 2 Weeks 1–4 map layout. The
+interactive website retains all six forecast weeks for exploratory research.
+
 The India presentation follows the supplied four-panel PDF structure: one
 shared fixed legend, exact reference colour levels, surrounding-country and
 India administrative outlines, and selectable Weeks 1–4 or Weeks 3–6 for all

@@ -17,9 +17,9 @@ const PRODUCT_ORDER: ProductKey[] = [
 
 const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
   rainfall_total: {
-    label: "Weekly-mean rainfall rate",
-    short_label: "Rainfall rate",
-    description: "Weekly mean of the daily 100-member ensemble-mean rainfall forecast",
+    label: "Weekly mean rainfall",
+    short_label: "Rainfall",
+    description: "Mean daily rainfall rate over each 7-day forecast week",
     units: "mm day⁻¹",
     baseline: null,
     legend: {
@@ -38,9 +38,9 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
     },
   },
   rainfall_anomaly: {
-    label: "Weekly-mean rainfall anomaly",
+    label: "Weekly mean rainfall anomaly",
     short_label: "Rainfall anomaly",
-    description: "Forecast minus calendar-interpolated, lead-matched 2002–2021 model climatology",
+    description: "Difference from the model's typical rainfall for the same season and forecast lead",
     units: "mm day⁻¹",
     baseline: "Native reforecasts, 2002–2021",
     legend: {
@@ -61,9 +61,9 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
     },
   },
   temperature_mean: {
-    label: "Weekly-mean 2 m temperature",
+    label: "Weekly mean 2 m temperature",
     short_label: "Temperature",
-    description: "Weekly mean of the daily 100-member ensemble-mean 2-metre temperature",
+    description: "Mean of seven daily-mean 2 m temperature forecasts",
     units: "°C",
     baseline: null,
     legend: {
@@ -88,9 +88,9 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
     },
   },
   temperature_anomaly: {
-    label: "Weekly-mean temperature anomaly",
+    label: "Weekly mean temperature anomaly",
     short_label: "Temperature anomaly",
-    description: "Forecast minus calendar-interpolated, lead-matched 2002–2021 model climatology",
+    description: "Difference from the model's typical temperature for the same season and forecast lead",
     units: "°C",
     baseline: "Native reforecasts, 2002–2021",
     legend: {
@@ -335,9 +335,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     legend.replaceChildren(createLegend(product));
     container.querySelector("#india-visual-note")!.textContent =
       `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
-    const alignment = activeForecast.issue.climatology_alignment;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
-      ? `Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (${alignment.left_slot}/${alignment.right_slot} interpolation).`
+      ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
       : sourceId === "gfs"
         ? "Experimental initialization from operational analysis and short-range forecast proxy inputs."
         : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";

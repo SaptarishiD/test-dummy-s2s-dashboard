@@ -27,7 +27,7 @@ DATA = PUBLIC / "data"
 
 PRODUCTS = {
     "rainfall_total": {
-        "title": "Weekly-mean rainfall rate",
+        "title": "Weekly mean rainfall",
         "units": "mm day⁻¹",
         "boundaries": [0, 1, 2, 5, 10, 20, 40, 60],
         "colors": [
@@ -37,10 +37,10 @@ PRODUCTS = {
         "under": "#ffffff",
         "over": "#002807",
         "operation": "divide_by_seven",
-        "note": "Seven-day accumulation divided by seven.",
+        "note": "Mean daily rainfall rate over each 7-day forecast week.",
     },
     "rainfall_anomaly": {
-        "title": "Weekly-mean rainfall anomaly",
+        "title": "Weekly mean rainfall anomaly",
         "units": "mm day⁻¹",
         "boundaries": [-20, -15, -10, -5, -2, 2, 5, 10, 15, 20],
         "colors": [
@@ -50,10 +50,10 @@ PRODUCTS = {
         "under": "#d70e00",
         "over": "#00001e",
         "operation": "identity",
-        "note": "Forecast minus calendar- and lead-matched 2002–2021 native-reforecast model climate.",
+        "note": "Difference from the model's typical rainfall for the same season and forecast lead (2002–2021).",
     },
     "temperature_mean": {
-        "title": "Weekly-mean 2 m temperature",
+        "title": "Weekly mean 2 m temperature",
         "units": "°C",
         "boundaries": [10, 14, 18, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42],
         "colors": [
@@ -64,10 +64,10 @@ PRODUCTS = {
         "under": "#9696c6",
         "over": "#5f0000",
         "operation": "identity",
-        "note": "Seven-day mean of the ensemble-mean 2 m temperature.",
+        "note": "Mean of seven daily-mean 2 m temperature fields.",
     },
     "temperature_anomaly": {
-        "title": "Weekly-mean temperature anomaly",
+        "title": "Weekly mean temperature anomaly",
         "units": "°C",
         "boundaries": [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
         "colors": [
@@ -78,7 +78,7 @@ PRODUCTS = {
         "under": "#10103a",
         "over": "#730000",
         "operation": "identity",
-        "note": "Forecast minus calendar- and lead-matched 2002–2021 native-reforecast model climate.",
+        "note": "Difference from the model's typical temperature for the same season and forecast lead (2002–2021).",
     },
 }
 
@@ -199,12 +199,13 @@ def build_pdf(
     output_root = PUBLIC / "downloads" / source_id / issue_id
     output_root.mkdir(parents=True, exist_ok=True)
     output = output_root / (
-        f"S2S_Research_India_Forecast_{source_id.upper()}_{issue_id}.pdf"
+        f"S2S_Research_India_Weeks1-4_{source_id.upper()}_{issue_id}.pdf"
     )
     for pattern in (
         "Atmosphere42_India_*.pdf",
         "SCDLDS_India_Experimental_Forecast_*.pdf",
         "S2S_Research_India_Forecast_*.pdf",
+        "S2S_Research_India_Weeks1-4_*.pdf",
     ):
         for stale_pdf in output_root.glob(pattern):
             if stale_pdf != output:
@@ -224,7 +225,7 @@ def build_pdf(
     metadata = {
         "Title": f"S2S Research India experimental forecast · {source_id.upper()} · {issue_id}",
         "Author": "S2S Research",
-        "Subject": "Experimental India subseasonal forecast guidance, Weeks 1–6",
+        "Subject": "Experimental India subseasonal forecast guidance, Weeks 1–4",
         "Keywords": "India, S2S, rainfall, temperature, anomaly, experimental",
     }
     with PdfPages(output, metadata=metadata) as pdf:
@@ -235,19 +236,19 @@ def build_pdf(
             norm = BoundaryNorm(definition["boundaries"], cmap.N)
             figure, axes_grid = plt.subplots(
                 2,
-                3,
-                figsize=(16.5, 11.7),
+                2,
+                figsize=(11.7, 16.5),
                 facecolor="white",
             )
             figure.subplots_adjust(
-                left=0.055,
-                right=0.965,
-                top=0.77,
-                bottom=0.14,
-                wspace=0.08,
-                hspace=0.18,
+                left=0.075,
+                right=0.94,
+                top=0.76,
+                bottom=0.12,
+                wspace=0.10,
+                hspace=0.15,
             )
-            mark_axes = figure.add_axes((0.055, 0.92, 0.033, 0.05))
+            mark_axes = figure.add_axes((0.06, 0.925, 0.047, 0.035))
             mark_axes.set_xlim(0, 1)
             mark_axes.set_ylim(0, 1)
             mark_axes.add_patch(
@@ -267,7 +268,7 @@ def build_pdf(
             mark_axes.scatter([0.18], [0.72], s=14, color="#d55a3a", zorder=3)
             mark_axes.axis("off")
             figure.text(
-                0.095,
+                0.115,
                 0.943,
                 "S2S RESEARCH",
                 color="#173f8a",
@@ -275,7 +276,7 @@ def build_pdf(
                 fontweight="bold",
             )
             figure.text(
-                0.215,
+                0.31,
                 0.943,
                 "EXPERIMENTAL SUBSEASONAL FORECASTING",
                 color="#a63f2d",
@@ -283,7 +284,7 @@ def build_pdf(
                 fontweight="bold",
             )
             figure.text(
-                0.055,
+                0.06,
                 0.875,
                 definition["title"],
                 color="#172033",
@@ -291,11 +292,11 @@ def build_pdf(
                 fontweight="bold",
             )
             figure.text(
-                0.055,
+                0.06,
                 0.828,
                 (
                     f"Initialized {friendly_day(initialization)} · {source_label} · "
-                    f"{members}-member ensemble mean · Weeks 1–6"
+                    f"{members}-member ensemble mean · Weeks 1–4"
                 ),
                 color="#52627a",
                 fontsize=10,
@@ -317,7 +318,9 @@ def build_pdf(
             )
 
             image = None
-            for axes, week in zip(axes_grid.flat, forecast["weeks"], strict=True):
+            for axes, week in zip(
+                axes_grid.flat, forecast["weeks"][:4], strict=True
+            ):
                 values = np.asarray(week["fields"][product_key], dtype=np.float64).reshape(27, 27)
                 if definition["operation"] == "divide_by_seven":
                     values = values / 7.0
@@ -370,19 +373,19 @@ def build_pdf(
             colorbar.ax.tick_params(labelsize=7, length=2)
             colorbar.set_label(definition["units"], fontsize=9, fontweight="bold")
             figure.text(
-                0.055,
+                0.06,
                 0.035,
                 f"{definition['note']}  Visual-only bilinear interpolation 1.5°→0.25°; values remain native-grid.",
                 color="#52627a",
-                fontsize=7.5,
+                fontsize=7,
             )
             figure.text(
-                0.965,
-                0.035,
+                0.94,
+                0.017,
                 warning,
                 ha="right",
                 color="#8a431f",
-                fontsize=7.5,
+                fontsize=7,
                 fontweight="bold",
             )
             pdf.savefig(figure, dpi=180, facecolor="white")
