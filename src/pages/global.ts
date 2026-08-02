@@ -418,7 +418,11 @@ export function renderGlobalPage(
     key: GlobalVariableKey,
     button?: HTMLButtonElement,
   ): Promise<void> {
-    if (key === variable && activeGlobal.fields[key]) return;
+    if (
+      key === variable &&
+      activeGlobal.fields[key] &&
+      activeGlobal.spreads[key]
+    ) return;
     const status = container.querySelector("#layer-load-status")!;
     button?.classList.add("is-loading");
     status.textContent = "Verifying…";
@@ -504,12 +508,19 @@ export function renderGlobalPage(
       container.querySelector<HTMLButtonElement>("#mode-anomaly")!;
     absoluteButton.classList.toggle("is-active", mode === "absolute");
     anomalyButton.classList.toggle("is-active", mode === "anomaly");
-    anomalyButton.disabled = !definition.anomaly;
-    anomalyButton.title = definition.anomaly
+    const anomalyReady = Boolean(
+      definition.anomaly && activeGlobal.anomalies[variable],
+    );
+    anomalyButton.disabled = !anomalyReady;
+    anomalyButton.title = anomalyReady
       ? "Show departure from the exact-date, lead-matched model climate"
+      : definition.anomaly
+        ? "Loading matched anomaly field…"
       : "No matched global anomaly baseline is published for this field";
     container.querySelector("#field-mode-note")!.textContent =
-      definition.anomaly
+      definition.anomaly && !anomalyReady
+        ? "Mean map ready · loading ensemble spread and matched anomaly…"
+        : definition.anomaly
         ? mode === "anomaly"
           ? "2002–2021 · exact 28 July initialization · lead matched"
           : "Anomaly available against the matched 2002–2021 model climate."
@@ -576,9 +587,9 @@ export function renderGlobalPage(
       pressureContours: pressureInput.checked,
       z500Contours: z500Input.checked,
     };
-    if (overlays.windVectors) await global.loadVariable("wind850");
-    if (overlays.pressureContours) await global.loadVariable("mslp");
-    if (overlays.z500Contours) await global.loadVariable("z500");
+    if (overlays.windVectors) await activeGlobal.loadVariable("wind850");
+    if (overlays.pressureContours) await activeGlobal.loadVariable("mslp");
+    if (overlays.z500Contours) await activeGlobal.loadVariable("z500");
     map.setOverlays(overlays);
     map.render(variable, day, 0, mode);
   };
@@ -594,7 +605,10 @@ export function renderGlobalPage(
     map.render(variable, day, 0, mode);
   });
   container.querySelector("#mode-anomaly")!.addEventListener("click", () => {
-    if (!global.metadata.variables[variable].anomaly) return;
+    if (
+      !activeGlobal.metadata.variables[variable].anomaly ||
+      !activeGlobal.anomalies[variable]
+    ) return;
     mode = "anomaly";
     cycleStart = performance.now();
     updateStatic();
@@ -631,6 +645,18 @@ export function renderGlobalPage(
 
   updateStatic();
   map.render(variable, day, 0, mode);
+  const initialStatus = container.querySelector("#layer-load-status")!;
+  initialStatus.textContent = "Loading diagnostics…";
+  void activeGlobal.loadVariable("precipitation").then(
+    () => {
+      initialStatus.textContent = "SHA-256 verified";
+      updateStatic();
+      map.render(variable, day, 0, mode);
+    },
+    () => {
+      initialStatus.textContent = "Mean ready · diagnostics unavailable";
+    },
+  );
   animationFrame = window.requestAnimationFrame(animation);
 
   return () => {

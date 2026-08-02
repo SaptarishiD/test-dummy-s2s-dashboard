@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T11:20:57.133328+00:00",
+  "generated_at": "2026-08-02T11:27:50.457050+00:00",
   "deployed_commit": "performance-candidate",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [

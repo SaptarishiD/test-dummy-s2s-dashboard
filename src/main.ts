@@ -68,52 +68,70 @@ async function fetchGlobalData(
   const anomalies: GlobalForecastData["anomalies"] = {};
   const spreads: GlobalForecastData["spreads"] = {};
   const vectors: GlobalForecastData["vectors"] = {};
+  const meanLoading: Partial<Record<GlobalVariableKey, Promise<void>>> = {};
   const loading: Partial<Record<GlobalVariableKey, Promise<void>>> = {};
+  const loadMean = (key: GlobalVariableKey): Promise<void> => {
+    if (fields[key]) return Promise.resolve();
+    if (meanLoading[key]) return meanLoading[key]!;
+    const definition = metadata.variables[key];
+    const promise = fetchBinary(
+      definition.path,
+      definition.size_bytes,
+      definition.sha256,
+    ).then((buffer) => {
+      fields[key] = new Uint16Array(buffer);
+    });
+    meanLoading[key] = promise;
+    return promise;
+  };
   const loadVariable = (key: GlobalVariableKey): Promise<void> => {
     if (fields[key] && spreads[key]) return Promise.resolve();
     if (loading[key]) return loading[key]!;
     const promise = (async () => {
       const definition = metadata.variables[key];
-      const [meanBuffer, spreadBuffer] = await Promise.all([
-        fetchBinary(
-          definition.path,
-          definition.size_bytes,
-          definition.sha256,
-        ),
+      await loadMean(key);
+      const tasks: Promise<void>[] = [
         fetchBinary(
           definition.spread.path,
           definition.spread.size_bytes,
           definition.spread.sha256,
-        ),
-      ]);
-      fields[key] = new Uint16Array(meanBuffer);
-      spreads[key] = new Uint16Array(spreadBuffer);
+        ).then((buffer) => {
+          spreads[key] = new Uint16Array(buffer);
+        }),
+      ];
       if (definition.anomaly) {
-        const anomalyBuffer = await fetchBinary(
-          definition.anomaly.path,
-          definition.anomaly.size_bytes,
-          definition.anomaly.sha256,
+        tasks.push(
+          fetchBinary(
+            definition.anomaly.path,
+            definition.anomaly.size_bytes,
+            definition.anomaly.sha256,
+          ).then((buffer) => {
+            anomalies[key] = new Uint16Array(buffer);
+          }),
         );
-        anomalies[key] = new Uint16Array(anomalyBuffer);
       }
       if (definition.vector) {
-        const [uBuffer, vBuffer] = await Promise.all([
-          fetchBinary(
-            definition.vector.u.path,
-            definition.vector.u.size_bytes,
-            definition.vector.u.sha256,
-          ),
-          fetchBinary(
-            definition.vector.v.path,
-            definition.vector.v.size_bytes,
-            definition.vector.v.sha256,
-          ),
-        ]);
-        vectors[key] = {
-          u: new Uint16Array(uBuffer),
-          v: new Uint16Array(vBuffer),
-        };
+        tasks.push(
+          Promise.all([
+            fetchBinary(
+              definition.vector.u.path,
+              definition.vector.u.size_bytes,
+              definition.vector.u.sha256,
+            ),
+            fetchBinary(
+              definition.vector.v.path,
+              definition.vector.v.size_bytes,
+              definition.vector.v.sha256,
+            ),
+          ]).then(([uBuffer, vBuffer]) => {
+            vectors[key] = {
+              u: new Uint16Array(uBuffer),
+              v: new Uint16Array(vBuffer),
+            };
+          }),
+        );
       }
+      await Promise.all(tasks);
     })();
     loading[key] = promise;
     return promise;
@@ -133,7 +151,7 @@ async function fetchGlobalData(
     oceanMask: new Uint8Array(oceanMaskBuffer),
     loadVariable,
   };
-  if (preloadPrecipitation) await loadVariable("precipitation");
+  if (preloadPrecipitation) await loadMean("precipitation");
   return result;
 }
 
