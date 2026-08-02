@@ -186,8 +186,12 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     : "Delayed reference run";
   const pdfPath = forecast.issue.downloads.india_pdf;
   const pdfReady = typeof pdfPath === "string" && pdfPath.endsWith(".pdf");
+  const pdfChecksum = forecast.issue.downloads.india_pdf_sha256;
+  const pdfVersion = typeof pdfChecksum === "string" && pdfChecksum.length >= 12
+    ? pdfChecksum.slice(0, 12)
+    : encodeURIComponent(forecast.generated_at);
   const pdfUrl = pdfReady
-    ? `./${pdfPath}?v=${encodeURIComponent(forecast.generated_at)}`
+    ? `./${pdfPath}?v=${pdfVersion}`
     : "";
 
   container.innerHTML = `

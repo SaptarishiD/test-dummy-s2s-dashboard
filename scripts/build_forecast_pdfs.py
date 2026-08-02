@@ -17,6 +17,7 @@ os.environ.setdefault("XDG_CACHE_HOME", "/tmp/atmos42_pdf_xdg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.backends.backend_pdf import PdfPages  # noqa: E402
+from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.colors import BoundaryNorm, ListedColormap  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,18 +106,16 @@ def rings(geometry: dict[str, Any]) -> Iterable[list[list[float]]]:
             yield from polygon
 
 
-def draw_geometry(
-    axes: plt.Axes,
-    payload: dict[str, Any],
-    color: str,
-    width: float,
-) -> None:
+def geometry_segments(payload: dict[str, Any]) -> list[np.ndarray]:
+    """Extract regional geometry once for efficient reuse across PDF panels."""
+
     features = payload.get("features")
     geometries = (
         (feature.get("geometry") for feature in features)
         if features is not None
         else (payload.get("geometry"),)
     )
+    segments: list[np.ndarray] = []
     for geometry in geometries:
         if not geometry:
             continue
@@ -131,14 +130,54 @@ def draw_geometry(
                 or array[:, 1].min() > 40.0
             ):
                 continue
-            axes.plot(
-                array[:, 0],
-                array[:, 1],
-                color=color,
-                linewidth=width,
-                solid_joinstyle="round",
-                zorder=4,
-            )
+            segments.append(array[:, :2])
+    return segments
+
+
+def draw_geometry(
+    axes: plt.Axes,
+    segments: list[np.ndarray],
+    color: str,
+    width: float,
+) -> None:
+    axes.add_collection(
+        LineCollection(
+            segments,
+            colors=color,
+            linewidths=width,
+            joinstyle="round",
+            capstyle="round",
+            zorder=4,
+        )
+    )
+
+
+def bilinear_display(values: np.ndarray, size: int = 162) -> np.ndarray:
+    """Match the website's clamped bilinear 1.5°→visual 0.25° rendering."""
+
+    y = np.arange(size, dtype=np.float64)
+    x = np.arange(size, dtype=np.float64)
+    sampled_latitude = 39.75 - ((y + 0.5) / size) * 40.5
+    sampled_longitude = 59.25 + ((x + 0.5) / size) * 40.5
+    row = (39.0 - sampled_latitude) / 1.5
+    column = (sampled_longitude - 60.0) / 1.5
+    row0 = np.floor(row).astype(int)
+    column0 = np.floor(column).astype(int)
+    row_weight = row - row0
+    column_weight = column - column0
+    r0 = np.clip(row0, 0, values.shape[0] - 1)
+    r1 = np.clip(row0 + 1, 0, values.shape[0] - 1)
+    c0 = np.clip(column0, 0, values.shape[1] - 1)
+    c1 = np.clip(column0 + 1, 0, values.shape[1] - 1)
+    top = (
+        values[r0[:, None], c0[None, :]] * (1.0 - column_weight[None, :])
+        + values[r0[:, None], c1[None, :]] * column_weight[None, :]
+    )
+    bottom = (
+        values[r1[:, None], c0[None, :]] * (1.0 - column_weight[None, :])
+        + values[r1[:, None], c1[None, :]] * column_weight[None, :]
+    )
+    return top * (1.0 - row_weight[:, None]) + bottom * row_weight[:, None]
 
 
 def friendly_day(value: str) -> str:
@@ -162,8 +201,9 @@ def build_pdf(
 
     latitude = np.asarray(forecast["grid"]["latitude"], dtype=np.float64)
     longitude = np.asarray(forecast["grid"]["longitude"], dtype=np.float64)
-    lon_edges = np.linspace(longitude[0] - 0.75, longitude[-1] + 0.75, 28)
-    lat_edges = np.linspace(latitude[0] + 0.75, latitude[-1] - 0.75, 28)
+    world_segments = geometry_segments(world)
+    outline_segments = geometry_segments(outline)
+    admin_segments = geometry_segments(admin)
     initialization = forecast["issue"]["initialization"][:10]
     source_label = forecast["issue"]["initial_condition_source"]["label"]
     members = forecast["issue"]["members"]
@@ -247,19 +287,21 @@ def build_pdf(
                 if definition["operation"] == "divide_by_seven":
                     values = values / 7.0
                 axes.set_facecolor("#edf5fb")
-                image = axes.pcolormesh(
-                    lon_edges,
-                    lat_edges,
-                    values,
+                visual_values = bilinear_display(values)
+                image = axes.imshow(
+                    visual_values,
+                    extent=(59.25, 99.75, -0.75, 39.75),
+                    origin="upper",
                     cmap=cmap,
                     norm=norm,
-                    shading="flat",
+                    interpolation="nearest",
+                    aspect="equal",
                     rasterized=True,
                     zorder=1,
                 )
-                draw_geometry(axes, world, "#777777", 0.38)
-                draw_geometry(axes, outline, "#161616", 1.0)
-                draw_geometry(axes, admin, "#333333", 0.38)
+                draw_geometry(axes, world_segments, "#777777", 0.38)
+                draw_geometry(axes, outline_segments, "#161616", 1.0)
+                draw_geometry(axes, admin_segments, "#333333", 0.38)
                 axes.set_xlim(59.25, 99.75)
                 axes.set_ylim(-0.75, 39.75)
                 axes.set_aspect("equal", adjustable="box")
@@ -292,7 +334,13 @@ def build_pdf(
             )
             colorbar.ax.tick_params(labelsize=7, length=2)
             colorbar.set_label(definition["units"], fontsize=9, fontweight="bold")
-            figure.text(0.055, 0.035, definition["note"], color="#52627a", fontsize=7.5)
+            figure.text(
+                0.055,
+                0.035,
+                f"{definition['note']}  Visual-only bilinear interpolation 1.5°→0.25°; values remain native-grid.",
+                color="#52627a",
+                fontsize=7.5,
+            )
             figure.text(
                 0.965,
                 0.035,
@@ -307,6 +355,7 @@ def build_pdf(
 
     relative_pdf = output.relative_to(PUBLIC).as_posix()
     forecast["issue"]["downloads"]["india_pdf"] = relative_pdf
+    forecast["issue"]["downloads"]["india_pdf_sha256"] = sha256(output)
     forecast_path.write_text(
         json.dumps(forecast, indent=2, allow_nan=False) + "\n",
         encoding="utf-8",
@@ -317,7 +366,11 @@ def build_pdf(
         entry for entry in package_manifest["files"] if entry["path"] != output.name
     ]
     package_manifest["files"].append(
-        {"path": output.name, "size_bytes": output.stat().st_size, "sha256": sha256(output)}
+        {
+            "path": output.name,
+            "size_bytes": output.stat().st_size,
+            "sha256": forecast["issue"]["downloads"]["india_pdf_sha256"],
+        }
     )
     package_manifest_path.write_text(
         json.dumps(package_manifest, indent=2, allow_nan=False) + "\n",

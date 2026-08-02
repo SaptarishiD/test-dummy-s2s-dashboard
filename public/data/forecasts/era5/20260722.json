@@ -27,7 +27,8 @@
       "india_netcdf": "downloads/era5/20260722/india-weekly.nc",
       "india_summary_csv": "downloads/era5/20260722/india-summary.csv",
       "manifest": "downloads/era5/20260722/manifest.json",
-      "india_pdf": "downloads/era5/20260722/Atmosphere42_India_ERA5_20260722.pdf"
+      "india_pdf": "downloads/era5/20260722/Atmosphere42_India_ERA5_20260722.pdf",
+      "india_pdf_sha256": "a1240544460533de85aff14543de577392142d210bd86d480dc55942e096a038"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0721",
