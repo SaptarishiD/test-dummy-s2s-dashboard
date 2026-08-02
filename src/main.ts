@@ -212,9 +212,30 @@ function shell(): string {
         <a href="./#outlook" data-route="outlook">Regional Outlook</a>
         <a href="./?view=global#forecast" data-route="forecast">Global <small>Beta</small></a>
       </nav>
-      <div class="header-status">
-        <span class="live-dot" aria-hidden="true"></span>
-        <span>Research prototype</span>
+      <div class="header-partner">
+        <a
+          class="institution-lockup"
+          href="https://scdlds.ashoka.edu.in/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University"
+        >
+          <img
+            class="institution-lockup__centre"
+            src="./brand/scdlds-centre.png"
+            alt="Safexpress Centre for Data, Learning and Decision Sciences"
+          />
+          <span aria-hidden="true"></span>
+          <img
+            class="institution-lockup__ashoka"
+            src="./brand/ashoka-university.png"
+            alt="Ashoka University"
+          />
+        </a>
+        <div class="header-status">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="header-status__label">Research prototype</span>
+        </div>
       </div>
     </header>
     <main id="content" tabindex="-1"></main>
@@ -250,7 +271,7 @@ async function renderRoute(data: AppData): Promise<void> {
   const statusLabel = new Intl.DateTimeFormat("en-IN", {
     day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
   }).format(new Date(statusDate));
-  document.querySelector<HTMLElement>(".header-status span:last-child")!.textContent = statusLabel;
+  document.querySelector<HTMLElement>(".header-status__label")!.textContent = statusLabel;
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
     .forEach((link) => {

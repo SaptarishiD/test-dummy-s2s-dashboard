@@ -1,13 +1,23 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T14:39:14.417905+00:00",
-  "deployed_commit": "7a4fbac",
+  "generated_at": "2026-08-02T17:55:21.491140+00:00",
+  "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
+    {
+      "path": "brand/ashoka-university.png",
+      "size_bytes": 215250,
+      "sha256": "58a41816e8764e10b41803f96acf2c1c96bde3b0f061a62cd785eceb5850a917"
+    },
     {
       "path": "brand/s2s-research-mark.svg",
       "size_bytes": 345,
       "sha256": "4e97d5e109df15cc8f1e780aabedd99f11905800a440aa09aef291ad87704cce"
+    },
+    {
+      "path": "brand/scdlds-centre.png",
+      "size_bytes": 214060,
+      "sha256": "1c94beaa4397c61a68ee60e1e0629183b5fff7dd240ef9cdf00ae35b0c1ba38c"
     },
     {
       "path": "data/comparisons/20260720.json",
@@ -311,8 +321,8 @@
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5946,
-      "sha256": "4663d669683935745765c79df78b5df80f93638558619eafc6b09c443fad7e8f"
+      "size_bytes": 5937,
+      "sha256": "53a8766fd5f3cf1fffd11912498a14e6e5114297fcf668785797c84de67a0515"
     },
     {
       "path": "data/world-countries.geojson",
