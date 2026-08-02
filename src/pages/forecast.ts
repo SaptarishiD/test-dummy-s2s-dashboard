@@ -3,6 +3,7 @@ import { createLegend } from "../components/Legend";
 import type {
   AppData,
   ForecastWeek,
+  InitialConditionSourceId,
   ProductDefinition,
   ProductKey,
 } from "../types";
@@ -135,7 +136,7 @@ function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
 }
 
 export function renderForecastPage(container: HTMLElement, data: AppData): void {
-  const { forecast, validation } = data;
+  const { forecast, validation, index } = data;
   if (!validation.presentation_allowed) {
     container.innerHTML = `
       <section class="blocked-state">
@@ -146,17 +147,74 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     `;
     return;
   }
+  const sourceId = forecast.issue.initial_condition_source.id;
+  const source = index.initial_condition_sources.find(
+    (candidate) => candidate.id === sourceId,
+  );
+  if (!source) {
+    container.innerHTML = `
+      <section class="blocked-state">
+        <span class="eyebrow">Run unavailable</span>
+        <h1>The selected initialization source is not registered.</h1>
+        <p>No partial map has been shown.</p>
+      </section>
+    `;
+    return;
+  }
+  const currentIssueId = forecast.issue.initialization.slice(0, 10).replaceAll("-", "");
+  const sourceLink = (id: InitialConditionSourceId, issue: string): string =>
+    `./?source=${id}&issue=${issue}#india`;
+  const matchedSource = index.initial_condition_sources.find(
+    (candidate) =>
+      candidate.id !== sourceId &&
+      candidate.issues.some((issue) => issue.id === currentIssueId),
+  );
+  const sourceBadge = sourceId === "gfs"
+    ? "Experimental operational proxy"
+    : "Delayed reference run";
 
   container.innerHTML = `
     <section class="india-sheet">
       <header class="india-sheet__header">
         <div>
-          <span class="india-sheet__brand">Atmosphere 42 · India S2S forecast prototype</span>
+          <span class="india-sheet__brand">Atmosphere 42 · India forecast operations</span>
           <h1 id="india-product-title">Weekly-mean rainfall anomaly</h1>
-          <p>28 July 2026 forecast start <i>•</i> 26–27 July daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
+          <p>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} forecast start <i>•</i> ${forecast.issue.input_days.map((day) => friendlyDate(day)).join("–")} daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
         </div>
-        <span class="india-experimental">Experimental prototype</span>
+        <span class="india-experimental">${sourceBadge}</span>
       </header>
+
+      <section class="india-run-console" aria-label="Forecast run selection and downloads">
+        <div class="india-run-console__heading">
+          <div>
+            <span>Initial-condition source</span>
+            <strong>${forecast.issue.initial_condition_source.label}</strong>
+          </div>
+          <p>${forecast.issue.initial_condition_source.description}</p>
+        </div>
+        <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source">
+          ${index.initial_condition_sources.map((candidate) => `
+            <a href="${sourceLink(candidate.id, candidate.default_issue)}" class="${candidate.id === sourceId ? "is-active" : ""}" ${candidate.id === sourceId ? "aria-current=\"page\"" : ""}>
+              <span>${candidate.short_label}</span>
+              <small>${candidate.category === "operational_proxy" ? "Operational proxy" : "Reanalysis reference"}</small>
+            </a>
+          `).join("")}
+        </div>
+        <label class="india-date-select">
+          <span>Initialization date</span>
+          <select id="india-date-select" aria-label="Forecast initialization date">
+            ${source.issues.map((issue) => `<option value="${issue.id}" ${issue.id === currentIssueId ? "selected" : ""}>${friendlyDate(issue.initialization.slice(0, 10), true)} · ${issue.members} members${issue.role === "rapid_prototype" ? " · rapid prototype" : ""}</option>`).join("")}
+          </select>
+        </label>
+        <div class="india-run-actions" aria-label="Forecast downloads">
+          <span>Download this issue</span>
+          <a href="./${forecast.issue.downloads.india_netcdf}" download>India NetCDF</a>
+          <a href="./${forecast.issue.downloads.india_summary_csv}" download>Summary CSV</a>
+          <a href="./${forecast.issue.downloads.compact_json}" download>Web JSON</a>
+          <a href="./${forecast.issue.downloads.manifest}" download>Checksums</a>
+        </div>
+        ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
+      </section>
 
       <div class="india-toolbar">
         <div class="india-product-tabs" id="india-product-tabs" aria-label="India forecast field"></div>
@@ -181,6 +239,16 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
   let rangeStart = 0;
   const productTabs = container.querySelector<HTMLDivElement>("#india-product-tabs")!;
   const panelGrid = container.querySelector<HTMLDivElement>("#india-panel-grid")!;
+
+  container.querySelector<HTMLSelectElement>("#india-date-select")!.addEventListener("change", (event) => {
+    const issue = (event.currentTarget as HTMLSelectElement).value;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("view");
+    url.searchParams.set("source", sourceId);
+    url.searchParams.set("issue", issue);
+    url.hash = "india";
+    window.location.assign(url);
+  });
 
   PRODUCT_ORDER.forEach((productKey) => {
     const product = PRESENTATION_PRODUCTS[productKey];
@@ -248,10 +316,13 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     legend.style.setProperty("--legend-over", product.legend.over);
     legend.replaceChildren(createLegend(product));
     container.querySelector("#india-visual-note")!.textContent =
-      `${product.description}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
+      `${product.description.replace("100-member", `${forecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
+    const alignment = forecast.issue.climatology_alignment;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
-      ? "Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (0725/0728 interpolation)."
-      : "Experimental initialization from operational analysis and short-range forecast proxy inputs.";
+      ? `Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (${alignment.left_slot}/${alignment.right_slot} interpolation).`
+      : sourceId === "gfs"
+        ? "Experimental initialization from operational analysis and short-range forecast proxy inputs."
+        : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 
   update();

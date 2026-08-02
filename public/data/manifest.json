@@ -1,13 +1,43 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T09:57:02.685599+00:00",
-  "deployed_commit": "local-uncommitted",
-  "inventory_scope": "Every deployed public-data file except manifest.json itself, whose self-checksum would be recursive.",
+  "generated_at": "2026-08-02T11:02:53.640388+00:00",
+  "deployed_commit": "local-candidate",
+  "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
       "path": "data/forecasts/20260728.json",
-      "size_bytes": 346208,
-      "sha256": "475ec3f366d9410e9f296d8c48976712b4502451fffb36a29c6a130090747658"
+      "size_bytes": 346888,
+      "sha256": "049706564f21cda325b651e56f69689540e65cfa0c71a913e5269b20ad479a5a"
+    },
+    {
+      "path": "data/forecasts/era5/20260715.json",
+      "size_bytes": 344773,
+      "sha256": "dff28448fa76ea93336cc43597c601d3b4d457b4d21c63b569a83346c85abe99"
+    },
+    {
+      "path": "data/forecasts/era5/20260722.json",
+      "size_bytes": 344724,
+      "sha256": "386ed71d0a0b427dff9aa7b7a8fb61c0094ef031b047d53cb6b329d188b252ac"
+    },
+    {
+      "path": "data/forecasts/gfs/20260722.json",
+      "size_bytes": 346933,
+      "sha256": "b98ea34a54e073db9431b9bd2dd693c7e4d67be60de558b859ef99aaed7b5211"
+    },
+    {
+      "path": "data/forecasts/gfs/20260728.json",
+      "size_bytes": 346888,
+      "sha256": "049706564f21cda325b651e56f69689540e65cfa0c71a913e5269b20ad479a5a"
+    },
+    {
+      "path": "data/forecasts/gfs/20260730.json",
+      "size_bytes": 346863,
+      "sha256": "1f4d2357c21963b7901660eb3d628b09fdd6617ca1cf8e6f49717b04fa4db926"
+    },
+    {
+      "path": "data/forecasts/gfs/20260731.json",
+      "size_bytes": 346815,
+      "sha256": "b7c919dc1510c4b9c350f9fd44954348366270236380e2e506d5a51471a36fe8"
     },
     {
       "path": "data/formulas.json",
@@ -131,8 +161,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 691,
-      "sha256": "855c64520c9f71c5d48c26509ccbcda033580e95fa63e2e24924b86110b65555"
+      "size_bytes": 3380,
+      "sha256": "895b605b16aeabd53c242987d720c8d9ec42fa838733d060b2ea8d92a7c650f8"
     },
     {
       "path": "data/india-admin.json",
@@ -151,13 +181,108 @@
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5542,
-      "sha256": "e0c297a575cbbec0bbec535d643080ce110aeef27c0063f69dc54e33d8180d46"
+      "size_bytes": 5903,
+      "sha256": "c691e52ef02b5e5b7e25c7ac14c2c9723aee4407160866112f43b7a4160c908c"
     },
     {
       "path": "data/world-countries.geojson",
       "size_bytes": 838726,
       "sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f"
+    },
+    {
+      "path": "downloads/era5/20260715/india-summary.csv",
+      "size_bytes": 487,
+      "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
+    },
+    {
+      "path": "downloads/era5/20260715/india-weekly.nc",
+      "size_bytes": 85991,
+      "sha256": "dfa85b8d973410b6788ae9172143f376f4c645d9c4186d5ebf855a2a757ac67f"
+    },
+    {
+      "path": "downloads/era5/20260715/manifest.json",
+      "size_bytes": 479,
+      "sha256": "4fe3d0604196c624d1d0e6f8a1a3b1b8f37cc9aa49e822344f91ba93add84333"
+    },
+    {
+      "path": "downloads/era5/20260722/india-summary.csv",
+      "size_bytes": 484,
+      "sha256": "4098cfdb166ec9d2cc583a17c4027ae31ff65597fd2c92d96e046fef435ead84"
+    },
+    {
+      "path": "downloads/era5/20260722/india-weekly.nc",
+      "size_bytes": 85872,
+      "sha256": "d67d6a4564d74d748bc8e55ce503e0d4a1623d4155f7097f7bbe1e5073ad25b4"
+    },
+    {
+      "path": "downloads/era5/20260722/manifest.json",
+      "size_bytes": 479,
+      "sha256": "8203ee68216ed638b81a6cddc044888dbe90c328ed86e6b50db748a5079cb541"
+    },
+    {
+      "path": "downloads/gfs/20260722/india-summary.csv",
+      "size_bytes": 493,
+      "sha256": "3472c3ce783a9226390c1bd3aa2e51095016b303bd67b843783801bc450dba1c"
+    },
+    {
+      "path": "downloads/gfs/20260722/india-weekly.nc",
+      "size_bytes": 85959,
+      "sha256": "e168b951099fd700ec40dbd1f41f9820c25582ca2384b169e4fb748cfcd595ea"
+    },
+    {
+      "path": "downloads/gfs/20260722/manifest.json",
+      "size_bytes": 478,
+      "sha256": "90c0b9f9624c7dce4ccf6d11ba784b5160567275869f0c0921e689e4a2838f19"
+    },
+    {
+      "path": "downloads/gfs/20260728/india-summary.csv",
+      "size_bytes": 494,
+      "sha256": "b47efeb483342eb1705b236d9d54f0ecef10f3aeedcac7e4da4b3e054b69aa7a"
+    },
+    {
+      "path": "downloads/gfs/20260728/india-weekly.nc",
+      "size_bytes": 86127,
+      "sha256": "599d92fb4cc391f89d42aa5677906afb4872f26eb6971b99eb6f1af35d613ba4"
+    },
+    {
+      "path": "downloads/gfs/20260728/manifest.json",
+      "size_bytes": 478,
+      "sha256": "ebd2ffef02dd758bc4114fd30c00e192528fad304947c2c4a52984e806464c97"
+    },
+    {
+      "path": "downloads/gfs/20260730/india-summary.csv",
+      "size_bytes": 491,
+      "sha256": "c43c2b700dbbacd10edaeee68db81e6d5fa786f8f998183bd90ae22b565731d8"
+    },
+    {
+      "path": "downloads/gfs/20260730/india-weekly.nc",
+      "size_bytes": 86209,
+      "sha256": "e1be6e6440412dbbecc69d301b06b6d9ba6367b4b77560480b3b36e61d3ea4cb"
+    },
+    {
+      "path": "downloads/gfs/20260730/manifest.json",
+      "size_bytes": 476,
+      "sha256": "b9017ac7783eb8c93ed1dfe39ec038fda88057a89a1680c40f4abca71745c6fb"
+    },
+    {
+      "path": "downloads/gfs/20260731/india-summary.csv",
+      "size_bytes": 492,
+      "sha256": "6b49035ffcf85baa8f7dc55016833fff67e3627fb8b2c0ccb75180b5eb81a120"
+    },
+    {
+      "path": "downloads/gfs/20260731/india-weekly.nc",
+      "size_bytes": 86202,
+      "sha256": "93784dda3200d0604632489c667c7ead7c5bd5436abc19254c1718447a0c3ca4"
+    },
+    {
+      "path": "downloads/gfs/20260731/manifest.json",
+      "size_bytes": 476,
+      "sha256": "4caabb73c5fa559815c827891edaf8a920d09c7dd43a17a24d46b0fab9e17459"
+    },
+    {
+      "path": "favicon.svg",
+      "size_bytes": 587,
+      "sha256": "5c03e4b576af0f58c1203483bef0c69a3763d931f5b2c8483d2636c526a8d5c8"
     }
   ]
 }

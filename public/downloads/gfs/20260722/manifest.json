@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "initialization": "2026-07-22T00:00:00Z",
+  "initial_condition_source": "gfs",
+  "members": 100,
+  "derived_only": true,
+  "files": [
+    {
+      "path": "india-weekly.nc",
+      "size_bytes": 85959,
+      "sha256": "e168b951099fd700ec40dbd1f41f9820c25582ca2384b169e4fb748cfcd595ea"
+    },
+    {
+      "path": "india-summary.csv",
+      "size_bytes": 493,
+      "sha256": "3472c3ce783a9226390c1bd3aa2e51095016b303bd67b843783801bc450dba1c"
+    }
+  ]
+}

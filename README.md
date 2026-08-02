@@ -1,20 +1,34 @@
 # Atmosphere 42
 
-A static interactive global outlook and validated India case for the 28 July
-2026 experimental forecast. The global viewer animates 42 daily ensemble-mean
-fields for precipitation, 2 m temperature, 500 hPa geopotential height,
-850 hPa wind, mean sea-level pressure, sea-surface temperature, and outgoing
-longwave radiation, plus total-column water vapour.
+A static, source-aware India S2S forecast interface with a separate global
+viewer in beta. India is the default operational-facing page. It separates
+near-real-time GFS-proxy initializations from delayed ERA5 reference
+initializations, exposes the available issue dates and ensemble sizes, and
+provides compact issue-level downloads.
+
+The global beta viewer animates 42 daily ensemble-mean fields for
+precipitation, 2 m temperature, 500 hPa geopotential height, 850 hPa wind,
+mean sea-level pressure, sea-surface temperature, outgoing longwave radiation,
+and total-column water vapour.
 The site publishes compact ensemble-derived fields only. It does not contain
 raw model inputs, member fields, observations, reforecasts, model weights,
 credentials, or cluster paths.
 
 ## Scientific status
 
-The forecast is a 100-member FuXi-S2S run initialized with operational GFS
-daily proxy fields. FuXi-S2S was trained with ERA5-style daily inputs, and no
-matched GFS-initialized hindcast calibration exists. It is research guidance,
-not an official forecast or warning.
+Each forecast package records its initialization-source family explicitly:
+
+- **GFS operational proxy** uses near-real-time daily proxy fields for
+  experimental guidance. The model was trained with ERA5-style inputs, and no
+  matched GFS-initialized hindcast calibration exists yet.
+- **ERA5 reanalysis reference** uses scientifically matched but delayed inputs
+  for reference experiments and initialization-sensitivity comparisons. It is
+  not a near-real-time forecast.
+
+The 22 July 2026 issue is available from both sources with 100 members, giving
+one controlled comparison in which the source is changed without changing the
+initialization date. All displayed products remain research guidance, not an
+official forecast or warning.
 
 The global animation is an independently sampled 100-member companion ensemble
 generated from the same frozen input as the earlier India case. The raw members
@@ -77,6 +91,12 @@ Database state/UT layer and contains no raw shapefile.
 The India forecast JSON stores latitude and longitude vectors, a support mask,
 six week records, and flattened row-major fields. Every displayed field
 contains exactly `latitude.length × longitude.length` finite values.
+
+Source-aware packages live under
+`public/data/forecasts/{gfs,era5}/YYYYMMDD.json`. Each issue links to a compact
+derived India NetCDF, a regional-summary CSV, the web JSON, and a checksum
+manifest under `public/downloads/<source>/YYYYMMDD/`. Raw initial conditions
+and ensemble-member fields are never published.
 
 The India presentation follows the supplied four-panel PDF structure: one
 shared fixed legend, exact reference colour levels, surrounding-country and

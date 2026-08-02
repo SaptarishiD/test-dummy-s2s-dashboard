@@ -14,6 +14,7 @@ from typing import Any, Callable
 
 import jsonschema
 import numpy as np
+import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = ROOT.parent
@@ -36,7 +37,7 @@ from science.validators import (  # noqa: E402
     utc_now,
     write_json,
 )
-from scripts.stamp_deploy import build_manifest  # noqa: E402
+from scripts.stamp_deploy import build_manifest, sha256  # noqa: E402
 from scripts.validate_sources import DEFAULT_FORECAST, DEFAULT_FUXI_CLIMO  # noqa: E402
 
 LEGACY_BUILDER = (
@@ -171,6 +172,69 @@ def schema_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     )
 
 
+def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
+    """Validate source separation, issue topology, and derived downloads."""
+
+    index = load_json(public_data / "index.json")
+    sources = index["initial_condition_sources"]
+    if [source["id"] for source in sources] != ["gfs", "era5"]:
+        raise ValueError("initial-condition sources must be explicit GFS then ERA5")
+    if index["default_source"] != "gfs" or index["default_view"] != "india":
+        raise ValueError("India/GFS defaults are not locked")
+    schema = load_json(ROOT / "science/web-data.schema.json")
+    issue_count = 0
+    public_root = public_data.parent
+    matched_22 = set()
+    for source in sources:
+        if not source["issues"]:
+            raise ValueError(f"{source['id']} has no registered issues")
+        for issue in source["issues"]:
+            issue_count += 1
+            forecast_path = public_data / issue["forecast"]
+            forecast = load_json(forecast_path)
+            jsonschema.Draft202012Validator(schema).validate(forecast)
+            source_id = forecast["issue"]["initial_condition_source"]["id"]
+            if source_id != source["id"]:
+                raise ValueError(f"source mismatch in {forecast_path}")
+            if forecast["issue"]["members"] != issue["members"]:
+                raise ValueError(f"member mismatch in {forecast_path}")
+            if issue["id"] == "20260722":
+                matched_22.add(source_id)
+            downloads = forecast["issue"]["downloads"]
+            for key in (
+                "india_netcdf",
+                "india_summary_csv",
+                "manifest",
+            ):
+                if not (public_root / downloads[key]).is_file():
+                    raise ValueError(f"missing {key} for {source_id}/{issue['id']}")
+            package_manifest = load_json(public_root / downloads["manifest"])
+            package_root = (public_root / downloads["manifest"]).parent
+            for file_entry in package_manifest["files"]:
+                file_path = package_root / file_entry["path"]
+                if file_path.stat().st_size != file_entry["size_bytes"]:
+                    raise ValueError(f"download size mismatch: {file_path}")
+                if sha256(file_path) != file_entry["sha256"]:
+                    raise ValueError(f"download checksum mismatch: {file_path}")
+            with xr.open_dataset(public_root / downloads["india_netcdf"]) as dataset:
+                if dataset.sizes != {"week": 6, "latitude": 27, "longitude": 27}:
+                    raise ValueError(f"unexpected NetCDF shape for {source_id}/{issue['id']}")
+                for variable in (
+                    "rainfall_total",
+                    "rainfall_anomaly",
+                    "temperature_mean",
+                    "temperature_anomaly",
+                ):
+                    if not np.isfinite(dataset[variable].values).all():
+                        raise ValueError(f"non-finite {variable} in download")
+    if matched_22 != {"gfs", "era5"}:
+        raise ValueError("the matched 22 July GFS/ERA5 IC pair is incomplete")
+    return (
+        "GFS and ERA5 issues are source-separated with verified compact downloads.",
+        {"sources": len(sources), "issues": issue_count, "matched_issue": "20260722"},
+    )
+
+
 def independent_builder_gate(
     public_data: Path, forecast_path: Path, climatology_path: Path
 ) -> tuple[str, dict[str, Any]]:
@@ -283,6 +347,12 @@ def main() -> int:
             "Web export",
             "publication",
             lambda: schema_gate(args.public_data),
+        ),
+        run_check(
+            "initial_condition_catalog",
+            "Initial-condition source catalog",
+            "publication",
+            lambda: source_catalog_gate(args.public_data),
         ),
         run_check(
             "publication_safety",

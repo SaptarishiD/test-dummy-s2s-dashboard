@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-30T23:40:18.913105+00:00",
+  "generated_at": "2026-08-02T10:55:44.054730+00:00",
   "issue": {
     "initialization": "2026-07-28T00:00:00Z",
     "information_cutoff": "2026-07-28T00:00:00Z",
@@ -9,11 +9,25 @@
       "2026-07-26",
       "2026-07-27"
     ],
-    "input_source": "NCEP operational GFS 1.0\u00b0 analyses and 0\u20136 h forecasts, aggregated to two UTC daily proxy inputs",
+    "input_source": "NCEP operational GFS 1.0-degree analyses and 0-6 hour forecasts for 2026-07-26 and 2026-07-27; experimental proxy for ERA5-initialized FuXi-S2S",
     "members": 100,
     "lead_days": 42,
     "status": "warning",
-    "scientific_status": "Experimental GFS-proxy initialization; no matched GFS-initialized FuXi hindcast calibration",
+    "scientific_status": "Experimental GFS-proxy initialization; no matched GFS-initialized hindcast calibration is available.",
+    "initial_condition_source": {
+      "label": "GFS operational proxy",
+      "short_label": "GFS",
+      "category": "operational_proxy",
+      "availability": "near_real_time",
+      "description": "Near-real-time operational analyses and short-range forecasts aggregated into the model's two daily input states. Experimental.",
+      "id": "gfs"
+    },
+    "downloads": {
+      "compact_json": "data/forecasts/gfs/20260728.json",
+      "india_netcdf": "downloads/gfs/20260728/india-weekly.nc",
+      "india_summary_csv": "downloads/gfs/20260728/india-summary.csv",
+      "manifest": "downloads/gfs/20260728/manifest.json"
+    },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0727",
       "left_slot": "0725",

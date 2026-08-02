@@ -1,0 +1,7 @@
+week,valid_start,valid_end,rainfall_total_india_weighted_mean,rainfall_anomaly_india_weighted_mean,temperature_mean_india_weighted_mean,temperature_anomaly_india_weighted_mean
+1,2026-07-30,2026-08-05,51.38,-0.852,25.59,-0.355
+2,2026-08-06,2026-08-12,40.994,-1.905,24.738,-1.18
+3,2026-08-13,2026-08-19,43.746,-1.011,24.464,-1.317
+4,2026-08-20,2026-08-26,29.732,-2.312,24.767,-0.961
+5,2026-08-27,2026-09-02,34.339,-1.364,24.727,-0.865
+6,2026-09-03,2026-09-09,41.637,0.215,24.191,-1.258

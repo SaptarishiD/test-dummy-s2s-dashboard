@@ -248,14 +248,14 @@ export function renderGlobalPage(
       <div class="global-stage-shade" aria-hidden="true"></div>
 
       <div class="global-title">
-        <span class="global-eyebrow"><b>Experimental prototype</b> · S2S ensemble guidance · not operational</span>
-        <h1>Global outlook</h1>
+        <span class="global-eyebrow"><b>Global beta</b> · Experimental S2S ensemble guidance · not operational</span>
+        <h1>Global outlook <small>Beta</small></h1>
         <p>42-day ensemble guidance · 100 members · Weeks 1–6</p>
       </div>
 
       <aside class="global-facts" aria-label="Forecast issue and integrity facts">
         <div><span>Initialized</span><strong>28 Jul 2026 · 00 UTC</strong></div>
-        <div><span>Product</span><strong class="experimental-text">Experimental S2S prototype</strong></div>
+        <div><span>Product</span><strong class="experimental-text">Global beta · Experimental prototype</strong></div>
         <div><span>Integrity</span><strong class="integrity-ok" id="integrity-status">✓ Active layer SHA-256 verified</strong></div>
       </aside>
 

@@ -1,10 +1,12 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-07-30T23:40:19.069182+00:00",
-  "latest_successful_issue": "20260728",
+  "schema_version": 2,
+  "generated_at": "2026-08-02T10:55:58Z",
+  "default_view": "india",
+  "default_source": "gfs",
+  "latest_successful_issue": "20260731",
   "global_viewer": {
     "issue": "20260728",
-    "status": "experimental",
+    "status": "beta",
     "metadata": "global/metadata.json",
     "lead_days": 42,
     "variables": [
@@ -23,12 +25,96 @@
       "z500"
     ]
   },
+  "initial_condition_sources": [
+    {
+      "id": "gfs",
+      "label": "GFS operational proxy",
+      "short_label": "GFS",
+      "category": "operational_proxy",
+      "status": "experimental",
+      "description": "Near-real-time operational inputs for twice-weekly experimental guidance. No matched GFS-initialized hindcast calibration is currently available.",
+      "default_issue": "20260728",
+      "issues": [
+        {
+          "id": "20260731",
+          "initialization": "2026-07-31T00:00:00Z",
+          "members": 5,
+          "status": "warning",
+          "role": "rapid_prototype",
+          "forecast": "forecasts/gfs/20260731.json"
+        },
+        {
+          "id": "20260730",
+          "initialization": "2026-07-30T00:00:00Z",
+          "members": 5,
+          "status": "warning",
+          "role": "rapid_prototype",
+          "forecast": "forecasts/gfs/20260730.json"
+        },
+        {
+          "id": "20260728",
+          "initialization": "2026-07-28T00:00:00Z",
+          "members": 100,
+          "status": "warning",
+          "role": "operational_experimental",
+          "forecast": "forecasts/gfs/20260728.json"
+        },
+        {
+          "id": "20260722",
+          "initialization": "2026-07-22T00:00:00Z",
+          "members": 100,
+          "status": "warning",
+          "role": "operational_experimental",
+          "forecast": "forecasts/gfs/20260722.json"
+        }
+      ]
+    },
+    {
+      "id": "era5",
+      "label": "ERA5 reanalysis reference",
+      "short_label": "ERA5",
+      "category": "reanalysis_reference",
+      "status": "reference",
+      "description": "Delayed, scientifically matched reanalysis initializations for reference experiments and IC-sensitivity comparisons; not near-real-time guidance.",
+      "default_issue": "20260722",
+      "issues": [
+        {
+          "id": "20260722",
+          "initialization": "2026-07-22T00:00:00Z",
+          "members": 100,
+          "status": "warning",
+          "role": "reference",
+          "forecast": "forecasts/era5/20260722.json"
+        },
+        {
+          "id": "20260715",
+          "initialization": "2026-07-15T00:00:00Z",
+          "members": 100,
+          "status": "warning",
+          "role": "reference",
+          "forecast": "forecasts/era5/20260715.json"
+        }
+      ]
+    }
+  ],
   "available_issues": [
     {
       "id": "20260728",
       "initialization": "2026-07-28T00:00:00Z",
       "status": "warning",
-      "forecast": "forecasts/20260728.json"
+      "forecast": "forecasts/gfs/20260728.json"
+    },
+    {
+      "id": "20260730",
+      "initialization": "2026-07-30T00:00:00Z",
+      "status": "warning",
+      "forecast": "forecasts/gfs/20260730.json"
+    },
+    {
+      "id": "20260731",
+      "initialization": "2026-07-31T00:00:00Z",
+      "status": "warning",
+      "forecast": "forecasts/gfs/20260731.json"
     }
   ]
 }

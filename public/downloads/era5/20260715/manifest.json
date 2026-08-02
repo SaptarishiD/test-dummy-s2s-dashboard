@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "initialization": "2026-07-15T00:00:00Z",
+  "initial_condition_source": "era5",
+  "members": 100,
+  "derived_only": true,
+  "files": [
+    {
+      "path": "india-weekly.nc",
+      "size_bytes": 85991,
+      "sha256": "dfa85b8d973410b6788ae9172143f376f4c645d9c4186d5ebf855a2a757ac67f"
+    },
+    {
+      "path": "india-summary.csv",
+      "size_bytes": 487,
+      "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
+    }
+  ]
+}

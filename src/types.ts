@@ -1,4 +1,5 @@
 export type ValidationStatus = "green" | "warning" | "failure";
+export type InitialConditionSourceId = "gfs" | "era5";
 
 export type ProductKey =
   | "rainfall_total"
@@ -61,6 +62,20 @@ export interface ForecastData {
     lead_days: number;
     status: "green" | "warning";
     scientific_status: string;
+    initial_condition_source: {
+      id: InitialConditionSourceId;
+      label: string;
+      short_label: string;
+      category: "operational_proxy" | "reanalysis_reference";
+      availability: "near_real_time" | "delayed_reference";
+      description: string;
+    };
+    downloads: {
+      compact_json: string;
+      india_netcdf: string;
+      india_summary_csv: string;
+      manifest: string;
+    };
     climatology_alignment: {
       target_model_state_calendar_day: string;
       left_slot: string;
@@ -311,7 +326,38 @@ export interface IndiaAdminData {
   }>;
 }
 
+export interface IssueIndexData {
+  schema_version: number;
+  default_view: "india";
+  default_source: InitialConditionSourceId;
+  latest_successful_issue: string;
+  initial_condition_sources: Array<{
+    id: InitialConditionSourceId;
+    label: string;
+    short_label: string;
+    category: "operational_proxy" | "reanalysis_reference";
+    status: "experimental" | "reference";
+    description: string;
+    default_issue: string;
+    issues: Array<{
+      id: string;
+      initialization: string;
+      members: number;
+      status: "green" | "warning";
+      role: "operational_experimental" | "reference" | "rapid_prototype";
+      forecast: string;
+    }>;
+  }>;
+  available_issues: Array<{
+    id: string;
+    initialization: string;
+    status: "green" | "warning";
+    forecast: string;
+  }>;
+}
+
 export interface AppData {
+  index: IssueIndexData;
   forecast: ForecastData;
   global: GlobalForecastData;
   validation: ValidationData;

@@ -15,7 +15,10 @@ let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
   const hash = window.location.hash.replace("#", "") as Route;
-  return ROUTES.has(hash) ? hash : "forecast";
+  if (new URLSearchParams(window.location.search).get("view") === "global") {
+    return "forecast";
+  }
+  return ROUTES.has(hash) ? hash : "india";
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -33,7 +36,10 @@ async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
     .join("");
 }
 
-async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecastData> {
+async function fetchGlobalData(
+  metadata: GlobalMetadata,
+  preloadPrecipitation: boolean,
+): Promise<GlobalForecastData> {
   const fetchBinary = async (
     path: string,
     sizeBytes: number,
@@ -121,11 +127,23 @@ async function fetchGlobalData(metadata: GlobalMetadata): Promise<GlobalForecast
     oceanMask: new Uint8Array(oceanMaskBuffer),
     loadVariable,
   };
-  await loadVariable("precipitation");
+  if (preloadPrecipitation) await loadVariable("precipitation");
   return result;
 }
 
 async function loadData(): Promise<AppData> {
+  const index = await fetchJson<AppData["index"]>("./data/index.json");
+  const parameters = new URLSearchParams(window.location.search);
+  const requestedSource = parameters.get("source") ?? index.default_source;
+  const source =
+    index.initial_condition_sources.find((item) => item.id === requestedSource) ??
+    index.initial_condition_sources.find((item) => item.id === index.default_source);
+  if (!source) throw new Error("No initial-condition source is available");
+  const requestedIssue = parameters.get("issue") ?? source.default_issue;
+  const issue =
+    source.issues.find((item) => item.id === requestedIssue) ??
+    source.issues.find((item) => item.id === source.default_issue);
+  if (!issue) throw new Error(`${source.label} has no available forecast issue`);
   const [
     forecast,
     globalMetadata,
@@ -137,7 +155,7 @@ async function loadData(): Promise<AppData> {
     indiaAdmin,
   ] =
     await Promise.all([
-    fetchJson<AppData["forecast"]>("./data/forecasts/20260728.json"),
+    fetchJson<AppData["forecast"]>(`./data/${issue.forecast}`),
     fetchJson<GlobalMetadata>("./data/global/metadata.json"),
     fetchJson<AppData["validation"]>("./data/validation.json"),
     fetchJson<AppData["sources"]>("./data/sources.json"),
@@ -146,8 +164,15 @@ async function loadData(): Promise<AppData> {
     fetchJson<AppData["world"]>("./data/world-countries.geojson"),
     fetchJson<AppData["indiaAdmin"]>("./data/india-admin.json"),
   ]);
-  const global = await fetchGlobalData(globalMetadata);
+  if (forecast.issue.initial_condition_source.id !== source.id) {
+    throw new Error("Forecast source does not match the selected initialization source");
+  }
+  const global = await fetchGlobalData(
+    globalMetadata,
+    currentRoute() === "forecast",
+  );
   return {
+    index,
     forecast,
     global,
     validation,
@@ -162,13 +187,13 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand" href="#forecast" aria-label="Atmosphere 42 experimental S2S forecast prototype home">
+      <a class="brand" href="./#india" aria-label="Atmosphere 42 India forecast home">
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>Atmosphere 42</strong><small>Experimental S2S Prototype</small></span>
+        <span><strong>Atmosphere 42</strong><small>India Forecast Operations</small></span>
       </a>
       <nav class="site-nav" aria-label="Primary">
-        <a href="#forecast" data-route="forecast">Global</a>
-        <a href="#india" data-route="india">India</a>
+        <a href="./#india" data-route="india">India Forecasts</a>
+        <a href="./?view=global#forecast" data-route="forecast">Global <small>Beta</small></a>
       </nav>
       <div class="header-status">
         <span class="live-dot" aria-hidden="true"></span>
@@ -181,7 +206,7 @@ function shell(): string {
         <strong>Atmosphere 42</strong>
         <span>Experimental S2S forecast prototype · Research use only</span>
       </div>
-      <p>100 members · 42 days · Native 1.5° grid · Natural Earth geography</p>
+      <p>42 forecast days · Native 1.5° grid · Natural Earth geography</p>
     </footer>
   `;
 }
@@ -193,6 +218,13 @@ function renderRoute(data: AppData): void {
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("global-route", route === "forecast");
   document.body.classList.toggle("india-route", route === "india");
+  const statusDate = route === "forecast"
+    ? data.global.metadata.issue.initialization
+    : data.forecast.issue.initialization;
+  const statusLabel = new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
+  }).format(new Date(statusDate));
+  document.querySelector<HTMLElement>(".header-status span:last-child")!.textContent = statusLabel;
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
     .forEach((link) => {
@@ -225,7 +257,13 @@ async function start(): Promise<void> {
   try {
     const data = await loadData();
     renderRoute(data);
-    window.addEventListener("hashchange", () => renderRoute(data));
+    window.addEventListener("hashchange", () => {
+      if (currentRoute() === "forecast" && !data.global.fields.precipitation) {
+        window.location.assign("./?view=global#forecast");
+        return;
+      }
+      renderRoute(data);
+    });
   } catch (error) {
     renderLoadFailure(error);
   }

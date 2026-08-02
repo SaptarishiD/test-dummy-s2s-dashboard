@@ -8,6 +8,7 @@ from pathlib import Path
 
 import jsonschema
 import numpy as np
+import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DATA = ROOT / "public/data"
@@ -93,3 +94,40 @@ def test_only_compact_json_is_present_in_public_data() -> None:
         for path in PUBLIC_DATA.rglob("*")
         if path.is_file() and path.suffix.lower() in forbidden_suffixes
     ]
+
+
+def test_initial_condition_sources_are_never_conflated() -> None:
+    index = load(PUBLIC_DATA / "index.json")
+    assert index["default_view"] == "india"
+    assert index["default_source"] == "gfs"
+    sources = index["initial_condition_sources"]
+    assert [source["id"] for source in sources] == ["gfs", "era5"]
+    assert {issue["id"] for source in sources for issue in source["issues"]} >= {
+        "20260715",
+        "20260722",
+        "20260728",
+        "20260730",
+        "20260731",
+    }
+    for source in sources:
+        for issue in source["issues"]:
+            forecast = load(PUBLIC_DATA / issue["forecast"])
+            assert forecast["issue"]["initial_condition_source"]["id"] == source["id"]
+            assert forecast["issue"]["members"] == issue["members"]
+
+
+def test_each_issue_has_small_verified_downloads() -> None:
+    index = load(PUBLIC_DATA / "index.json")
+    public_root = PUBLIC_DATA.parent
+    for source in index["initial_condition_sources"]:
+        for issue in source["issues"]:
+            forecast = load(PUBLIC_DATA / issue["forecast"])
+            downloads = forecast["issue"]["downloads"]
+            netcdf_path = public_root / downloads["india_netcdf"]
+            csv_path = public_root / downloads["india_summary_csv"]
+            assert netcdf_path.stat().st_size < 1_000_000
+            assert csv_path.stat().st_size < 20_000
+            with xr.open_dataset(netcdf_path) as dataset:
+                assert dataset.sizes == {"week": 6, "latitude": 27, "longitude": 27}
+                assert dataset.attrs["initial_condition_source"] == source["id"]
+                assert dataset.attrs["raw_members_included"] == "false"
