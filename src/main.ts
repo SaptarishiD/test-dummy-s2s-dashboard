@@ -17,7 +17,7 @@ import type {
 type Route = "forecast" | "india";
 
 const ROUTES = new Set<Route>(["forecast", "india"]);
-const PUBLIC_DATA_VERSION = "20260802-s2s2";
+const PUBLIC_DATA_VERSION = "20260802-s2s3";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {

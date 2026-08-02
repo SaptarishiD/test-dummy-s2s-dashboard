@@ -28,7 +28,7 @@
       "india_summary_csv": "downloads/era5/20260722/india-summary.csv",
       "manifest": "downloads/era5/20260722/manifest.json",
       "india_pdf": "downloads/era5/20260722/S2S_Research_India_Weeks1-4_ERA5_20260722.pdf",
-      "india_pdf_sha256": "9967daf7c5cc78cd6cde1951f6800e6d8fb480e0e1d2d242525e91fb939d7b48"
+      "india_pdf_sha256": "91a2fd370f3bfda5bff91aebeb31b55089772d034ddf26000fee36ba6b9d3a82"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0721",

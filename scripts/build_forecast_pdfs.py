@@ -19,11 +19,11 @@ import numpy as np  # noqa: E402
 from matplotlib.backends.backend_pdf import PdfPages  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.colors import BoundaryNorm, ListedColormap  # noqa: E402
-from matplotlib.patches import FancyBboxPatch  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
 DATA = PUBLIC / "data"
+BRAND_ASSETS = ROOT / "scripts" / "assets"
 
 PRODUCTS = {
     "rainfall_total": {
@@ -222,6 +222,8 @@ def build_pdf(
         if members < 100
         else "Experimental research guidance · not an operational warning"
     )
+    ashoka_logo = plt.imread(BRAND_ASSETS / "ashoka-university.png")
+    centre_logo = plt.imread(BRAND_ASSETS / "scdlds-centre.png")
     metadata = {
         "Title": f"S2S Research India experimental forecast · {source_id.upper()} · {issue_id}",
         "Author": "S2S Research",
@@ -248,35 +250,14 @@ def build_pdf(
                 wspace=0.10,
                 hspace=0.15,
             )
-            mark_axes = figure.add_axes((0.06, 0.925, 0.047, 0.035))
-            mark_axes.set_xlim(0, 1)
-            mark_axes.set_ylim(0, 1)
-            mark_axes.add_patch(
-                FancyBboxPatch(
-                    (0, 0),
-                    1,
-                    1,
-                    boxstyle="round,pad=0,rounding_size=0.2",
-                    facecolor="#173f8a",
-                    edgecolor="none",
-                )
-            )
-            wave_x = np.linspace(0.18, 0.82, 60)
-            for base in (0.72, 0.56, 0.40, 0.24):
-                wave_y = base + 0.055 * np.sin(np.pi * (wave_x - 0.18) / 0.64)
-                mark_axes.plot(wave_x, wave_y, color="white", linewidth=1.5)
-            mark_axes.scatter([0.18], [0.72], s=14, color="#d55a3a", zorder=3)
-            mark_axes.axis("off")
+            ashoka_axes = figure.add_axes((0.06, 0.925, 0.047, 0.035))
+            ashoka_axes.imshow(ashoka_logo)
+            ashoka_axes.axis("off")
+            centre_axes = figure.add_axes((0.115, 0.925, 0.16, 0.035))
+            centre_axes.imshow(centre_logo)
+            centre_axes.axis("off")
             figure.text(
-                0.115,
-                0.943,
-                "S2S RESEARCH",
-                color="#173f8a",
-                fontsize=12,
-                fontweight="bold",
-            )
-            figure.text(
-                0.31,
+                0.29,
                 0.943,
                 "EXPERIMENTAL SUBSEASONAL FORECASTING",
                 color="#a63f2d",

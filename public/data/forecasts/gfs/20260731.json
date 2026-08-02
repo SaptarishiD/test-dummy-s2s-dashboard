@@ -28,7 +28,7 @@
       "india_summary_csv": "downloads/gfs/20260731/india-summary.csv",
       "manifest": "downloads/gfs/20260731/manifest.json",
       "india_pdf": "downloads/gfs/20260731/S2S_Research_India_Weeks1-4_GFS_20260731.pdf",
-      "india_pdf_sha256": "69abddcff7367f5dc55985b6e5df110fc01ac033939d565682d83e55ed44b391"
+      "india_pdf_sha256": "eb46d9b51ceaa21632a3915b99e52042afbdea370418509db2733f116286e2f6"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0730",

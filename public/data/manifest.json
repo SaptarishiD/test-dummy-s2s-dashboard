@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T13:07:11.503869+00:00",
-  "deployed_commit": "weeks1-4-pdf-candidate",
+  "generated_at": "2026-08-02T13:17:18.900645+00:00",
+  "deployed_commit": "ashoka-pdf-masthead-candidate",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -12,37 +12,37 @@
     {
       "path": "data/forecasts/20260728.json",
       "size_bytes": 347072,
-      "sha256": "a47b53a498fd4283c159c48cf630a2de771a9aa9bbfffe2a339905eb7f78954b"
+      "sha256": "e4ad8d5b994ddfa58023b081dc4147c3a454b6733d33c1eadfc8d16a72ea0f55"
     },
     {
       "path": "data/forecasts/era5/20260715.json",
       "size_bytes": 344959,
-      "sha256": "9d40a3b0c85e92098c302faaf132b72d7a657b7a01f85326baaf1ba81b72dbdd"
+      "sha256": "c03987fecff6af06e1162cf0c9614b39b635689a723bcd78149e8adab576216d"
     },
     {
       "path": "data/forecasts/era5/20260722.json",
       "size_bytes": 344910,
-      "sha256": "27223c3496ff452587b2350a4de0a27f1d6e9f98f4cc4206ae6e25246dc13810"
+      "sha256": "4316ef6c5be037a23c5f0df3c7ae0f7b3134726422998463aaa949889919f54d"
     },
     {
       "path": "data/forecasts/gfs/20260722.json",
       "size_bytes": 347117,
-      "sha256": "04df60ffbfdb3b5ef4400d96d051f45afe65af465e5f721af40e0548c20ac8aa"
+      "sha256": "9c997d989dcb5795e37f1248f98f184930bbac16c910c0f744fbf6326b362f0d"
     },
     {
       "path": "data/forecasts/gfs/20260728.json",
       "size_bytes": 347072,
-      "sha256": "a47b53a498fd4283c159c48cf630a2de771a9aa9bbfffe2a339905eb7f78954b"
+      "sha256": "e4ad8d5b994ddfa58023b081dc4147c3a454b6733d33c1eadfc8d16a72ea0f55"
     },
     {
       "path": "data/forecasts/gfs/20260730.json",
       "size_bytes": 347047,
-      "sha256": "292267fe64809c1eec9b64f6cf0f0549e8052eed4b983ca34bb06ddc0b5d72f9"
+      "sha256": "c7257dec109b697b65603baff9a476233945731e803e12c084d2eb9004bed1f2"
     },
     {
       "path": "data/forecasts/gfs/20260731.json",
       "size_bytes": 346999,
-      "sha256": "5cdce29d897f8760b8860f5461f9c482fde55b2c3cc032be8732e38f1ab88d29"
+      "sha256": "3dc23bf00f3a2d20ce9fdd1d576c386134fd0b63803a6fe641117d89f0093635"
     },
     {
       "path": "data/formulas.json",
@@ -201,8 +201,8 @@
     },
     {
       "path": "downloads/era5/20260715/S2S_Research_India_Weeks1-4_ERA5_20260715.pdf",
-      "size_bytes": 2740291,
-      "sha256": "19fb4ca92137500e9e5dd3e43ad1f5c88b45eba87f97c0bc003b34806bde9fe7"
+      "size_bytes": 2884214,
+      "sha256": "c2b6a75b2c1ff278d82cd09375234eab2f38495bf75788c69f306247aa062621"
     },
     {
       "path": "downloads/era5/20260715/india-summary.csv",
@@ -217,12 +217,12 @@
     {
       "path": "downloads/era5/20260715/manifest.json",
       "size_bytes": 667,
-      "sha256": "f43adb23e5c6749d5eb4cf8d4fae05a4f6209be7e22f8fd5a8a157c9027a30dc"
+      "sha256": "abe9658cbb083481a24bddcf6c46005d6f4c002f228571d8fbc34c41de7b8bff"
     },
     {
       "path": "downloads/era5/20260722/S2S_Research_India_Weeks1-4_ERA5_20260722.pdf",
-      "size_bytes": 2735370,
-      "sha256": "9967daf7c5cc78cd6cde1951f6800e6d8fb480e0e1d2d242525e91fb939d7b48"
+      "size_bytes": 2879271,
+      "sha256": "91a2fd370f3bfda5bff91aebeb31b55089772d034ddf26000fee36ba6b9d3a82"
     },
     {
       "path": "downloads/era5/20260722/india-summary.csv",
@@ -237,12 +237,12 @@
     {
       "path": "downloads/era5/20260722/manifest.json",
       "size_bytes": 667,
-      "sha256": "ff3d5b1e8a25db2ca874ffcc850171913899465564c34a924fa6aa51992d8824"
+      "sha256": "f3bc68bad630a01ceb3147c9fbc02182322a48dcae8d2c6cb76e4b39a2a83b00"
     },
     {
       "path": "downloads/gfs/20260722/S2S_Research_India_Weeks1-4_GFS_20260722.pdf",
-      "size_bytes": 2748178,
-      "sha256": "225cc79e1842cdc673eaaf52d1eab35b95920156deb0f983e305e7aad8d3c72b"
+      "size_bytes": 2892083,
+      "sha256": "8670029e6d7ad926c06ff0a8b05cabedca2f476e6719b2e36939d5f78079ee17"
     },
     {
       "path": "downloads/gfs/20260722/india-summary.csv",
@@ -257,12 +257,12 @@
     {
       "path": "downloads/gfs/20260722/manifest.json",
       "size_bytes": 665,
-      "sha256": "8f2d38d479f7a8a455e05f36359080ac88290e9ebc7d817fa300e462d925be92"
+      "sha256": "ce6d8cd2badde9926e01ec3f82d257844d1b834aa4d6225155bc7ca5facc78c2"
     },
     {
       "path": "downloads/gfs/20260728/S2S_Research_India_Weeks1-4_GFS_20260728.pdf",
-      "size_bytes": 2746523,
-      "sha256": "471fc6b95d382949c05660c252a0ad7b2a0195ee07479383617e2aaa4e66181f"
+      "size_bytes": 2890428,
+      "sha256": "6ac340e9d937def819b6d03a8f684d1294ee6f72e87da47d62aab0d41b8efc0f"
     },
     {
       "path": "downloads/gfs/20260728/india-summary.csv",
@@ -277,12 +277,12 @@
     {
       "path": "downloads/gfs/20260728/manifest.json",
       "size_bytes": 665,
-      "sha256": "7ea1be0e545e20ac6d8ad8e6e97a5314fa74970d1fb00bc1bcb2413256f26846"
+      "sha256": "9e904c90d8a9b8a8eacffb6ed5e166bd1cdc5d529b5aadef9ed49d02b73a3ecb"
     },
     {
       "path": "downloads/gfs/20260730/S2S_Research_India_Weeks1-4_GFS_20260730.pdf",
-      "size_bytes": 2744618,
-      "sha256": "f67d89565010f792ef120eee761ec0463440e2babbb39f237978cb266eda181c"
+      "size_bytes": 2888485,
+      "sha256": "3aeba3b70e93e2ea955fcb6923d0b59ab3e12c3c075be1e45ebd058de2df7ca4"
     },
     {
       "path": "downloads/gfs/20260730/india-summary.csv",
@@ -297,12 +297,12 @@
     {
       "path": "downloads/gfs/20260730/manifest.json",
       "size_bytes": 663,
-      "sha256": "67004823c634ab88878c075d0b6c5318d5b9bf5865c92b93d307777aadc1d9bd"
+      "sha256": "5906a974717b24da2a1f02067ad5e6f7b53c97e2bb51809ad60f12884d16c478"
     },
     {
       "path": "downloads/gfs/20260731/S2S_Research_India_Weeks1-4_GFS_20260731.pdf",
-      "size_bytes": 2745233,
-      "sha256": "69abddcff7367f5dc55985b6e5df110fc01ac033939d565682d83e55ed44b391"
+      "size_bytes": 2889098,
+      "sha256": "eb46d9b51ceaa21632a3915b99e52042afbdea370418509db2733f116286e2f6"
     },
     {
       "path": "downloads/gfs/20260731/india-summary.csv",
@@ -317,7 +317,7 @@
     {
       "path": "downloads/gfs/20260731/manifest.json",
       "size_bytes": 663,
-      "sha256": "4fa08827ab8aae8cbaafee77f5b23701ba983ea8304442051fa90bfaa5f516ad"
+      "sha256": "97514011c279cdbca15e16cb349628b97682e5ad1db134b600659a4d063f3ad6"
     }
   ]
 }

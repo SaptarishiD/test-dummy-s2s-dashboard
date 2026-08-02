@@ -39,6 +39,12 @@ The public interface uses the neutral identity **S2S Research · Experimental
 Subseasonal Forecasting**. Model identity and scientific provenance remain in
 this repository.
 
+The downloadable PDF masthead uses unmodified Ashoka University and Safexpress
+Centre marks sourced from the official SCDLDS website. These institutional
+brand assets are stored under `scripts/assets/`, remain the property of their
+respective owners, and are not covered by any source-code licence for this
+prototype. The web interface itself retains the neutral S2S Research identity.
+
 The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized
 FuXi climatology and audited IMERG Final climatology are currently
