@@ -186,6 +186,9 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     : "Delayed reference run";
   const pdfPath = forecast.issue.downloads.india_pdf;
   const pdfReady = typeof pdfPath === "string" && pdfPath.endsWith(".pdf");
+  const pdfUrl = pdfReady
+    ? `./${pdfPath}?v=${encodeURIComponent(forecast.generated_at)}`
+    : "";
 
   container.innerHTML = `
     <section class="india-sheet">
@@ -223,7 +226,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         <div class="india-run-actions" aria-label="Forecast downloads">
           <span>Forecast briefing</span>
           ${pdfReady
-            ? `<a class="india-pdf-download" href="./${pdfPath}" download>Download PDF</a>`
+            ? `<a class="india-pdf-download" href="${pdfUrl}" target="_blank" rel="noopener" type="application/pdf">Open / Download PDF</a>`
             : `<button class="india-pdf-download" type="button" disabled>PDF preparing · refresh shortly</button>`}
         </div>
         ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
