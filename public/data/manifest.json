@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T11:02:53.640388+00:00",
-  "deployed_commit": "local-candidate",
+  "generated_at": "2026-08-02T11:20:57.133328+00:00",
+  "deployed_commit": "performance-candidate",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -170,6 +170,11 @@
       "sha256": "39e157a2e21953426efe3e9ab54c45a97f197b0bd7209952ec3df6ecd2b4b6f8"
     },
     {
+      "path": "data/india-map-geography.json",
+      "size_bytes": 155937,
+      "sha256": "915afce5ce50880864d913d0cdf5b597b2a73b6ccc00473978f7ab715bf0fced"
+    },
+    {
       "path": "data/india-outline.json",
       "size_bytes": 448020,
       "sha256": "0aa127cb934cc8c244afc9fce5dd8ad064895ea870ecca7bb825e3f2d7cc3c91"
@@ -182,7 +187,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 5903,
-      "sha256": "c691e52ef02b5e5b7e25c7ac14c2c9723aee4407160866112f43b7a4160c908c"
+      "sha256": "ff8470b4c2f663564ac42dc7812f2f7db0f316e95a57479ed907e630aa4c9e83"
     },
     {
       "path": "data/world-countries.geojson",

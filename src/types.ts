@@ -326,6 +326,20 @@ export interface IndiaAdminData {
   }>;
 }
 
+export interface IndiaMapGeographyData {
+  schema_version: 1;
+  description: string;
+  view_box: [0, 0, 620, 620];
+  world_path: string;
+  india_outline_path: string;
+  india_admin_path: string;
+  sources: {
+    world_countries_sha256: string;
+    india_outline_sha256: string;
+    india_admin_sha256: string;
+  };
+}
+
 export interface IssueIndexData {
   schema_version: number;
   default_view: "india";
@@ -357,13 +371,11 @@ export interface IssueIndexData {
 }
 
 export interface AppData {
-  index: IssueIndexData;
-  forecast: ForecastData;
-  global: GlobalForecastData;
-  validation: ValidationData;
-  sources: SourcesData;
-  formulas: FormulasData;
-  outline: OutlineData;
-  world: WorldCountriesData;
-  indiaAdmin: IndiaAdminData;
+  index?: IssueIndexData;
+  forecast?: ForecastData;
+  validation?: ValidationData;
+  indiaGeography?: IndiaMapGeographyData;
+  global?: GlobalForecastData;
+  world?: WorldCountriesData;
+  indiaAdmin?: IndiaAdminData;
 }

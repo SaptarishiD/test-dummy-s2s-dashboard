@@ -136,7 +136,19 @@ function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
 }
 
 export function renderForecastPage(container: HTMLElement, data: AppData): void {
-  const { forecast, validation, index } = data;
+  const { forecast, validation, index, indiaGeography } = data;
+  if (!forecast || !validation || !index || !indiaGeography) {
+    container.innerHTML = `
+      <section class="blocked-state">
+        <span class="eyebrow">India data unavailable</span>
+        <h1>The India forecast package could not be loaded.</h1>
+        <p>No partial map has been shown.</p>
+      </section>
+    `;
+    return;
+  }
+  const activeForecast = forecast;
+  const activeGeography = indiaGeography;
   if (!validation.presentation_allowed) {
     container.innerHTML = `
       <section class="blocked-state">
@@ -291,7 +303,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
 
     container.querySelector("#india-product-title")!.textContent = product.label;
     panelGrid.replaceChildren();
-    forecast.weeks.slice(rangeStart, rangeStart + 4).forEach((sourceWeek) => {
+    activeForecast.weeks.slice(rangeStart, rangeStart + 4).forEach((sourceWeek) => {
       const week = displayWeek(sourceWeek, selectedProduct);
       const panel = document.createElement("article");
       panel.className = "india-map-panel";
@@ -303,10 +315,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       const frame = panel.querySelector<HTMLDivElement>(".india-map-frame")!;
       const map = new ForecastMap(
         frame,
-        forecast,
-        data.outline,
-        data.world,
-        data.indiaAdmin,
+        activeForecast,
+        activeGeography,
       );
       map.render(selectedProduct, week, product);
     });
@@ -316,8 +326,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     legend.style.setProperty("--legend-over", product.legend.over);
     legend.replaceChildren(createLegend(product));
     container.querySelector("#india-visual-note")!.textContent =
-      `${product.description.replace("100-member", `${forecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
-    const alignment = forecast.issue.climatology_alignment;
+      `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
+    const alignment = activeForecast.issue.climatology_alignment;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
       ? `Anomaly uses calendar- and lead-matched 2002–2021 native-reforecast climatology (${alignment.left_slot}/${alignment.right_slot} interpolation).`
       : sourceId === "gfs"

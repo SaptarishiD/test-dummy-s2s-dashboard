@@ -7,6 +7,7 @@ import { createLegend } from "../components/Legend";
 import type {
   AppData,
   GlobalDisplayMode,
+  GlobalForecastData,
   GlobalVariableKey,
 } from "../types";
 
@@ -115,7 +116,7 @@ function linePath(
 }
 
 function renderPointChart(
-  data: AppData["global"],
+  data: GlobalForecastData,
   variable: GlobalVariableKey,
   selection: MapSelection,
   selectedDay: number,
@@ -230,7 +231,18 @@ export function renderGlobalPage(
   container: HTMLElement,
   data: AppData,
 ): () => void {
-  const { global } = data;
+  const { global, world, indiaAdmin } = data;
+  if (!global || !world || !indiaAdmin) {
+    container.innerHTML = `
+      <section class="blocked-state blocked-state--dark">
+        <span class="eyebrow">Global data unavailable</span>
+        <h1>The Global Beta package could not be loaded.</h1>
+        <p>No partial map has been shown.</p>
+      </section>
+    `;
+    return () => undefined;
+  }
+  const activeGlobal = global;
   if (global.metadata.validation.status === "failure") {
     container.innerHTML = `
       <section class="blocked-state blocked-state--dark">
@@ -365,8 +377,8 @@ export function renderGlobalPage(
   const map = new GlobalForecastMap(
     mapHost,
     global,
-    data.world,
-    data.indiaAdmin,
+    world,
+    indiaAdmin,
     (next) => {
       selection = next;
       updateInspector();
@@ -406,14 +418,14 @@ export function renderGlobalPage(
     key: GlobalVariableKey,
     button?: HTMLButtonElement,
   ): Promise<void> {
-    if (key === variable && global.fields[key]) return;
+    if (key === variable && activeGlobal.fields[key]) return;
     const status = container.querySelector("#layer-load-status")!;
     button?.classList.add("is-loading");
     status.textContent = "Verifying…";
     try {
-      await global.loadVariable(key);
+      await activeGlobal.loadVariable(key);
       variable = key;
-      if (mode === "anomaly" && !global.metadata.variables[key].anomaly) {
+      if (mode === "anomaly" && !activeGlobal.metadata.variables[key].anomaly) {
         mode = "absolute";
       }
       if (key === "wind850") {
@@ -443,13 +455,13 @@ export function renderGlobalPage(
     container.querySelector("#point-location")!.textContent =
       pointLabel(selection);
     container.querySelector("#point-chart")!.innerHTML = renderPointChart(
-      global,
+      activeGlobal,
       variable,
       selection,
       day,
       mode,
     );
-    const definition = global.metadata.variables[variable];
+    const definition = activeGlobal.metadata.variables[variable];
     container.querySelector("#notice-copy")!.textContent =
       mode === "anomaly" && definition.anomaly
         ? definition.anomaly.description
@@ -457,7 +469,7 @@ export function renderGlobalPage(
   }
 
   function updateStatic(): void {
-    const definition = global.metadata.variables[variable];
+    const definition = activeGlobal.metadata.variables[variable];
     const displayDefinition =
       mode === "anomaly" && definition.anomaly
         ? definition.anomaly
@@ -472,7 +484,7 @@ export function renderGlobalPage(
     container.querySelector("#lead-label")!.textContent =
       `Lead ${String(day + 1).padStart(2, "0")} / 42`;
     container.querySelector("#valid-label")!.textContent = friendlyDate(
-      global.metadata.valid_period_starts[day],
+      activeGlobal.metadata.valid_period_starts[day],
     );
     const guidance = leadGuidance(day);
     container.querySelector("#lead-period")!.textContent = guidance.period;

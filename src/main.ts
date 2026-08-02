@@ -3,9 +3,15 @@ import { renderForecastPage } from "./pages/forecast";
 import { renderGlobalPage } from "./pages/global";
 import type {
   AppData,
+  ForecastData,
   GlobalForecastData,
   GlobalMetadata,
   GlobalVariableKey,
+  IndiaAdminData,
+  IndiaMapGeographyData,
+  IssueIndexData,
+  ValidationData,
+  WorldCountriesData,
 } from "./types";
 
 type Route = "forecast" | "india";
@@ -132,7 +138,17 @@ async function fetchGlobalData(
 }
 
 async function loadData(): Promise<AppData> {
-  const index = await fetchJson<AppData["index"]>("./data/index.json");
+  if (currentRoute() === "forecast") {
+    const [globalMetadata, world, indiaAdmin] = await Promise.all([
+      fetchJson<GlobalMetadata>("./data/global/metadata.json"),
+      fetchJson<WorldCountriesData>("./data/world-countries.geojson"),
+      fetchJson<IndiaAdminData>("./data/india-admin.json"),
+    ]);
+    const global = await fetchGlobalData(globalMetadata, true);
+    return { global, world, indiaAdmin };
+  }
+
+  const index = await fetchJson<IssueIndexData>("./data/index.json");
   const parameters = new URLSearchParams(window.location.search);
   const requestedSource = parameters.get("source") ?? index.default_source;
   const source =
@@ -144,44 +160,15 @@ async function loadData(): Promise<AppData> {
     source.issues.find((item) => item.id === requestedIssue) ??
     source.issues.find((item) => item.id === source.default_issue);
   if (!issue) throw new Error(`${source.label} has no available forecast issue`);
-  const [
-    forecast,
-    globalMetadata,
-    validation,
-    sources,
-    formulas,
-    outline,
-    world,
-    indiaAdmin,
-  ] =
-    await Promise.all([
-    fetchJson<AppData["forecast"]>(`./data/${issue.forecast}`),
-    fetchJson<GlobalMetadata>("./data/global/metadata.json"),
-    fetchJson<AppData["validation"]>("./data/validation.json"),
-    fetchJson<AppData["sources"]>("./data/sources.json"),
-    fetchJson<AppData["formulas"]>("./data/formulas.json"),
-    fetchJson<AppData["outline"]>("./data/india-outline.json"),
-    fetchJson<AppData["world"]>("./data/world-countries.geojson"),
-    fetchJson<AppData["indiaAdmin"]>("./data/india-admin.json"),
+  const [forecast, validation, indiaGeography] = await Promise.all([
+    fetchJson<ForecastData>(`./data/${issue.forecast}`),
+    fetchJson<ValidationData>("./data/validation.json"),
+    fetchJson<IndiaMapGeographyData>("./data/india-map-geography.json"),
   ]);
   if (forecast.issue.initial_condition_source.id !== source.id) {
     throw new Error("Forecast source does not match the selected initialization source");
   }
-  const global = await fetchGlobalData(
-    globalMetadata,
-    currentRoute() === "forecast",
-  );
-  return {
-    index,
-    forecast,
-    global,
-    validation,
-    sources,
-    formulas,
-    outline,
-    world,
-    indiaAdmin,
-  };
+  return { index, forecast, validation, indiaGeography };
 }
 
 function shell(): string {
@@ -213,14 +200,22 @@ function shell(): string {
 
 function renderRoute(data: AppData): void {
   const route = currentRoute();
+  if (route === "forecast" && !data.global) {
+    window.location.assign("./?view=global#forecast");
+    return;
+  }
+  if (route === "india" && !data.forecast) {
+    window.location.assign("./#india");
+    return;
+  }
   routeCleanup?.();
   routeCleanup = undefined;
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("global-route", route === "forecast");
   document.body.classList.toggle("india-route", route === "india");
   const statusDate = route === "forecast"
-    ? data.global.metadata.issue.initialization
-    : data.forecast.issue.initialization;
+    ? data.global!.metadata.issue.initialization
+    : data.forecast!.issue.initialization;
   const statusLabel = new Intl.DateTimeFormat("en-IN", {
     day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
   }).format(new Date(statusDate));
@@ -258,8 +253,12 @@ async function start(): Promise<void> {
     const data = await loadData();
     renderRoute(data);
     window.addEventListener("hashchange", () => {
-      if (currentRoute() === "forecast" && !data.global.fields.precipitation) {
+      if (currentRoute() === "forecast" && !data.global) {
         window.location.assign("./?view=global#forecast");
+        return;
+      }
+      if (currentRoute() === "india" && !data.forecast) {
+        window.location.assign("./#india");
         return;
       }
       renderRoute(data);

@@ -88,6 +88,12 @@ Country boundaries and labels use Natural Earth. `india-admin.json` is a
 simplified display derivative of the Survey of India Administrative Boundary
 Database state/UT layer and contains no raw shapefile.
 
+The India startup path uses `india-map-geography.json`, a compact,
+pre-projected display derivative of those same checked geography files. It
+preserves the displayed boundaries while avoiding the full global geography
+download and thousands of per-cell SVG nodes. Global metadata and forecast
+fields are loaded only when the Global Beta route is opened.
+
 The India forecast JSON stores latitude and longitude vectors, a support mask,
 six week records, and flattened row-major fields. Every displayed field
 contains exactly `latitude.length × longitude.length` finite values.

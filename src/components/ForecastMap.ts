@@ -2,11 +2,9 @@ import { colorFor, formatValue } from "../lib/color";
 import type {
   ForecastData,
   ForecastWeek,
-  IndiaAdminData,
-  OutlineData,
+  IndiaMapGeographyData,
   ProductDefinition,
   ProductKey,
-  WorldCountriesData,
 } from "../types";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -31,52 +29,20 @@ function mapY(latitude: number): number {
   return ((LAT_MAX - latitude) / (LAT_MAX - LAT_MIN)) * MAP_SIZE;
 }
 
-type Coordinates = number[][] | number[][][] | number[][][][];
-
-function ringPath(ring: number[][]): string {
-  return ring
-    .map(([longitude, latitude], index) => {
-      const command = index === 0 ? "M" : "L";
-      return `${command}${mapX(longitude).toFixed(2)},${mapY(latitude).toFixed(2)}`;
-    })
-    .join(" ")
-    .concat(" Z");
-}
-
-function polygonPath(polygon: number[][][]): string {
-  return polygon.map(ringPath).join(" ");
-}
-
-function geometryPath(type: string, coordinates: unknown): string {
-  if (type === "Polygon") {
-    return polygonPath(coordinates as number[][][]);
-  }
-  if (type === "MultiPolygon") {
-    return (coordinates as number[][][][]).map(polygonPath).join(" ");
-  }
-  return "";
-}
-
 export class ForecastMap {
   private readonly container: HTMLElement;
   private readonly forecast: ForecastData;
-  private readonly outline: OutlineData;
-  private readonly world: WorldCountriesData;
-  private readonly indiaAdmin: IndiaAdminData;
+  private readonly geography: IndiaMapGeographyData;
   private readonly tooltip: HTMLDivElement;
 
   constructor(
     container: HTMLElement,
     forecast: ForecastData,
-    outline: OutlineData,
-    world: WorldCountriesData,
-    indiaAdmin: IndiaAdminData,
+    geography: IndiaMapGeographyData,
   ) {
     this.container = container;
     this.forecast = forecast;
-    this.outline = outline;
-    this.world = world;
-    this.indiaAdmin = indiaAdmin;
+    this.geography = geography;
     this.tooltip = document.createElement("div");
     this.tooltip.className = "map-tooltip";
     this.tooltip.hidden = true;
@@ -106,7 +72,7 @@ export class ForecastMap {
     this.addInterpolatedField(svg, productKey, week, product);
     this.addWorldBoundaries(svg);
     this.addGraticules(svg);
-    this.addInteractiveCells(svg, productKey, week, product);
+    this.addInteraction(svg, productKey, week, product);
     this.addOutline(svg);
     this.addIndiaAdmin(svg);
     this.container.prepend(svg);
@@ -202,7 +168,7 @@ export class ForecastMap {
     }
   }
 
-  private addInteractiveCells(
+  private addInteraction(
     svg: SVGSVGElement,
     productKey: ProductKey,
     week: ForecastWeek,
@@ -210,92 +176,86 @@ export class ForecastMap {
   ): void {
     const values = week.fields[productKey];
     const { latitude, longitude } = this.forecast.grid;
-    const cellSize = mapX(LON_MIN + 1.5) - mapX(LON_MIN);
-
-    latitude.forEach((lat, latIndex) => {
-      longitude.forEach((lon, lonIndex) => {
-        const flatIndex = latIndex * longitude.length + lonIndex;
-        const value = values[flatIndex];
-        const cell = svgElement("rect");
-        cell.setAttribute("x", String(mapX(lon - 0.75)));
-        cell.setAttribute("y", String(mapY(lat + 0.75)));
-        cell.setAttribute("width", String(cellSize + 0.3));
-        cell.setAttribute("height", String(cellSize + 0.3));
-        cell.setAttribute("fill", "transparent");
-        cell.setAttribute("class", "map-cell");
-        cell.setAttribute("tabindex", "0");
-        cell.setAttribute(
-          "aria-label",
-          `${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formatValue(value, product.units)}`,
+    svg.setAttribute("tabindex", "0");
+    svg.classList.add("forecast-map--interactive");
+    const show = (event?: PointerEvent): void => {
+      let latIndex = Math.floor(latitude.length / 2);
+      let lonIndex = Math.floor(longitude.length / 2);
+      if (event) {
+        const bounds = svg.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+        const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+        const hoveredLongitude = LON_MIN + x * (LON_MAX - LON_MIN);
+        const hoveredLatitude = LAT_MAX - y * (LAT_MAX - LAT_MIN);
+        lonIndex = Math.max(
+          0,
+          Math.min(
+            longitude.length - 1,
+            Math.round((hoveredLongitude - longitude[0]) / this.forecast.grid.spacing_degrees),
+          ),
         );
-        const show = (event: PointerEvent | FocusEvent): void => {
-          this.tooltip.innerHTML = `
-            <strong>${formatValue(value, product.units)}</strong>
-            <span>${lat.toFixed(1)}°N · ${lon.toFixed(1)}°E</span>
-            <small>Native 1.5° grid cell</small>
-          `;
-          this.tooltip.hidden = false;
-          if (event instanceof PointerEvent) {
-            const bounds = this.container.getBoundingClientRect();
-            this.tooltip.style.left = `${event.clientX - bounds.left + 14}px`;
-            this.tooltip.style.top = `${event.clientY - bounds.top + 14}px`;
-          } else {
-            this.tooltip.style.left = "16px";
-            this.tooltip.style.top = "16px";
-          }
-        };
-        cell.addEventListener("pointermove", show);
-        cell.addEventListener("pointerenter", show);
-        cell.addEventListener("focus", show);
-        cell.addEventListener("pointerleave", () => {
-          this.tooltip.hidden = true;
-        });
-        cell.addEventListener("blur", () => {
-          this.tooltip.hidden = true;
-        });
-        svg.append(cell);
-      });
+        latIndex = Math.max(
+          0,
+          Math.min(
+            latitude.length - 1,
+            Math.round((latitude[0] - hoveredLatitude) / this.forecast.grid.spacing_degrees),
+          ),
+        );
+      }
+      const lat = latitude[latIndex];
+      const lon = longitude[lonIndex];
+      const value = values[latIndex * longitude.length + lonIndex];
+      this.tooltip.innerHTML = `
+        <strong>${formatValue(value, product.units)}</strong>
+        <span>${lat.toFixed(1)}°N · ${lon.toFixed(1)}°E</span>
+        <small>Native 1.5° grid cell</small>
+      `;
+      this.tooltip.hidden = false;
+      svg.setAttribute(
+        "aria-label",
+        `${product.label}, Week ${week.week}; selected cell ${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formatValue(value, product.units)}`,
+      );
+      if (event) {
+        const bounds = this.container.getBoundingClientRect();
+        this.tooltip.style.left = `${event.clientX - bounds.left + 14}px`;
+        this.tooltip.style.top = `${event.clientY - bounds.top + 14}px`;
+      } else {
+        this.tooltip.style.left = "16px";
+        this.tooltip.style.top = "16px";
+      }
+    };
+    svg.addEventListener("pointermove", (event) => show(event));
+    svg.addEventListener("pointerenter", (event) => show(event));
+    svg.addEventListener("focus", () => show());
+    svg.addEventListener("pointerleave", () => {
+      this.tooltip.hidden = true;
+    });
+    svg.addEventListener("blur", () => {
+      this.tooltip.hidden = true;
     });
   }
 
   private addWorldBoundaries(svg: SVGSVGElement): void {
-    this.world.features.forEach((feature) => {
-      if (!feature.geometry) return;
-      const path = svgElement("path");
-      path.setAttribute(
-        "d",
-        geometryPath(feature.geometry.type, feature.geometry.coordinates),
-      );
-      path.setAttribute("class", "map-world-outline");
-      path.setAttribute("fill-rule", "evenodd");
-      svg.append(path);
-    });
+    const path = svgElement("path");
+    path.setAttribute("d", this.geography.world_path);
+    path.setAttribute("class", "map-world-outline");
+    path.setAttribute("fill-rule", "evenodd");
+    svg.append(path);
   }
 
   private addOutline(svg: SVGSVGElement): void {
-    const geometry = this.outline.geometry;
-    if (geometry.coordinates) {
-      const path = svgElement("path");
-      path.setAttribute(
-        "d",
-        geometryPath(geometry.type, geometry.coordinates as Coordinates),
-      );
-      path.setAttribute("class", "map-outline");
-      path.setAttribute("fill-rule", "evenodd");
-      svg.append(path);
-    }
+    const path = svgElement("path");
+    path.setAttribute("d", this.geography.india_outline_path);
+    path.setAttribute("class", "map-outline");
+    path.setAttribute("fill-rule", "evenodd");
+    svg.append(path);
   }
 
   private addIndiaAdmin(svg: SVGSVGElement): void {
-    this.indiaAdmin.features.forEach((feature) => {
-      const path = svgElement("path");
-      path.setAttribute(
-        "d",
-        geometryPath(feature.geometry.type, feature.geometry.coordinates),
-      );
-      path.setAttribute("class", "map-india-admin");
-      path.setAttribute("fill-rule", "evenodd");
-      svg.append(path);
-    });
+    const path = svgElement("path");
+    path.setAttribute("d", this.geography.india_admin_path);
+    path.setAttribute("class", "map-india-admin");
+    path.setAttribute("fill-rule", "evenodd");
+    svg.append(path);
   }
 }

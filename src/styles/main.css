@@ -571,6 +571,16 @@ a {
   height: 100%;
 }
 
+.forecast-map--interactive {
+  cursor: crosshair;
+  outline: none;
+}
+
+.forecast-map--interactive:focus-visible {
+  outline: 2px solid #173f8a;
+  outline-offset: -2px;
+}
+
 .map-ocean {
   fill: #e4eef1;
 }
