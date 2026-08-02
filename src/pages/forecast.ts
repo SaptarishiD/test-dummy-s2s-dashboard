@@ -193,6 +193,21 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
   const pdfUrl = pdfReady
     ? `./${pdfPath}?v=${pdfVersion}`
     : "";
+  const initializationComparison = forecast.issue.initialization_comparison;
+  const comparisonCard = initializationComparison
+    ? `
+      <section class="india-ic-comparison" aria-label="Matched GFS and ERA5 initialization comparison">
+        <div>
+          <span>Matched initialization sensitivity · Week 1</span>
+          <strong>GFS − ERA5</strong>
+          <p>This measures the effect of changing the initial-state source, not forecast skill. Observations are required before either source can be called better.</p>
+        </div>
+        <dl>
+          <div><dt>India rainfall</dt><dd>${initializationComparison.week1_rainfall_gfs_minus_era5_mm_day >= 0 ? "+" : ""}${initializationComparison.week1_rainfall_gfs_minus_era5_mm_day.toFixed(2)} mm/day</dd></div>
+          <div><dt>India temperature</dt><dd>${initializationComparison.week1_temperature_gfs_minus_era5_deg_c >= 0 ? "+" : ""}${initializationComparison.week1_temperature_gfs_minus_era5_deg_c.toFixed(2)} °C</dd></div>
+        </dl>
+      </section>`
+    : "";
 
   container.innerHTML = `
     <section class="india-sheet">
@@ -230,11 +245,13 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         <div class="india-run-actions" aria-label="Forecast downloads">
           <span>Forecast briefing</span>
           ${pdfReady
-            ? `<a class="india-pdf-download" href="${pdfUrl}" target="_blank" rel="noopener" type="application/pdf">Open / Download PDF</a>`
+            ? `<a class="india-pdf-download" href="${pdfUrl}" download type="application/pdf">Download PDF</a>`
             : `<button class="india-pdf-download" type="button" disabled>PDF preparing · refresh shortly</button>`}
         </div>
         ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
       </section>
+
+      ${comparisonCard}
 
       <div class="india-toolbar">
         <div class="india-product-tabs" id="india-product-tabs" aria-label="India forecast field"></div>

@@ -88,6 +88,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--index", type=Path, default=DATA / "index.json", help="Issue catalog"
     )
+    parser.add_argument("--source", choices=("gfs", "era5"))
+    parser.add_argument("--issue", help="Optional YYYYMMDD issue filter")
     return parser.parse_args()
 
 
@@ -373,26 +375,16 @@ def build_pdf(
             plt.close(figure)
 
     relative_pdf = output.relative_to(PUBLIC).as_posix()
-    forecast["issue"]["downloads"]["india_pdf"] = relative_pdf
-    forecast["issue"]["downloads"]["india_pdf_sha256"] = sha256(output)
+    compact_json = forecast["issue"].get("downloads", {}).get(
+        "compact_json", forecast_path.relative_to(PUBLIC).as_posix()
+    )
+    forecast["issue"]["downloads"] = {
+        "compact_json": compact_json,
+        "india_pdf": relative_pdf,
+        "india_pdf_sha256": sha256(output),
+    }
     forecast_path.write_text(
         json.dumps(forecast, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )
-    package_manifest_path = output_root / "manifest.json"
-    package_manifest = json.loads(package_manifest_path.read_text(encoding="utf-8"))
-    package_manifest["files"] = [
-        entry for entry in package_manifest["files"] if not entry["path"].endswith(".pdf")
-    ]
-    package_manifest["files"].append(
-        {
-            "path": output.name,
-            "size_bytes": output.stat().st_size,
-            "sha256": forecast["issue"]["downloads"]["india_pdf_sha256"],
-        }
-    )
-    package_manifest_path.write_text(
-        json.dumps(package_manifest, indent=2, allow_nan=False) + "\n",
         encoding="utf-8",
     )
     return output
@@ -406,9 +398,15 @@ def main() -> int:
     admin = json.loads((DATA / "india-admin.json").read_text(encoding="utf-8"))
     built: list[Path] = []
     for source in index["initial_condition_sources"]:
+        if args.source and source["id"] != args.source:
+            continue
         for issue in source["issues"]:
+            if args.issue and issue["id"] != args.issue:
+                continue
             forecast_path = DATA / issue["forecast"]
             built.append(build_pdf(forecast_path, source, issue, world, outline, admin))
+    if not built:
+        raise ValueError("no forecast issue matched the requested PDF filters")
     legacy = DATA / "forecasts/20260728.json"
     canonical = DATA / "forecasts/gfs/20260728.json"
     legacy.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")

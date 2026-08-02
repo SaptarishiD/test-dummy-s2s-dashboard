@@ -25,6 +25,9 @@ from science.formulas import (  # noqa: E402
     area_weights,
     calendar_interpolation,
     kelvin_to_celsius,
+    probability_above_normal,
+    probability_below_normal,
+    probability_near_normal,
     tp_mm_hour_to_mm_day,
     verification_metrics,
     weekly_mean_rainfall,
@@ -114,6 +117,15 @@ def formula_gate() -> tuple[str, dict[str, Any]]:
     )
     weights = area_weights([0.0, 60.0], [[1.0], [1.0]])
     np.testing.assert_allclose(weights.sum(), 1.0, atol=1e-15)
+    members = np.asarray([0.0, 1.0, 2.0, 3.0])
+    tercile_probabilities = np.asarray(
+        [
+            probability_below_normal(members, 1.0),
+            probability_near_normal(members, 1.0, 2.0),
+            probability_above_normal(members, 2.0),
+        ]
+    )
+    np.testing.assert_allclose(tercile_probabilities, [25.0, 50.0, 25.0])
     metrics = verification_metrics(
         [2.0, 4.0, 6.0],
         [1.0, 5.0, 5.0],
@@ -127,7 +139,7 @@ def formula_gate() -> tuple[str, dict[str, Any]]:
     np.testing.assert_allclose(metrics["acc"], 1.0)
     return (
         "Conversions, weekly aggregation, anomalies, interpolation, weights, and metrics passed.",
-        {"formula_version": "1.0.0", "independent_examples": 9},
+        {"formula_version": "1.1.0", "independent_examples": 10},
     )
 
 
@@ -183,6 +195,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
         raise ValueError("India/GFS defaults are not locked")
     schema = load_json(ROOT / "science/web-data.schema.json")
     issue_count = 0
+    regional_count = 0
     public_root = public_data.parent
     matched_22 = set()
     for source in sources:
@@ -198,47 +211,114 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                 raise ValueError(f"source mismatch in {forecast_path}")
             if forecast["issue"]["members"] != issue["members"]:
                 raise ValueError(f"member mismatch in {forecast_path}")
+            regional_path_text = issue.get("regional_outlook")
+            if issue["members"] == 100 and not regional_path_text:
+                raise ValueError(
+                    f"100-member issue lacks regional outlook: {source_id}/{issue['id']}"
+                )
+            if issue["members"] < 100 and regional_path_text:
+                raise ValueError(
+                    f"limited ensemble must not publish probabilities: {source_id}/{issue['id']}"
+                )
+            if regional_path_text:
+                regional_count += 1
+                regional = load_json(public_data / regional_path_text)
+                if regional["issue"]["source_id"] != source_id:
+                    raise ValueError("regional outlook source does not match its issue")
+                if regional["issue"]["initialization"] != issue["initialization"]:
+                    raise ValueError("regional outlook initialization does not match")
+                if regional["issue"]["members"] != 100:
+                    raise ValueError("regional probability sample is not 100 members")
+                if regional["issue"]["hindcast_years"] != list(range(2002, 2022)):
+                    raise ValueError("regional outlook lacks the locked 20 years")
+                if regional["grid"]["shape"] != [27, 27]:
+                    raise ValueError("regional probability grid is not 27 by 27")
+                if len(regional["weeks"]) != 6:
+                    raise ValueError("regional outlook must contain six weeks")
+                expected_regions = [
+                    "all_india",
+                    "northwest",
+                    "central",
+                    "south_peninsula",
+                    "east_northeast",
+                ]
+                for week_number, regional_week in enumerate(
+                    regional["weeks"], start=1
+                ):
+                    if regional_week["week"] != week_number:
+                        raise ValueError("regional week order is incorrect")
+                    if [item["id"] for item in regional_week["regions"]] != expected_regions:
+                        raise ValueError("regional identities or order are incorrect")
+                    for variable in ("rainfall", "temperature"):
+                        probability = regional_week["probability_fields"][variable]
+                        arrays = [
+                            np.asarray(probability[category], dtype=np.float64)
+                            for category in (
+                                "below_normal",
+                                "near_normal",
+                                "above_normal",
+                            )
+                        ]
+                        if any(array.shape != (729,) for array in arrays):
+                            raise ValueError("regional probability field shape is invalid")
+                        if any(
+                            not np.isfinite(array).all()
+                            or np.any((array < 0.0) | (array > 100.0))
+                            for array in arrays
+                        ):
+                            raise ValueError("regional probability field is invalid")
+                        np.testing.assert_allclose(
+                            arrays[0] + arrays[1] + arrays[2],
+                            100.0,
+                            rtol=0.0,
+                            atol=0.0,
+                        )
+                    for region in regional_week["regions"]:
+                        for variable in ("rainfall", "temperature"):
+                            probability = region[variable][
+                                "tercile_probability_percent"
+                            ]
+                            if sum(
+                                probability[category]
+                                for category in (
+                                    "below_normal",
+                                    "near_normal",
+                                    "above_normal",
+                                )
+                            ) != 100:
+                                raise ValueError(
+                                    "regional summary probabilities do not sum to 100"
+                                )
             if issue["id"] == "20260722":
                 matched_22.add(source_id)
             downloads = forecast["issue"]["downloads"]
-            for key in (
-                "india_netcdf",
-                "india_summary_csv",
+            if set(downloads) != {
+                "compact_json",
                 "india_pdf",
-                "manifest",
-            ):
-                if not (public_root / downloads[key]).is_file():
-                    raise ValueError(f"missing {key} for {source_id}/{issue['id']}")
+                "india_pdf_sha256",
+            }:
+                raise ValueError(
+                    "only compact map data and PDF metadata may be public for "
+                    f"{source_id}/{issue['id']}"
+                )
             pdf_path = public_root / downloads["india_pdf"]
             pdf_bytes = pdf_path.read_bytes()
             if not pdf_bytes.startswith(b"%PDF-"):
                 raise ValueError(f"invalid PDF header: {pdf_path}")
             if len(re.findall(rb"/Type /Page\b", pdf_bytes)) != 4:
                 raise ValueError(f"PDF must contain four product pages: {pdf_path}")
-            package_manifest = load_json(public_root / downloads["manifest"])
-            package_root = (public_root / downloads["manifest"]).parent
-            for file_entry in package_manifest["files"]:
-                file_path = package_root / file_entry["path"]
-                if file_path.stat().st_size != file_entry["size_bytes"]:
-                    raise ValueError(f"download size mismatch: {file_path}")
-                if sha256(file_path) != file_entry["sha256"]:
-                    raise ValueError(f"download checksum mismatch: {file_path}")
-            with xr.open_dataset(public_root / downloads["india_netcdf"]) as dataset:
-                if dataset.sizes != {"week": 6, "latitude": 27, "longitude": 27}:
-                    raise ValueError(f"unexpected NetCDF shape for {source_id}/{issue['id']}")
-                for variable in (
-                    "rainfall_total",
-                    "rainfall_anomaly",
-                    "temperature_mean",
-                    "temperature_anomaly",
-                ):
-                    if not np.isfinite(dataset[variable].values).all():
-                        raise ValueError(f"non-finite {variable} in download")
+            if sha256(pdf_path) != downloads["india_pdf_sha256"]:
+                raise ValueError(f"PDF checksum mismatch: {pdf_path}")
     if matched_22 != {"gfs", "era5"}:
         raise ValueError("the matched 22 July GFS/ERA5 IC pair is incomplete")
     return (
-        "GFS and ERA5 issues are source-separated with verified four-page PDF briefings.",
-        {"sources": len(sources), "issues": issue_count, "matched_issue": "20260722"},
+        "GFS and ERA5 issues are source-separated with PDF-only public briefings.",
+        {
+            "sources": len(sources),
+            "issues": issue_count,
+            "regional_outlooks": regional_count,
+            "matched_issue": "20260722",
+        },
     )
 
 

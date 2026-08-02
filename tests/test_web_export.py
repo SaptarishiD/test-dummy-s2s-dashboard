@@ -9,7 +9,6 @@ from pathlib import Path
 
 import jsonschema
 import numpy as np
-import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DATA = ROOT / "public/data"
@@ -117,26 +116,87 @@ def test_initial_condition_sources_are_never_conflated() -> None:
             assert forecast["issue"]["members"] == issue["members"]
 
 
-def test_each_issue_has_small_verified_downloads() -> None:
+def test_regional_outlooks_use_complete_ensembles_and_locked_terciles() -> None:
+    index = load(PUBLIC_DATA / "index.json")
+    expected_regions = [
+        "all_india",
+        "northwest",
+        "central",
+        "south_peninsula",
+        "east_northeast",
+    ]
+    regional_count = 0
+    for source in index["initial_condition_sources"]:
+        for issue in source["issues"]:
+            regional_path = issue.get("regional_outlook")
+            if issue["members"] < 100:
+                assert regional_path is None
+                continue
+            assert regional_path is not None
+            regional_count += 1
+            outlook = load(PUBLIC_DATA / regional_path)
+            assert outlook["issue"]["source_id"] == source["id"]
+            assert outlook["issue"]["initialization"] == issue["initialization"]
+            assert outlook["issue"]["members"] == 100
+            assert outlook["issue"]["hindcast_years"] == list(range(2002, 2022))
+            assert outlook["region_definition"]["name"] == (
+                "IMD four broad homogeneous rainfall regions"
+            )
+            assert len(outlook["weeks"]) == 6
+            for week_number, week in enumerate(outlook["weeks"], start=1):
+                assert week["week"] == week_number
+                assert [region["id"] for region in week["regions"]] == expected_regions
+                for variable in ("rainfall", "temperature"):
+                    probability = week["probability_fields"][variable]
+                    arrays = [
+                        np.asarray(probability[category])
+                        for category in (
+                            "below_normal",
+                            "near_normal",
+                            "above_normal",
+                        )
+                    ]
+                    assert all(array.shape == (729,) for array in arrays)
+                    assert all(np.issubdtype(array.dtype, np.integer) for array in arrays)
+                    assert all(np.all((array >= 0) & (array <= 100)) for array in arrays)
+                    np.testing.assert_array_equal(arrays[0] + arrays[1] + arrays[2], 100)
+                for region in week["regions"]:
+                    for variable in ("rainfall", "temperature"):
+                        probability = region[variable]["tercile_probability_percent"]
+                        assert sum(
+                            probability[category]
+                            for category in (
+                                "below_normal",
+                                "near_normal",
+                                "above_normal",
+                            )
+                        ) == 100
+    expected_count = sum(
+        issue["members"] == 100
+        for source in index["initial_condition_sources"]
+        for issue in source["issues"]
+    )
+    assert regional_count == expected_count
+
+
+def test_each_issue_has_one_verified_pdf_download() -> None:
     index = load(PUBLIC_DATA / "index.json")
     public_root = PUBLIC_DATA.parent
     for source in index["initial_condition_sources"]:
         for issue in source["issues"]:
             forecast = load(PUBLIC_DATA / issue["forecast"])
             downloads = forecast["issue"]["downloads"]
-            netcdf_path = public_root / downloads["india_netcdf"]
-            csv_path = public_root / downloads["india_summary_csv"]
+            assert set(downloads) == {
+                "compact_json",
+                "india_pdf",
+                "india_pdf_sha256",
+            }
             pdf_path = public_root / downloads["india_pdf"]
-            assert netcdf_path.stat().st_size < 1_000_000
-            assert csv_path.stat().st_size < 20_000
             pdf_bytes = pdf_path.read_bytes()
             assert pdf_bytes.startswith(b"%PDF-")
             assert len(re.findall(rb"/Type /Page\b", pdf_bytes)) == 4
             assert pdf_path.stat().st_size < 10_000_000
-            with xr.open_dataset(netcdf_path) as dataset:
-                assert dataset.sizes == {"week": 6, "latitude": 27, "longitude": 27}
-                assert dataset.attrs["initial_condition_source"] == source["id"]
-                assert dataset.attrs["raw_members_included"] == "false"
+            assert hashlib.sha256(pdf_bytes).hexdigest() == downloads["india_pdf_sha256"]
 
 
 def test_india_map_geography_is_compact_and_source_locked() -> None:

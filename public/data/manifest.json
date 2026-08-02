@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T13:17:18.900645+00:00",
-  "deployed_commit": "ashoka-pdf-masthead-candidate",
+  "generated_at": "2026-08-02T14:39:14.417905+00:00",
+  "deployed_commit": "7a4fbac",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -10,39 +10,129 @@
       "sha256": "4e97d5e109df15cc8f1e780aabedd99f11905800a440aa09aef291ad87704cce"
     },
     {
+      "path": "data/comparisons/20260720.json",
+      "size_bytes": 4536,
+      "sha256": "648057aa239df671f343b644e7bf2710a87e60863c2b4a2f8d8c5e81395205b4"
+    },
+    {
+      "path": "data/comparisons/20260721.json",
+      "size_bytes": 4535,
+      "sha256": "d994a4be8f7fc416daf7893ef60d7364fea4a11505f8a0f97d53ed073af72d39"
+    },
+    {
+      "path": "data/comparisons/20260722.json",
+      "size_bytes": 4542,
+      "sha256": "e71b3b6807dee20be66ac1e4a9fc3d6a216b29307cae7ffcc611f1d4ac2f9a60"
+    },
+    {
+      "path": "data/comparisons/20260723.json",
+      "size_bytes": 4536,
+      "sha256": "c30f06a3e013b208f55893b9854f01a97dbfcab9712c9620d8e1a879f289724c"
+    },
+    {
+      "path": "data/comparisons/20260724.json",
+      "size_bytes": 4534,
+      "sha256": "13c31ed46b36c7bc1b7b420176256a372d7e4c49ebc00bb132e28b82cb79e737"
+    },
+    {
       "path": "data/forecasts/20260728.json",
-      "size_bytes": 347072,
-      "sha256": "e4ad8d5b994ddfa58023b081dc4147c3a454b6733d33c1eadfc8d16a72ea0f55"
+      "size_bytes": 346879,
+      "sha256": "45838687a237cfc89d96624a714efdddcf1657bfb33024e03e6691df100087f0"
+    },
+    {
+      "path": "data/forecasts/20260730.json",
+      "size_bytes": 346224,
+      "sha256": "b237eb1b2e786e1fc29322e310bd7a74f6e562e6b0d737d59134ac1936982614"
+    },
+    {
+      "path": "data/forecasts/20260731.json",
+      "size_bytes": 346176,
+      "sha256": "d6fd4cd59b0c612f6fab31c2b9e733c6fb34b8b8adc4b3481bfca5a039895fc5"
     },
     {
       "path": "data/forecasts/era5/20260715.json",
-      "size_bytes": 344959,
-      "sha256": "c03987fecff6af06e1162cf0c9614b39b635689a723bcd78149e8adab576216d"
+      "size_bytes": 344763,
+      "sha256": "c1a452a41b5138cfdabd54a6eccb0a842972610f59a5e2e43c0fd83fe548d2eb"
+    },
+    {
+      "path": "data/forecasts/era5/20260720.json",
+      "size_bytes": 345272,
+      "sha256": "11f79185842eb898c4d88ba794f84c26c05eb4c52e7e773eba6dbbc58060bd2b"
+    },
+    {
+      "path": "data/forecasts/era5/20260721.json",
+      "size_bytes": 345485,
+      "sha256": "83ffe0fdd929388beb7017daf227fa447799119a7bcbda1b9dd8fec4341f464d"
     },
     {
       "path": "data/forecasts/era5/20260722.json",
-      "size_bytes": 344910,
-      "sha256": "4316ef6c5be037a23c5f0df3c7ae0f7b3134726422998463aaa949889919f54d"
+      "size_bytes": 345203,
+      "sha256": "e22dc44f501cf106bab38883759a2a8851bc64b2a9730997de5cf634e0e1db96"
+    },
+    {
+      "path": "data/forecasts/era5/20260723.json",
+      "size_bytes": 345281,
+      "sha256": "a80b773e2a6bcb6e890bd5875ddfca56e7d9771f1f15e3cfc5b1c76183e505e1"
+    },
+    {
+      "path": "data/forecasts/era5/20260724.json",
+      "size_bytes": 345256,
+      "sha256": "d860a556f0e7a27533857459302e198abb47f954b9a2a943bb77dd5b09005106"
+    },
+    {
+      "path": "data/forecasts/gfs/20260720.json",
+      "size_bytes": 347663,
+      "sha256": "f2fc67530a8a58d0cc762f34915ae92336e81c3cc4691a3df26d318f1928a669"
+    },
+    {
+      "path": "data/forecasts/gfs/20260721.json",
+      "size_bytes": 347662,
+      "sha256": "8db7c07116e5d21d3787985626b67f91c81b3826b8e5322a20bb321ba60de57e"
     },
     {
       "path": "data/forecasts/gfs/20260722.json",
-      "size_bytes": 347117,
-      "sha256": "9c997d989dcb5795e37f1248f98f184930bbac16c910c0f744fbf6326b362f0d"
+      "size_bytes": 347414,
+      "sha256": "2f8ee70e57fe68a51a32516e789d53ca7d212bf171edbb831ffa4b991886f451"
+    },
+    {
+      "path": "data/forecasts/gfs/20260723.json",
+      "size_bytes": 347581,
+      "sha256": "34dd0c3e585b378c0ed4ae2e60a879528831f09d89a0e20911720d53a22ae4c1"
+    },
+    {
+      "path": "data/forecasts/gfs/20260724.json",
+      "size_bytes": 347610,
+      "sha256": "67faaa1c3a81ab9a4954186ef4f4cc6ec32ab61e11c28cc08393e0560eb39474"
     },
     {
       "path": "data/forecasts/gfs/20260728.json",
-      "size_bytes": 347072,
-      "sha256": "e4ad8d5b994ddfa58023b081dc4147c3a454b6733d33c1eadfc8d16a72ea0f55"
+      "size_bytes": 346879,
+      "sha256": "45838687a237cfc89d96624a714efdddcf1657bfb33024e03e6691df100087f0"
+    },
+    {
+      "path": "data/forecasts/gfs/20260729.json",
+      "size_bytes": 346924,
+      "sha256": "c1509cd571b074f44a728f549a555898531b975c1d564ef579f00897752b6b89"
     },
     {
       "path": "data/forecasts/gfs/20260730.json",
-      "size_bytes": 347047,
-      "sha256": "c7257dec109b697b65603baff9a476233945731e803e12c084d2eb9004bed1f2"
+      "size_bytes": 346854,
+      "sha256": "706d62e5562225eb677cc32d2f5738f8b1df7562fba761574266d55cab8af1ae"
     },
     {
       "path": "data/forecasts/gfs/20260731.json",
-      "size_bytes": 346999,
-      "sha256": "3dc23bf00f3a2d20ce9fdd1d576c386134fd0b63803a6fe641117d89f0093635"
+      "size_bytes": 346806,
+      "sha256": "660daab06c04ef08d695b54df9071a08a1c27e6ea61697632b9ebee612711f64"
+    },
+    {
+      "path": "data/forecasts/gfs/20260801.json",
+      "size_bytes": 346878,
+      "sha256": "74ff3ec200315910b0fcb3391711d69ba03adb6ddc05c62bd1b8fbd3343af6a3"
+    },
+    {
+      "path": "data/forecasts/gfs/20260802.json",
+      "size_bytes": 346835,
+      "sha256": "06d8cb6528076c0df57ae7ae8e617ad7f3b2f837a0d8b76bc74417d7d7edea43"
     },
     {
       "path": "data/formulas.json",
@@ -166,8 +256,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 3380,
-      "sha256": "895b605b16aeabd53c242987d720c8d9ec42fa838733d060b2ea8d92a7c650f8"
+      "size_bytes": 7755,
+      "sha256": "7044610ee99138303484267d06853f34aec4cf47a4914b1b827bff5af498aa11"
     },
     {
       "path": "data/india-admin.json",
@@ -185,14 +275,44 @@
       "sha256": "0aa127cb934cc8c244afc9fce5dd8ad064895ea870ecca7bb825e3f2d7cc3c91"
     },
     {
+      "path": "data/regional/era5/20260715.json",
+      "size_bytes": 449019,
+      "sha256": "a27887238056171b78dceb323697e72cb63b02e8cdd04e8132c7562af1cbb85d"
+    },
+    {
+      "path": "data/regional/era5/20260722.json",
+      "size_bytes": 448914,
+      "sha256": "df56cad45f68f073cf486bc7570cdc813ef5b3582508184846b69fae159d4b95"
+    },
+    {
+      "path": "data/regional/gfs/20260722.json",
+      "size_bytes": 447750,
+      "sha256": "da03bc3abe89d5ef9f4e039acdacc9559473da5211cd721c852bcff111e29056"
+    },
+    {
+      "path": "data/regional/gfs/20260728.json",
+      "size_bytes": 447564,
+      "sha256": "38716f83bed0340be24fc24860e7baa5f97a54eb3e8f3d1919defab79349c9f2"
+    },
+    {
+      "path": "data/regional/gfs/20260729.json",
+      "size_bytes": 447663,
+      "sha256": "19c2401525fc551711c2577f67104a9864465eeb0edf4669da88270e90a7f859"
+    },
+    {
+      "path": "data/regional/gfs/20260801.json",
+      "size_bytes": 447759,
+      "sha256": "91e001ae9b1bfafe189fd74ef0fe68bec35a1d9277bbda718aed53ac2068acd8"
+    },
+    {
       "path": "data/sources.json",
       "size_bytes": 2358,
       "sha256": "ffc1a5ef83e38810b5a492d01861efb9ea73468d3fae232e4b5b0dcd37bec318"
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5909,
-      "sha256": "9fddd45f6ec9b0c213bbe6697ff10f85e8764bb5af9f3ef48859074a4d627f3f"
+      "size_bytes": 5946,
+      "sha256": "4663d669683935745765c79df78b5df80f93638558619eafc6b09c443fad7e8f"
     },
     {
       "path": "data/world-countries.geojson",
@@ -201,123 +321,113 @@
     },
     {
       "path": "downloads/era5/20260715/S2S_Research_India_Weeks1-4_ERA5_20260715.pdf",
-      "size_bytes": 2884214,
-      "sha256": "c2b6a75b2c1ff278d82cd09375234eab2f38495bf75788c69f306247aa062621"
+      "size_bytes": 2877387,
+      "sha256": "70856291f98d6f9145ca3d59a06b799a71df7cc97643a563b849955a5a60de44"
     },
     {
-      "path": "downloads/era5/20260715/india-summary.csv",
-      "size_bytes": 487,
-      "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
+      "path": "downloads/era5/20260720/S2S_Research_India_Weeks1-4_ERA5_20260720.pdf",
+      "size_bytes": 2878279,
+      "sha256": "8bc76a12c90002e38cd9cdde2a12ace6197db4b3a07b5e8aa796be8dba3dddf2"
     },
     {
-      "path": "downloads/era5/20260715/india-weekly.nc",
-      "size_bytes": 85991,
-      "sha256": "dfa85b8d973410b6788ae9172143f376f4c645d9c4186d5ebf855a2a757ac67f"
-    },
-    {
-      "path": "downloads/era5/20260715/manifest.json",
-      "size_bytes": 667,
-      "sha256": "abe9658cbb083481a24bddcf6c46005d6f4c002f228571d8fbc34c41de7b8bff"
+      "path": "downloads/era5/20260721/S2S_Research_India_Weeks1-4_ERA5_20260721.pdf",
+      "size_bytes": 2877373,
+      "sha256": "1dde216a36c29bb9690ce0f2a6421fd17342196a51943fde8f36bfbabd6c207c"
     },
     {
       "path": "downloads/era5/20260722/S2S_Research_India_Weeks1-4_ERA5_20260722.pdf",
-      "size_bytes": 2879271,
-      "sha256": "91a2fd370f3bfda5bff91aebeb31b55089772d034ddf26000fee36ba6b9d3a82"
+      "size_bytes": 2876198,
+      "sha256": "84a88d6169336ecc5bc353771830f3c85ac81429e0434848bd118c7be9cfeb1a"
     },
     {
-      "path": "downloads/era5/20260722/india-summary.csv",
-      "size_bytes": 484,
-      "sha256": "4098cfdb166ec9d2cc583a17c4027ae31ff65597fd2c92d96e046fef435ead84"
+      "path": "downloads/era5/20260723/S2S_Research_India_Weeks1-4_ERA5_20260723.pdf",
+      "size_bytes": 2876109,
+      "sha256": "333b94a3551016d1e23c2e68cf740e1b1ed7a5d3a3158d38b3332d8dcf8620a1"
     },
     {
-      "path": "downloads/era5/20260722/india-weekly.nc",
-      "size_bytes": 85872,
-      "sha256": "d67d6a4564d74d748bc8e55ce503e0d4a1623d4155f7097f7bbe1e5073ad25b4"
+      "path": "downloads/era5/20260724/S2S_Research_India_Weeks1-4_ERA5_20260724.pdf",
+      "size_bytes": 2872472,
+      "sha256": "ba4691e02863d6896e607de807c7ff5c9b4f03980c2d2432f9bc7858fd67e770"
     },
     {
-      "path": "downloads/era5/20260722/manifest.json",
-      "size_bytes": 667,
-      "sha256": "f3bc68bad630a01ceb3147c9fbc02182322a48dcae8d2c6cb76e4b39a2a83b00"
+      "path": "downloads/gfs/20260720/S2S_Research_India_Weeks1-4_GFS_20260720.pdf",
+      "size_bytes": 2888849,
+      "sha256": "dd2a9f293a22266a7a873293a9dd83f8d4f4f730055ad85de4b463d86cbc5348"
+    },
+    {
+      "path": "downloads/gfs/20260721/S2S_Research_India_Weeks1-4_GFS_20260721.pdf",
+      "size_bytes": 2888151,
+      "sha256": "2a0d33caf87e99ac700b1e9ee64c8d5e10e3d0b62751db5ce7084022b9a00687"
     },
     {
       "path": "downloads/gfs/20260722/S2S_Research_India_Weeks1-4_GFS_20260722.pdf",
-      "size_bytes": 2892083,
-      "sha256": "8670029e6d7ad926c06ff0a8b05cabedca2f476e6719b2e36939d5f78079ee17"
+      "size_bytes": 2889818,
+      "sha256": "9e041155767a36e84481bbe87113c4d63cc2850f5eff0bdaa4639d1dd6498793"
     },
     {
-      "path": "downloads/gfs/20260722/india-summary.csv",
-      "size_bytes": 493,
-      "sha256": "3472c3ce783a9226390c1bd3aa2e51095016b303bd67b843783801bc450dba1c"
+      "path": "downloads/gfs/20260723/S2S_Research_India_Weeks1-4_GFS_20260723.pdf",
+      "size_bytes": 2887902,
+      "sha256": "742188116294eb2b96f0c745f956ff063e0f295679bfed06f08e8adbf4b1fa22"
     },
     {
-      "path": "downloads/gfs/20260722/india-weekly.nc",
-      "size_bytes": 85959,
-      "sha256": "e168b951099fd700ec40dbd1f41f9820c25582ca2384b169e4fb748cfcd595ea"
-    },
-    {
-      "path": "downloads/gfs/20260722/manifest.json",
-      "size_bytes": 665,
-      "sha256": "ce6d8cd2badde9926e01ec3f82d257844d1b834aa4d6225155bc7ca5facc78c2"
+      "path": "downloads/gfs/20260724/S2S_Research_India_Weeks1-4_GFS_20260724.pdf",
+      "size_bytes": 2887819,
+      "sha256": "2fc3bbd2e7640153d1d81ea8d8a20abeb52410b50df154fb5c9d9b6471ef51c1"
     },
     {
       "path": "downloads/gfs/20260728/S2S_Research_India_Weeks1-4_GFS_20260728.pdf",
-      "size_bytes": 2890428,
-      "sha256": "6ac340e9d937def819b6d03a8f684d1294ee6f72e87da47d62aab0d41b8efc0f"
+      "size_bytes": 2888226,
+      "sha256": "aaafb0e5d1d8cf4174b83dd5ab7cf6c885ed3a740b1f81e13aa8a31e290dd537"
     },
     {
-      "path": "downloads/gfs/20260728/india-summary.csv",
-      "size_bytes": 494,
-      "sha256": "b47efeb483342eb1705b236d9d54f0ecef10f3aeedcac7e4da4b3e054b69aa7a"
-    },
-    {
-      "path": "downloads/gfs/20260728/india-weekly.nc",
-      "size_bytes": 86127,
-      "sha256": "599d92fb4cc391f89d42aa5677906afb4872f26eb6971b99eb6f1af35d613ba4"
-    },
-    {
-      "path": "downloads/gfs/20260728/manifest.json",
-      "size_bytes": 665,
-      "sha256": "9e904c90d8a9b8a8eacffb6ed5e166bd1cdc5d529b5aadef9ed49d02b73a3ecb"
+      "path": "downloads/gfs/20260729/S2S_Research_India_Weeks1-4_GFS_20260729.pdf",
+      "size_bytes": 2887797,
+      "sha256": "7f53977384daa7926c0df7d8fcb6277eee95fede1dfe32723811f2168c900da7"
     },
     {
       "path": "downloads/gfs/20260730/S2S_Research_India_Weeks1-4_GFS_20260730.pdf",
-      "size_bytes": 2888485,
-      "sha256": "3aeba3b70e93e2ea955fcb6923d0b59ab3e12c3c075be1e45ebd058de2df7ca4"
-    },
-    {
-      "path": "downloads/gfs/20260730/india-summary.csv",
-      "size_bytes": 491,
-      "sha256": "c43c2b700dbbacd10edaeee68db81e6d5fa786f8f998183bd90ae22b565731d8"
-    },
-    {
-      "path": "downloads/gfs/20260730/india-weekly.nc",
-      "size_bytes": 86209,
-      "sha256": "e1be6e6440412dbbecc69d301b06b6d9ba6367b4b77560480b3b36e61d3ea4cb"
-    },
-    {
-      "path": "downloads/gfs/20260730/manifest.json",
-      "size_bytes": 663,
-      "sha256": "5906a974717b24da2a1f02067ad5e6f7b53c97e2bb51809ad60f12884d16c478"
+      "size_bytes": 2887514,
+      "sha256": "55c5ab9fdc25a2357d93d1d5035441fed72d4e0b4aad93b73dbab645fb849592"
     },
     {
       "path": "downloads/gfs/20260731/S2S_Research_India_Weeks1-4_GFS_20260731.pdf",
-      "size_bytes": 2889098,
-      "sha256": "eb46d9b51ceaa21632a3915b99e52042afbdea370418509db2733f116286e2f6"
+      "size_bytes": 2886585,
+      "sha256": "eb65b892579887263fd930f465c04a9bbad748e86f4f35d8af443369b3384777"
     },
     {
-      "path": "downloads/gfs/20260731/india-summary.csv",
-      "size_bytes": 492,
-      "sha256": "6b49035ffcf85baa8f7dc55016833fff67e3627fb8b2c0ccb75180b5eb81a120"
+      "path": "downloads/gfs/20260801/S2S_Research_India_Weeks1-4_GFS_20260801.pdf",
+      "size_bytes": 2888095,
+      "sha256": "24a4a7a7215e6a6832c07bffdecf6ab1a25b527673a03de70705185a40771447"
     },
     {
-      "path": "downloads/gfs/20260731/india-weekly.nc",
-      "size_bytes": 86202,
-      "sha256": "93784dda3200d0604632489c667c7ead7c5bd5436abc19254c1718447a0c3ca4"
+      "path": "downloads/gfs/20260802/S2S_Research_India_Weeks1-4_GFS_20260802.pdf",
+      "size_bytes": 2888084,
+      "sha256": "5866c363c11735a27010f953a7c6d579c79ff6c08071429819fa00cb20ce8a01"
     },
     {
-      "path": "downloads/gfs/20260731/manifest.json",
-      "size_bytes": 663,
-      "sha256": "97514011c279cdbca15e16cb349628b97682e5ad1db134b600659a4d063f3ad6"
+      "path": "meeting/20260731/rainfall-anomaly.png",
+      "size_bytes": 488714,
+      "sha256": "890b59489a8bfeb1bbd6529a1d54d6b0f23dff057ee383a3c1038355508830c3"
+    },
+    {
+      "path": "meeting/20260731/rainfall.png",
+      "size_bytes": 496548,
+      "sha256": "01ddbfbbeed841cb832db32ba8600f3f0b54cdbe730d3b325213a659e128b03c"
+    },
+    {
+      "path": "meeting/20260731/temperature-anomaly.png",
+      "size_bytes": 549134,
+      "sha256": "00fe1c92856523cbbc235d74e8583bcce6fb5f513f455f4543c819f01308a60e"
+    },
+    {
+      "path": "meeting/20260731/temperature.png",
+      "size_bytes": 524981,
+      "sha256": "249e16974115cd9fa5c17b1668d65a81852fcee12d1eeb9d769396678efdba20"
+    },
+    {
+      "path": "meeting.html",
+      "size_bytes": 2661,
+      "sha256": "0d79c6dc429b109e5102a320252e48b50c8f45a8f116d54fe22563510e3e3ae7"
     }
   ]
 }

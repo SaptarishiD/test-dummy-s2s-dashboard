@@ -24,11 +24,8 @@
     },
     "downloads": {
       "compact_json": "data/forecasts/gfs/20260722.json",
-      "india_netcdf": "downloads/gfs/20260722/india-weekly.nc",
-      "india_summary_csv": "downloads/gfs/20260722/india-summary.csv",
-      "manifest": "downloads/gfs/20260722/manifest.json",
       "india_pdf": "downloads/gfs/20260722/S2S_Research_India_Weeks1-4_GFS_20260722.pdf",
-      "india_pdf_sha256": "8670029e6d7ad926c06ff0a8b05cabedca2f476e6719b2e36939d5f78079ee17"
+      "india_pdf_sha256": "9e041155767a36e84481bbe87113c4d63cc2850f5eff0bdaa4639d1dd6498793"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0721",
@@ -62,6 +59,14 @@
     "observation_verification": {
       "status": "not_available",
       "message": "Verification is withheld until every required observation day in a valid week is available."
+    },
+    "initialization_comparison": {
+      "status": "initialization_sensitivity_only",
+      "counterpart_source_id": "era5",
+      "comparison": "comparisons/20260722.json",
+      "week1_rainfall_gfs_minus_era5_mm_day": -1.7245,
+      "week1_temperature_gfs_minus_era5_deg_c": -0.7896,
+      "message": "GFS-minus-ERA5 differences measure sensitivity to the initial-state source. They do not show which forecast is better; skill requires observations for the complete valid period."
     }
   },
   "grid": {

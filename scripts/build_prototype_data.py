@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import json
 import os
@@ -242,8 +241,8 @@ def validate_run_manifest(path: Path | None, forecast: Path, members: int, leads
     if path is None:
         return
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("status") != "generated_valid":
-        raise ValueError(f"run manifest is not generated_valid: {path}")
+    if payload.get("status") not in {"generated_valid", "existing_valid"}:
+        raise ValueError(f"run manifest is not publishable: {path}")
     if int(payload.get("members", -1)) != members:
         raise ValueError("run manifest member count does not match forecast")
     if int(payload.get("lead_days", -1)) != leads:
@@ -441,126 +440,6 @@ def date_text(value: np.datetime64) -> str:
     return np.datetime_as_string(value.astype("datetime64[D]"), unit="D")
 
 
-def write_download_package(
-    public_root: Path,
-    source_id: str,
-    issue_id: str,
-    initialization: str,
-    members: int,
-    latitude: np.ndarray,
-    longitude: np.ndarray,
-    week_start: list[np.datetime64],
-    week_end_exclusive: list[np.datetime64],
-    fields: dict[str, np.ndarray],
-    weeks: list[dict[str, Any]],
-) -> dict[str, str]:
-    """Write compact, public derived downloads without raw ensemble members."""
-
-    relative_root = Path("downloads") / source_id / issue_id
-    output_root = public_root / relative_root
-    output_root.mkdir(parents=True, exist_ok=True)
-    netcdf_path = output_root / "india-weekly.nc"
-    csv_path = output_root / "india-summary.csv"
-    manifest_path = output_root / "manifest.json"
-
-    dataset = xr.Dataset(
-        {
-            name: (("week", "latitude", "longitude"), values.astype(np.float32))
-            for name, values in fields.items()
-        },
-        coords={
-            "week": np.arange(1, 7, dtype=np.int16),
-            "latitude": latitude.astype(np.float32),
-            "longitude": longitude.astype(np.float32),
-            "valid_start": (
-                "week",
-                np.asarray(week_start, dtype="datetime64[D]"),
-            ),
-            "valid_end": (
-                "week",
-                np.asarray(week_end_exclusive, dtype="datetime64[D]")
-                - np.timedelta64(1, "D"),
-            ),
-        },
-        attrs={
-            "title": "Atmosphere 42 India weekly derived forecast fields",
-            "forecast_initialization": initialization,
-            "initial_condition_source": source_id,
-            "ensemble_members": members,
-            "experimental": "true",
-            "raw_members_included": "false",
-        },
-    )
-    dataset["rainfall_total"].attrs["units"] = "mm 7-day-1"
-    dataset["rainfall_anomaly"].attrs["units"] = "mm day-1"
-    dataset["temperature_mean"].attrs["units"] = "degree_Celsius"
-    dataset["temperature_anomaly"].attrs["units"] = "degree_Celsius"
-    dataset.to_netcdf(
-        netcdf_path,
-        encoding={name: {"zlib": True, "complevel": 4} for name in fields},
-    )
-
-    summary_names = [
-        "rainfall_total",
-        "rainfall_anomaly",
-        "temperature_mean",
-        "temperature_anomaly",
-    ]
-    with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(
-            handle,
-            fieldnames=[
-                "week",
-                "valid_start",
-                "valid_end",
-                *[f"{name}_india_weighted_mean" for name in summary_names],
-            ],
-        )
-        writer.writeheader()
-        for week in weeks:
-            writer.writerow(
-                {
-                    "week": week["week"],
-                    "valid_start": week["valid_start"],
-                    "valid_end": week["valid_end"],
-                    **{
-                        f"{name}_india_weighted_mean": week["summary"][name][
-                            "india_weighted_mean"
-                        ]
-                        for name in summary_names
-                    },
-                }
-            )
-
-    write_json(
-        manifest_path,
-        {
-            "schema_version": 1,
-            "initialization": initialization,
-            "initial_condition_source": source_id,
-            "members": members,
-            "derived_only": True,
-            "files": [
-                {
-                    "path": netcdf_path.name,
-                    "size_bytes": netcdf_path.stat().st_size,
-                    "sha256": sha256(netcdf_path),
-                },
-                {
-                    "path": csv_path.name,
-                    "size_bytes": csv_path.stat().st_size,
-                    "sha256": sha256(csv_path),
-                },
-            ],
-        },
-    )
-    return {
-        "india_netcdf": (relative_root / netcdf_path.name).as_posix(),
-        "india_summary_csv": (relative_root / csv_path.name).as_posix(),
-        "manifest": (relative_root / manifest_path.name).as_posix(),
-    }
-
-
 def main() -> int:
     args = parse_args()
     if not args.validation.is_file():
@@ -627,19 +506,6 @@ def main() -> int:
     source_definition = INITIAL_CONDITION_SOURCES[source_id]
     validate_run_manifest(args.run_manifest, args.forecast, members, lead_days)
     relative_forecast_path = Path("data/forecasts") / source_id / f"{issue_id}.json"
-    download_paths = write_download_package(
-        args.output_dir.parent,
-        source_id,
-        issue_id,
-        initialization,
-        members,
-        latitude,
-        longitude,
-        week_start,
-        week_end_exclusive,
-        fields,
-        weeks,
-    )
     products = json.loads(json.dumps(PRODUCTS))
     for product in products.values():
         product["description"] = product["description"].replace(
@@ -671,7 +537,6 @@ def main() -> int:
             | {"id": source_id},
             "downloads": {
                 "compact_json": relative_forecast_path.as_posix(),
-                **download_paths,
             },
             "climatology_alignment": diagnostics["alignment"],
             "hindcast_years": diagnostics["hindcast_years"],
@@ -703,7 +568,7 @@ def main() -> int:
         write_json(args.output_dir / "forecasts" / "20260728.json", forecast_payload)
     if args.forecast_only:
         print(
-            f"wrote {forecast_path} and compact downloads; "
+            f"wrote {forecast_path}; "
             f"India support contains {int(india_mask.sum())} native-grid cells"
         )
         return 0

@@ -1,6 +1,4 @@
 import "./styles/main.css";
-import { renderForecastPage } from "./pages/forecast";
-import { renderGlobalPage } from "./pages/global";
 import type {
   AppData,
   ForecastData,
@@ -10,14 +8,15 @@ import type {
   IndiaAdminData,
   IndiaMapGeographyData,
   IssueIndexData,
+  RegionalOutlookData,
   ValidationData,
   WorldCountriesData,
 } from "./types";
 
-type Route = "forecast" | "india";
+type Route = "forecast" | "india" | "outlook";
 
-const ROUTES = new Set<Route>(["forecast", "india"]);
-const PUBLIC_DATA_VERSION = "20260802-s2s3";
+const ROUTES = new Set<Route>(["forecast", "india", "outlook"]);
+const PUBLIC_DATA_VERSION = "20260802-regional1";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -182,15 +181,20 @@ async function loadData(): Promise<AppData> {
     source.issues.find((item) => item.id === requestedIssue) ??
     source.issues.find((item) => item.id === source.default_issue);
   if (!issue) throw new Error(`${source.label} has no available forecast issue`);
-  const [forecast, validation, indiaGeography] = await Promise.all([
+  const regionalPromise: Promise<RegionalOutlookData | undefined> =
+    issue.regional_outlook
+      ? fetchJson<RegionalOutlookData>(`./data/${issue.regional_outlook}`)
+      : Promise.resolve(undefined);
+  const [forecast, validation, indiaGeography, regionalOutlook] = await Promise.all([
     fetchJson<ForecastData>(`./data/${issue.forecast}`),
     fetchJson<ValidationData>("./data/validation.json"),
     fetchJson<IndiaMapGeographyData>("./data/india-map-geography.json"),
+    regionalPromise,
   ]);
   if (forecast.issue.initial_condition_source.id !== source.id) {
     throw new Error("Forecast source does not match the selected initialization source");
   }
-  return { index, forecast, validation, indiaGeography };
+  return { index, forecast, validation, indiaGeography, regionalOutlook };
 }
 
 function shell(): string {
@@ -205,6 +209,7 @@ function shell(): string {
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">India Forecasts</a>
+        <a href="./#outlook" data-route="outlook">Regional Outlook</a>
         <a href="./?view=global#forecast" data-route="forecast">Global <small>Beta</small></a>
       </nav>
       <div class="header-status">
@@ -223,13 +228,13 @@ function shell(): string {
   `;
 }
 
-function renderRoute(data: AppData): void {
+async function renderRoute(data: AppData): Promise<void> {
   const route = currentRoute();
   if (route === "forecast" && !data.global) {
     window.location.assign("./?view=global#forecast");
     return;
   }
-  if (route === "india" && !data.forecast) {
+  if ((route === "india" || route === "outlook") && !data.forecast) {
     window.location.assign("./#india");
     return;
   }
@@ -238,6 +243,7 @@ function renderRoute(data: AppData): void {
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("global-route", route === "forecast");
   document.body.classList.toggle("india-route", route === "india");
+  document.body.classList.toggle("outlook-route", route === "outlook");
   const statusDate = route === "forecast"
     ? data.global!.metadata.issue.initialization
     : data.forecast!.issue.initialization;
@@ -254,8 +260,18 @@ function renderRoute(data: AppData): void {
       else link.removeAttribute("aria-current");
     });
   content.replaceChildren();
-  if (route === "forecast") routeCleanup = renderGlobalPage(content, data);
-  if (route === "india") renderForecastPage(content, data);
+  if (route === "forecast") {
+    const { renderGlobalPage } = await import("./pages/global");
+    routeCleanup = renderGlobalPage(content, data);
+  }
+  if (route === "india") {
+    const { renderForecastPage } = await import("./pages/forecast");
+    renderForecastPage(content, data);
+  }
+  if (route === "outlook") {
+    const { renderOutlookPage } = await import("./pages/outlook");
+    renderOutlookPage(content, data);
+  }
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -276,17 +292,20 @@ async function start(): Promise<void> {
   app.innerHTML = shell();
   try {
     const data = await loadData();
-    renderRoute(data);
+    await renderRoute(data);
     window.addEventListener("hashchange", () => {
       if (currentRoute() === "forecast" && !data.global) {
         window.location.assign("./?view=global#forecast");
         return;
       }
-      if (currentRoute() === "india" && !data.forecast) {
+      if (
+        (currentRoute() === "india" || currentRoute() === "outlook") &&
+        !data.forecast
+      ) {
         window.location.assign("./#india");
         return;
       }
-      renderRoute(data);
+      void renderRoute(data).catch(renderLoadFailure);
     });
   } catch (error) {
     renderLoadFailure(error);

@@ -72,9 +72,6 @@ export interface ForecastData {
     };
     downloads: {
       compact_json: string;
-      india_netcdf: string;
-      india_summary_csv: string;
-      manifest: string;
       india_pdf: string;
       india_pdf_sha256: string;
     };
@@ -88,6 +85,14 @@ export interface ForecastData {
     hindcast_years: number[];
     observation_verification: {
       status: string;
+      message: string;
+    };
+    initialization_comparison?: {
+      status: "initialization_sensitivity_only";
+      counterpart_source_id: InitialConditionSourceId;
+      comparison: string;
+      week1_rainfall_gfs_minus_era5_mm_day: number;
+      week1_temperature_gfs_minus_era5_deg_c: number;
       message: string;
     };
   };
@@ -106,6 +111,97 @@ export interface ForecastData {
     temperature_weekly_mean_max_deg_c: number;
   };
   weeks: ForecastWeek[];
+}
+
+export type TercileCategory =
+  | "below_normal"
+  | "near_normal"
+  | "above_normal";
+
+export interface TercileProbabilityRecord {
+  below_normal: number;
+  near_normal: number;
+  above_normal: number;
+  dominant_category: TercileCategory | "mixed";
+  dominant_probability: number;
+}
+
+export interface RegionalVariableSummary {
+  weekly_mean_mm_day?: number;
+  anomaly_mm_day?: number;
+  ensemble_spread_mm_day?: number;
+  weekly_mean_deg_c?: number;
+  anomaly_deg_c?: number;
+  ensemble_spread_deg_c?: number;
+  tercile_probability_percent: TercileProbabilityRecord;
+}
+
+export interface RegionalOutlookWeek {
+  week: number;
+  valid_start: string;
+  valid_end: string;
+  probability_fields: Record<
+    "rainfall" | "temperature",
+    Record<TercileCategory, number[]>
+  >;
+  regions: Array<{
+    id: string;
+    label: string;
+    short_label: string;
+    rainfall: RegionalVariableSummary;
+    temperature: RegionalVariableSummary;
+  }>;
+}
+
+export interface RegionalOutlookData {
+  schema_version: 1;
+  generated_at: string;
+  issue: {
+    initialization: string;
+    source_id: InitialConditionSourceId;
+    source_label: string;
+    members: 100;
+    lead_days: 42;
+    status: "experimental";
+    probability_type: "raw_ensemble_tercile_probability";
+    calibration:
+      | "uncalibrated_gfs_proxy"
+      | "raw_ensemble_reanalysis_reference";
+    forecast_sha256: string;
+    climatology_sha256: string;
+    hindcast_years: number[];
+  };
+  grid: {
+    shape: [27, 27];
+    spacing_degrees: 1.5;
+    latitude: number[];
+    longitude: number[];
+    value_order: string;
+  };
+  region_definition: {
+    name: string;
+    geometry_source: IndiaAdminData["source"];
+    geometry_sha256: string;
+    aggregation: string;
+    reference: string;
+    interpretation: string;
+    excluded_geometry_features: string[];
+    regions: Array<{
+      id: string;
+      label: string;
+      short_label: string;
+      states_and_union_territories: string[];
+      equivalent_native_grid_cells: number;
+    }>;
+  };
+  probability_definition: {
+    below_normal: string;
+    near_normal: string;
+    above_normal: string;
+    terciles: string;
+    warning: string;
+  };
+  weeks: RegionalOutlookWeek[];
 }
 
 export interface ValidationCheck {
@@ -362,6 +458,7 @@ export interface IssueIndexData {
       status: "green" | "warning";
       role: "operational_experimental" | "reference" | "rapid_prototype";
       forecast: string;
+      regional_outlook?: string;
     }>;
   }>;
   available_issues: Array<{
@@ -377,6 +474,7 @@ export interface AppData {
   forecast?: ForecastData;
   validation?: ValidationData;
   indiaGeography?: IndiaMapGeographyData;
+  regionalOutlook?: RegionalOutlookData;
   global?: GlobalForecastData;
   world?: WorldCountriesData;
   indiaAdmin?: IndiaAdminData;
