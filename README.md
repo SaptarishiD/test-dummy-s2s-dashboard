@@ -1,7 +1,8 @@
-# Atmosphere 42
+# SCDLDS Experimental Forecasting
 
-A static, source-aware India S2S forecast interface with a separate global
-viewer in beta. India is the default operational-facing page. It separates
+A static, source-aware India S2S research forecast interface from the
+Safexpress Centre for Data, Learning and Decision Sciences (SCDLDS), Ashoka
+University, with a separate global viewer in beta. India is the default page. It separates
 near-real-time GFS-proxy initializations from delayed ERA5 reference
 initializations, exposes the available issue dates and ensemble sizes, and
 provides compact issue-level downloads.
@@ -27,16 +28,17 @@ Each forecast package records its initialization-source family explicitly:
 
 The 22 July 2026 issue is available from both sources with 100 members, giving
 one controlled comparison in which the source is changed without changing the
-initialization date. All displayed products remain research guidance, not an
-official forecast or warning.
+initialization date. All displayed products remain experimental research
+guidance, not an operational weather forecast or warning.
 
 The global animation is an independently sampled 100-member companion ensemble
 generated from the same frozen input as the earlier India case. The raw members
 behind the India export had already been removed, so its exact stochastic draws
 could not be reused.
 
-The forecast interface uses the neutral product name **Atmosphere 42**. Model
-identity and scientific provenance remain in this repository.
+The public interface is institutionally identified as **SCDLDS, Ashoka
+University · Experimental Forecasting**. Model identity and scientific
+provenance remain in this repository.
 
 The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
 native reforecast climatology. They are not IMD or IMERG anomalies. The standardized

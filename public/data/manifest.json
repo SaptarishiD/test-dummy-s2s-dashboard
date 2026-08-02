@@ -1,43 +1,43 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T12:19:51.661403+00:00",
-  "deployed_commit": "interpolated-pdf-candidate",
+  "generated_at": "2026-08-02T12:29:05.570863+00:00",
+  "deployed_commit": "scdlds-brand-candidate",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
       "path": "data/forecasts/20260728.json",
-      "size_bytes": 347063,
-      "sha256": "7313818cb3f5ac137a204ad0bc42e40d9a22adac9dc3d2628a9c41becbef0caf"
+      "size_bytes": 347079,
+      "sha256": "4e64736fbd5914f5378fa4b2836a1844f779ada91d05669f3fd18a3c85b3127c"
     },
     {
       "path": "data/forecasts/era5/20260715.json",
-      "size_bytes": 344950,
-      "sha256": "a204ade21fc05fc7fdb84c1d7b445f8dbe326f9cfb15b3ac6a47fc7800caee23"
+      "size_bytes": 344966,
+      "sha256": "734a9c2dbe12c88d8ace1f966ed006277c98128933202ea6d3faa919ad3f72b4"
     },
     {
       "path": "data/forecasts/era5/20260722.json",
-      "size_bytes": 344901,
-      "sha256": "fc131468979868b8781f4085464e63cf9eb35ce739054cdd1577eb852fb4ce02"
+      "size_bytes": 344917,
+      "sha256": "6b2e7c98a775f468ffadc78d23094c7d952a730a7d4a3c3cdd2364e22c7f6b6a"
     },
     {
       "path": "data/forecasts/gfs/20260722.json",
-      "size_bytes": 347108,
-      "sha256": "0fdd6fd1df65d6860170debda9da3fd1d3643b4cbe8078028954c7233e8312a4"
+      "size_bytes": 347124,
+      "sha256": "4948721b99d645071f219a83a938890312e16e40bd3a0f6a04ccc4d1aba6d457"
     },
     {
       "path": "data/forecasts/gfs/20260728.json",
-      "size_bytes": 347063,
-      "sha256": "7313818cb3f5ac137a204ad0bc42e40d9a22adac9dc3d2628a9c41becbef0caf"
+      "size_bytes": 347079,
+      "sha256": "4e64736fbd5914f5378fa4b2836a1844f779ada91d05669f3fd18a3c85b3127c"
     },
     {
       "path": "data/forecasts/gfs/20260730.json",
-      "size_bytes": 347038,
-      "sha256": "a1fd34a8fb89a950d45ae1a3eebf469d87a10a6699fd7d1c033c5cda85934467"
+      "size_bytes": 347054,
+      "sha256": "a7d7ff5c7d34f23bf69a1bcb047b289356048516789fc00563bf634e9364d638"
     },
     {
       "path": "data/forecasts/gfs/20260731.json",
-      "size_bytes": 346990,
-      "sha256": "0cbc5b40be510e521c828c1583fd50cb8ca9b214b3cc3f6dfc6817c771db8dea"
+      "size_bytes": 347006,
+      "sha256": "ca15a3524f102a2708be120fa1e1d2729022164c5d3034b2fc582ac9b00ec042"
     },
     {
       "path": "data/formulas.json",
@@ -187,7 +187,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 5909,
-      "sha256": "809c5e5ae88e3ca3ae10abe125234e35e288c50727874cb319854d49e8dee662"
+      "sha256": "756a03ba50a93d3598ac6bf6b09daf2553d674601f308982e13024314860daa1"
     },
     {
       "path": "data/world-countries.geojson",
@@ -195,9 +195,9 @@
       "sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f"
     },
     {
-      "path": "downloads/era5/20260715/Atmosphere42_India_ERA5_20260715.pdf",
-      "size_bytes": 3975560,
-      "sha256": "92c25b97f7d311bf41be6facb346f0ba517438f4d914896495edb90c743ffe98"
+      "path": "downloads/era5/20260715/SCDLDS_India_Experimental_Forecast_ERA5_20260715.pdf",
+      "size_bytes": 3976628,
+      "sha256": "109dd3b166f4633b23a78bc36c06bcd6f7410115a0f34cd4bb1593222bfc0904"
     },
     {
       "path": "downloads/era5/20260715/india-summary.csv",
@@ -211,13 +211,13 @@
     },
     {
       "path": "downloads/era5/20260715/manifest.json",
-      "size_bytes": 658,
-      "sha256": "354a1794b29d0434e93997f7f0aaa936759393625f65f368c107da4cc05f57bb"
+      "size_bytes": 674,
+      "sha256": "c07647e6a354b51f5ec875fb8db2ccf780e17830ccf1bc6c8c89e75830bf8579"
     },
     {
-      "path": "downloads/era5/20260722/Atmosphere42_India_ERA5_20260722.pdf",
-      "size_bytes": 3972928,
-      "sha256": "a1240544460533de85aff14543de577392142d210bd86d480dc55942e096a038"
+      "path": "downloads/era5/20260722/SCDLDS_India_Experimental_Forecast_ERA5_20260722.pdf",
+      "size_bytes": 3973995,
+      "sha256": "5bfbc38794895bb5dee9858641c95389d051ee282a09d0e0bb9e0316c9237d07"
     },
     {
       "path": "downloads/era5/20260722/india-summary.csv",
@@ -231,13 +231,13 @@
     },
     {
       "path": "downloads/era5/20260722/manifest.json",
-      "size_bytes": 658,
-      "sha256": "e5696626c17efa91a73f56e544627f2cae263dce307f387f59a1c1d3df158840"
+      "size_bytes": 674,
+      "sha256": "64674494d42412433444e6b88d6d7d44da862ce01d695e6bad22dcd16f9d2b3e"
     },
     {
-      "path": "downloads/gfs/20260722/Atmosphere42_India_GFS_20260722.pdf",
-      "size_bytes": 3990143,
-      "sha256": "021fcdf6c2d20e8875b97a6d5a9ab4c28d5132b2d87ec72372f415e318f24e1a"
+      "path": "downloads/gfs/20260722/SCDLDS_India_Experimental_Forecast_GFS_20260722.pdf",
+      "size_bytes": 3991216,
+      "sha256": "1365e7440207a6b6b2fb2f7e7e8b83f17beace7651aa3eda3351d1d4052954c8"
     },
     {
       "path": "downloads/gfs/20260722/india-summary.csv",
@@ -251,13 +251,13 @@
     },
     {
       "path": "downloads/gfs/20260722/manifest.json",
-      "size_bytes": 656,
-      "sha256": "6bfa946f7da194a5abaa37c08423f6a84d21c41e1c671b1fb15fa74c33244dae"
+      "size_bytes": 672,
+      "sha256": "c0a9be7d6c22f2b8a148e6956948a9fd6c90b00759f5d4294b9b0986c73c80df"
     },
     {
-      "path": "downloads/gfs/20260728/Atmosphere42_India_GFS_20260728.pdf",
-      "size_bytes": 3987919,
-      "sha256": "5c901f1269ab9e54551742986d2abfc20381c7ecee780b20fdd1b0c31f43bdb5"
+      "path": "downloads/gfs/20260728/SCDLDS_India_Experimental_Forecast_GFS_20260728.pdf",
+      "size_bytes": 3988994,
+      "sha256": "cdd8f955cb989f28cf36e5bd1b520536e570fdfdd21d24cf5e81f64a685ac561"
     },
     {
       "path": "downloads/gfs/20260728/india-summary.csv",
@@ -271,13 +271,13 @@
     },
     {
       "path": "downloads/gfs/20260728/manifest.json",
-      "size_bytes": 656,
-      "sha256": "afe477b4e0509e51d9c84f6d5dc0010fd4c2fc88f4ab6a84e4f2599f4187ba88"
+      "size_bytes": 672,
+      "sha256": "9fa209293402be72272ca1963d02be9ec4382c95dcf375dcf820699bdde7c719"
     },
     {
-      "path": "downloads/gfs/20260730/Atmosphere42_India_GFS_20260730.pdf",
-      "size_bytes": 3989065,
-      "sha256": "e7714e2237cfdf05dd386caa326885a6e804e88825bda92ee3e0b2e8b92b47a9"
+      "path": "downloads/gfs/20260730/SCDLDS_India_Experimental_Forecast_GFS_20260730.pdf",
+      "size_bytes": 3990135,
+      "sha256": "ae364d818eca4f4f8fae7356b8930da3871c996529823ff8d7d509f31937e63a"
     },
     {
       "path": "downloads/gfs/20260730/india-summary.csv",
@@ -291,13 +291,13 @@
     },
     {
       "path": "downloads/gfs/20260730/manifest.json",
-      "size_bytes": 654,
-      "sha256": "9ee0a7965e465ed396e6e927ee9e17507ed1380db59ef96964351aeb11ccb29d"
+      "size_bytes": 670,
+      "sha256": "e769035690bf3a65ed786dcd2f4a85b40b1ed001a3a64bc370b7cac91c1b6264"
     },
     {
-      "path": "downloads/gfs/20260731/Atmosphere42_India_GFS_20260731.pdf",
-      "size_bytes": 3988828,
-      "sha256": "dd939d3d5e91aa17a7edb7b724b26511efc539755948f2f3e2e11879d6ca8378"
+      "path": "downloads/gfs/20260731/SCDLDS_India_Experimental_Forecast_GFS_20260731.pdf",
+      "size_bytes": 3989899,
+      "sha256": "aa98905e75e2edf5acddf57aecc590bbcb0c17a2d233f5bee6c6edd30c8094e8"
     },
     {
       "path": "downloads/gfs/20260731/india-summary.csv",
@@ -311,13 +311,13 @@
     },
     {
       "path": "downloads/gfs/20260731/manifest.json",
-      "size_bytes": 654,
-      "sha256": "0b99e1e0d8bfb529caa4453a53496e2983d1297a18538b17ea07cc44a98e43d4"
+      "size_bytes": 670,
+      "sha256": "95a43b83ad94bdfdd5edd66505a27f0c5c6ffcbd6200d25b75cc3b0b7ebcaefb"
     },
     {
       "path": "favicon.svg",
-      "size_bytes": 587,
-      "sha256": "5c03e4b576af0f58c1203483bef0c69a3763d931f5b2c8483d2636c526a8d5c8"
+      "size_bytes": 343,
+      "sha256": "95efb8ef9eee6c24da1223a30359b8186f934921f55cb7d9b90612708858c446"
     }
   ]
 }

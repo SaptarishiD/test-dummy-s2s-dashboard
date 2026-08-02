@@ -16,9 +16,9 @@
       "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
     },
     {
-      "path": "Atmosphere42_India_ERA5_20260715.pdf",
-      "size_bytes": 3975560,
-      "sha256": "92c25b97f7d311bf41be6facb346f0ba517438f4d914896495edb90c743ffe98"
+      "path": "SCDLDS_India_Experimental_Forecast_ERA5_20260715.pdf",
+      "size_bytes": 3976628,
+      "sha256": "109dd3b166f4633b23a78bc36c06bcd6f7410115a0f34cd4bb1593222bfc0904"
     }
   ]
 }

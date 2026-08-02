@@ -198,7 +198,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     <section class="india-sheet">
       <header class="india-sheet__header">
         <div>
-          <span class="india-sheet__brand">Atmosphere 42 · India forecast operations</span>
+          <span class="india-sheet__brand">SCDLDS · ASHOKA UNIVERSITY · EXPERIMENTAL FORECASTING</span>
           <h1 id="india-product-title">Weekly-mean rainfall anomaly</h1>
           <p>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} forecast start <i>•</i> ${forecast.issue.input_days.map((day) => friendlyDate(day)).join("–")} daily-mean inputs <i>•</i> ${forecast.issue.members}-member ensemble mean <i>•</i> Weeks 1–6</p>
         </div>
@@ -250,7 +250,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
 
       <footer class="india-sheet__footer">
         <p id="india-baseline-note"></p>
-        <span>Experimental S2S guidance · Not an operational warning</span>
+        <span>SCDLDS experimental S2S research guidance · Not an operational weather forecast or warning</span>
       </footer>
     </section>
   `;

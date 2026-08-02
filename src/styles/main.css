@@ -138,24 +138,17 @@ a {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid rgb(255 255 255 / 34%);
-  border-radius: 50%;
+  color: #fff;
+  background: #b94a32;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: 9px;
 }
 
-.brand-mark i {
-  position: absolute;
-  width: 19px;
-  height: 7px;
-  border-top: 1.5px solid #8fd5d3;
-  border-radius: 50%;
-}
-
-.brand-mark i:nth-child(2) {
-  transform: rotate(60deg);
-}
-
-.brand-mark i:nth-child(3) {
-  transform: rotate(120deg);
+.brand-mark b {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .site-nav {
@@ -2739,7 +2732,7 @@ a {
 .india-sheet__brand {
   display: block;
   margin-bottom: 22px;
-  color: #173f8a;
+  color: #a63f2d;
   font-size: 14px;
   font-weight: 850;
   letter-spacing: 0.02em;

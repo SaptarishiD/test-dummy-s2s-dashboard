@@ -197,10 +197,17 @@ def build_pdf(
     issue_id = issue["id"]
     output_root = PUBLIC / "downloads" / source_id / issue_id
     output_root.mkdir(parents=True, exist_ok=True)
-    output = output_root / f"Atmosphere42_India_{source_id.upper()}_{issue_id}.pdf"
+    output = output_root / (
+        f"SCDLDS_India_Experimental_Forecast_{source_id.upper()}_{issue_id}.pdf"
+    )
+    for pattern in (
+        "Atmosphere42_India_*.pdf",
+        "SCDLDS_India_Experimental_Forecast_*.pdf",
+    ):
+        for stale_pdf in output_root.glob(pattern):
+            if stale_pdf != output:
+                stale_pdf.unlink()
 
-    latitude = np.asarray(forecast["grid"]["latitude"], dtype=np.float64)
-    longitude = np.asarray(forecast["grid"]["longitude"], dtype=np.float64)
     world_segments = geometry_segments(world)
     outline_segments = geometry_segments(outline)
     admin_segments = geometry_segments(admin)
@@ -214,8 +221,8 @@ def build_pdf(
     )
 
     metadata = {
-        "Title": f"Atmosphere 42 India forecast · {source_id.upper()} · {issue_id}",
-        "Author": "Atmosphere 42",
+        "Title": f"SCDLDS India experimental forecast · {source_id.upper()} · {issue_id}",
+        "Author": "Safexpress Centre for Data, Learning and Decision Sciences, Ashoka University",
         "Subject": "Experimental India subseasonal forecast guidance, Weeks 1–6",
         "Keywords": "India, S2S, rainfall, temperature, anomaly, experimental",
     }
@@ -242,8 +249,8 @@ def build_pdf(
             figure.text(
                 0.055,
                 0.955,
-                "ATMOSPHERE 42  ·  INDIA FORECAST OPERATIONS",
-                color="#173f8a",
+                "SCDLDS  ·  ASHOKA UNIVERSITY  ·  EXPERIMENTAL FORECASTING",
+                color="#a63f2d",
                 fontsize=12,
                 fontweight="bold",
             )
@@ -363,7 +370,7 @@ def build_pdf(
     package_manifest_path = output_root / "manifest.json"
     package_manifest = json.loads(package_manifest_path.read_text(encoding="utf-8"))
     package_manifest["files"] = [
-        entry for entry in package_manifest["files"] if entry["path"] != output.name
+        entry for entry in package_manifest["files"] if not entry["path"].endswith(".pdf")
     ]
     package_manifest["files"].append(
         {

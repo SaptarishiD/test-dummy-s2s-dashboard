@@ -17,7 +17,7 @@ import type {
 type Route = "forecast" | "india";
 
 const ROUTES = new Set<Route>(["forecast", "india"]);
-const PUBLIC_DATA_VERSION = "20260802-pdf3";
+const PUBLIC_DATA_VERSION = "20260802-scdlds1";
 let routeCleanup: (() => void) | undefined;
 
 function currentRoute(): Route {
@@ -196,9 +196,9 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand" href="./#india" aria-label="Atmosphere 42 India forecast home">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>Atmosphere 42</strong><small>India Forecast Operations</small></span>
+      <a class="brand" href="./#india" aria-label="SCDLDS Ashoka University experimental forecast home">
+        <span class="brand-mark" aria-hidden="true"><b>S</b></span>
+        <span><strong>SCDLDS · Ashoka University</strong><small>Experimental Forecasting</small></span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">India Forecasts</a>
@@ -206,16 +206,16 @@ function shell(): string {
       </nav>
       <div class="header-status">
         <span class="live-dot" aria-hidden="true"></span>
-        <span>28 Jul 2026</span>
+        <span>Research prototype</span>
       </div>
     </header>
     <main id="content" tabindex="-1"></main>
     <footer class="site-footer">
       <div>
-        <strong>Atmosphere 42</strong>
-        <span>Experimental S2S forecast prototype · Research use only</span>
+        <strong>Safexpress Centre for Data, Learning and Decision Sciences</strong>
+        <span>Ashoka University · Experimental S2S research guidance</span>
       </div>
-      <p>42 forecast days · Native 1.5° grid · Natural Earth geography</p>
+      <p>Research use only · Not an operational weather forecast or warning</p>
     </footer>
   `;
 }
