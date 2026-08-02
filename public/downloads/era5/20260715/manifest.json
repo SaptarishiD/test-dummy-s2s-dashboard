@@ -14,6 +14,11 @@
       "path": "india-summary.csv",
       "size_bytes": 487,
       "sha256": "32dff47d52d3b70c27b42218b7d9bde2da1b418247b0b365f2116f58f5db67dc"
+    },
+    {
+      "path": "Atmosphere42_India_ERA5_20260715.pdf",
+      "size_bytes": 4049738,
+      "sha256": "fd9562265c07460e3297a210a1cc7032fb600cf29aff91703ca39598582087ad"
     }
   ]
 }

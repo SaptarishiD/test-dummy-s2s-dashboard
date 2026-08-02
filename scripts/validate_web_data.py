@@ -204,10 +204,17 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
             for key in (
                 "india_netcdf",
                 "india_summary_csv",
+                "india_pdf",
                 "manifest",
             ):
                 if not (public_root / downloads[key]).is_file():
                     raise ValueError(f"missing {key} for {source_id}/{issue['id']}")
+            pdf_path = public_root / downloads["india_pdf"]
+            pdf_bytes = pdf_path.read_bytes()
+            if not pdf_bytes.startswith(b"%PDF-"):
+                raise ValueError(f"invalid PDF header: {pdf_path}")
+            if len(re.findall(rb"/Type /Page\b", pdf_bytes)) != 4:
+                raise ValueError(f"PDF must contain four product pages: {pdf_path}")
             package_manifest = load_json(public_root / downloads["manifest"])
             package_root = (public_root / downloads["manifest"]).parent
             for file_entry in package_manifest["files"]:
@@ -230,7 +237,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     if matched_22 != {"gfs", "era5"}:
         raise ValueError("the matched 22 July GFS/ERA5 IC pair is incomplete")
     return (
-        "GFS and ERA5 issues are source-separated with verified compact downloads.",
+        "GFS and ERA5 issues are source-separated with verified four-page PDF briefings.",
         {"sources": len(sources), "issues": issue_count, "matched_issue": "20260722"},
     )
 

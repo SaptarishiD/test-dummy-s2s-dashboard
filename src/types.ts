@@ -75,6 +75,7 @@ export interface ForecastData {
       india_netcdf: string;
       india_summary_csv: string;
       manifest: string;
+      india_pdf: string;
     };
     climatology_alignment: {
       target_model_state_calendar_day: string;

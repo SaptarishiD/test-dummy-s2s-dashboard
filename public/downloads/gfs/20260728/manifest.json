@@ -14,6 +14,11 @@
       "path": "india-summary.csv",
       "size_bytes": 494,
       "sha256": "b47efeb483342eb1705b236d9d54f0ecef10f3aeedcac7e4da4b3e054b69aa7a"
+    },
+    {
+      "path": "Atmosphere42_India_GFS_20260728.pdf",
+      "size_bytes": 4050980,
+      "sha256": "63d46b6cf09120ff7d7501d52bedc69e723eb84292042f8a6c6892ca2d8ce9a4"
     }
   ]
 }

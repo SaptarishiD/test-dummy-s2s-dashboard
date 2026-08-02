@@ -26,7 +26,8 @@
       "compact_json": "data/forecasts/gfs/20260731.json",
       "india_netcdf": "downloads/gfs/20260731/india-weekly.nc",
       "india_summary_csv": "downloads/gfs/20260731/india-summary.csv",
-      "manifest": "downloads/gfs/20260731/manifest.json"
+      "manifest": "downloads/gfs/20260731/manifest.json",
+      "india_pdf": "downloads/gfs/20260731/Atmosphere42_India_GFS_20260731.pdf"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0730",

@@ -2905,6 +2905,24 @@ a {
   background: #173f8a;
 }
 
+.india-run-actions .india-pdf-download {
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  background: #173f8a;
+  border-color: #173f8a;
+}
+
+.india-run-actions .india-pdf-download::before {
+  margin-right: 7px;
+  content: "↓";
+}
+
+.india-run-actions .india-pdf-download:hover {
+  background: #0f2f6d;
+}
+
 .india-matched-run {
   grid-column: 1 / -1;
   color: #365d9e;

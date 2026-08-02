@@ -26,7 +26,8 @@
       "compact_json": "data/forecasts/era5/20260715.json",
       "india_netcdf": "downloads/era5/20260715/india-weekly.nc",
       "india_summary_csv": "downloads/era5/20260715/india-summary.csv",
-      "manifest": "downloads/era5/20260715/manifest.json"
+      "manifest": "downloads/era5/20260715/manifest.json",
+      "india_pdf": "downloads/era5/20260715/Atmosphere42_India_ERA5_20260715.pdf"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0714",

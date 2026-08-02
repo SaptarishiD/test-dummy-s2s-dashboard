@@ -54,6 +54,7 @@ From this directory:
 ```bash
 python scripts/validate_sources.py
 python scripts/build_prototype_data.py
+python scripts/build_forecast_pdfs.py
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 python scripts/validate_web_data.py
 npm ci
@@ -100,9 +101,12 @@ contains exactly `latitude.length × longitude.length` finite values.
 
 Source-aware packages live under
 `public/data/forecasts/{gfs,era5}/YYYYMMDD.json`. Each issue links to a compact
-derived India NetCDF, a regional-summary CSV, the web JSON, and a checksum
-manifest under `public/downloads/<source>/YYYYMMDD/`. Raw initial conditions
-and ensemble-member fields are never published.
+derived India NetCDF, a regional-summary CSV, the web JSON, a four-page PDF
+briefing, and a checksum manifest under
+`public/downloads/<source>/YYYYMMDD/`. The website presents only the PDF
+download; the machine-readable derivatives remain part of the checked data
+contract. Raw initial conditions and ensemble-member fields are never
+published.
 
 The India presentation follows the supplied four-panel PDF structure: one
 shared fixed legend, exact reference colour levels, surrounding-country and

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-02T11:16:29.927122+00:00",
+  "generated_at": "2026-08-02T11:41:47.154556+00:00",
   "overall_status": "warning",
   "presentation_allowed": true,
   "checks": [
@@ -153,7 +153,7 @@
       "label": "Initial-condition source catalog",
       "group": "publication",
       "status": "green",
-      "summary": "GFS and ERA5 issues are source-separated with verified compact downloads.",
+      "summary": "GFS and ERA5 issues are source-separated with verified four-page PDF briefings.",
       "details": {
         "sources": 2,
         "issues": 6,
@@ -168,7 +168,7 @@
       "summary": "Public JSON is finite and free of internal paths, credentials, and raw assets.",
       "details": {
         "json_files_scanned": 18,
-        "bytes_scanned": 4125959
+        "bytes_scanned": 4127753
       }
     }
   ],

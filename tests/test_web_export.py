@@ -126,8 +126,13 @@ def test_each_issue_has_small_verified_downloads() -> None:
             downloads = forecast["issue"]["downloads"]
             netcdf_path = public_root / downloads["india_netcdf"]
             csv_path = public_root / downloads["india_summary_csv"]
+            pdf_path = public_root / downloads["india_pdf"]
             assert netcdf_path.stat().st_size < 1_000_000
             assert csv_path.stat().st_size < 20_000
+            pdf_bytes = pdf_path.read_bytes()
+            assert pdf_bytes.startswith(b"%PDF-")
+            assert len(re.findall(rb"/Type /Page\b", pdf_bytes)) == 4
+            assert pdf_path.stat().st_size < 10_000_000
             with xr.open_dataset(netcdf_path) as dataset:
                 assert dataset.sizes == {"week": 6, "latitude": 27, "longitude": 27}
                 assert dataset.attrs["initial_condition_source"] == source["id"]

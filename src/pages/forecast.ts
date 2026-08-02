@@ -219,11 +219,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
           </select>
         </label>
         <div class="india-run-actions" aria-label="Forecast downloads">
-          <span>Download this issue</span>
-          <a href="./${forecast.issue.downloads.india_netcdf}" download>India NetCDF</a>
-          <a href="./${forecast.issue.downloads.india_summary_csv}" download>Summary CSV</a>
-          <a href="./${forecast.issue.downloads.compact_json}" download>Web JSON</a>
-          <a href="./${forecast.issue.downloads.manifest}" download>Checksums</a>
+          <span>Forecast briefing</span>
+          <a class="india-pdf-download" href="./${forecast.issue.downloads.india_pdf}" download>Download PDF</a>
         </div>
         ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
       </section>
