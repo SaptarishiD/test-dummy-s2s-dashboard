@@ -1,6 +1,12 @@
 {
   "available_issues": [
     {
+      "forecast": "forecasts/gfs/20260805.json",
+      "id": "20260805",
+      "initialization": "2026-08-05T00:00:00Z",
+      "status": "warning"
+    },
+    {
       "forecast": "forecasts/gfs/20260802.json",
       "id": "20260802",
       "initialization": "2026-08-02T00:00:00Z",
@@ -69,7 +75,7 @@
   ],
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-02T14:22:50.510512+00:00",
+  "generated_at": "2026-08-05T14:53:20.412613+00:00",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -94,10 +100,19 @@
   "initial_condition_sources": [
     {
       "category": "operational_proxy",
-      "default_issue": "20260801",
+      "default_issue": "20260805",
       "description": "Near-real-time operational inputs for twice-weekly experimental guidance. No matched GFS-initialized hindcast calibration is currently available.",
       "id": "gfs",
       "issues": [
+        {
+          "forecast": "forecasts/gfs/20260805.json",
+          "id": "20260805",
+          "initialization": "2026-08-05T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/gfs/20260805.json",
+          "role": "operational_experimental",
+          "status": "warning"
+        },
         {
           "forecast": "forecasts/gfs/20260802.json",
           "id": "20260802",
@@ -133,10 +148,10 @@
         },
         {
           "forecast": "forecasts/gfs/20260729.json",
-          "regional_outlook": "regional/gfs/20260729.json",
           "id": "20260729",
           "initialization": "2026-07-29T00:00:00Z",
           "members": 100,
+          "regional_outlook": "regional/gfs/20260729.json",
           "role": "operational_experimental",
           "status": "warning"
         },
@@ -257,6 +272,6 @@
       "status": "reference"
     }
   ],
-  "latest_successful_issue": "20260802",
+  "latest_successful_issue": "20260805",
   "schema_version": 2
 }
