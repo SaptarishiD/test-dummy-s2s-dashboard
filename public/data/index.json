@@ -75,7 +75,7 @@
   ],
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-05T14:53:20.412613+00:00",
+  "generated_at": "2026-08-05T15:20:14.081257+00:00",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -216,6 +216,14 @@
       "description": "Delayed, scientifically matched reanalysis initializations for reference experiments and IC-sensitivity comparisons; not near-real-time guidance.",
       "id": "era5",
       "issues": [
+        {
+          "forecast": "forecasts/era5/20260730.json",
+          "id": "20260730",
+          "initialization": "2026-07-30T00:00:00Z",
+          "members": 5,
+          "role": "rapid_prototype",
+          "status": "warning"
+        },
         {
           "forecast": "forecasts/era5/20260724.json",
           "id": "20260724",
