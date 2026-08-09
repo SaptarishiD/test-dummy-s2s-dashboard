@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-05T15:22:41.787944+00:00",
-  "deployed_commit": "local-uncommitted",
+  "generated_at": "2026-08-09T17:49:40.601551+00:00",
+  "deployed_commit": "f94e0eda43865905f5d81876d6b63bf0cb1f6185",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -155,6 +155,11 @@
       "sha256": "f9f67009d615d723c69ea6f7be1277d0b902559f5a30c320e88e3b3aee002c13"
     },
     {
+      "path": "data/forecasts/gfs/20260808.json",
+      "size_bytes": 346843,
+      "sha256": "189c5eef270b1c106777c0d4ad07486b0ff658a92fb3bafd0c938fda75c8dbcd"
+    },
+    {
       "path": "data/formulas.json",
       "size_bytes": 3121,
       "sha256": "18c6162c4beef6ec38f60a6fc9d6d5f21ae0eaac6766ebaf5e89d809e41ced33"
@@ -276,8 +281,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 8477,
-      "sha256": "48dc47843ba5e9cf5f1a723c9b354fb883940b0c80b6aea1b257de4394fa8b8d"
+      "size_bytes": 35863,
+      "sha256": "d519c474e931fbd71b089e86faa345a7243dca39b0da79432859674be46c2184"
     },
     {
       "path": "data/india-admin.json",
@@ -330,6 +335,11 @@
       "sha256": "3a3b635690a37b330345d50bf315c5359b7869769f22323c758c02c41ea5f5a7"
     },
     {
+      "path": "data/regional/gfs/20260808.json",
+      "size_bytes": 447634,
+      "sha256": "0e8ebd984187cf9f028c2cf167301948e3d450269d56a7216e1142b757d6f681"
+    },
+    {
       "path": "data/sources.json",
       "size_bytes": 2358,
       "sha256": "ffc1a5ef83e38810b5a492d01861efb9ea73468d3fae232e4b5b0dcd37bec318"
@@ -337,7 +347,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 5937,
-      "sha256": "8f8e7355994b1f1228ac2f2bb65f9241143cae3a8bdb21e2eac046a981bf6311"
+      "sha256": "e91145eb82ac1af9d783c0a7886c11e74be4296698e8414a57e9686a7c192474"
     },
     {
       "path": "data/world-countries.geojson",
@@ -438,6 +448,11 @@
       "path": "downloads/gfs/20260805/S2S_Research_India_Weeks1-4_GFS_20260805.pdf",
       "size_bytes": 2889531,
       "sha256": "ad10e9f7f375a59e119e5966620d116fbec6746f0ee3972bf45077a5104991a3"
+    },
+    {
+      "path": "downloads/gfs/20260808/S2S_Research_India_Weeks1-4_GFS_20260808.pdf",
+      "size_bytes": 2888139,
+      "sha256": "35fcde35190f598419638b9de82d7e11684a6861b58f21a0d908f6a2d59b2b51"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
