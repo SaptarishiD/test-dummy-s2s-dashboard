@@ -148,7 +148,11 @@ def enrich_issue(
     if not production:
         label = "Limited experiment"
     elif source_id == "era5":
-        label = "Delayed ERA5 reference"
+        label = (
+            "Delayed ERA5 reference"
+            if initialization.weekday() in CADENCE_WEEKDAYS
+            else "Ad-hoc ERA5 reference"
+        )
     else:
         label = "Archived guidance"
 

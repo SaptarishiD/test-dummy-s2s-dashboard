@@ -40,7 +40,7 @@ def test_checked_in_catalog_passes_issue_scoped_live_inventory() -> None:
         source="gfs",
         issue="20260808",
         expected_gfs_issue="20260808",
-        expected_era5_issue="20260722",
+        expected_era5_issue="20260802",
         expected_forecast_sha256=None,
         live_inventory=True,
     )

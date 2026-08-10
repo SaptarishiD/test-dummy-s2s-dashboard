@@ -487,9 +487,8 @@ def choose_scope(
         raise ValueError("current GFS issue must be a 100-member publication")
     if records[("era5", era5_id)].record.get("members") != 100:
         raise ValueError("latest ERA5 reference must be a 100-member publication")
-    for label, issue_id in (("current GFS", gfs_id), ("latest ERA5", era5_id)):
-        if dt.datetime.strptime(issue_id, "%Y%m%d").weekday() not in {2, 5}:
-            raise ValueError(f"{label} pointer is not a Wednesday/Saturday issue")
+    if dt.datetime.strptime(gfs_id, "%Y%m%d").weekday() not in {2, 5}:
+        raise ValueError("current GFS pointer is not a Wednesday/Saturday issue")
     if args.expected_gfs_issue and args.expected_gfs_issue != gfs_id:
         raise ValueError(
             f"expected GFS {args.expected_gfs_issue}, catalog points to {gfs_id}"
