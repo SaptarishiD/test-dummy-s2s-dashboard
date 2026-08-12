@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-10T13:15:03.668445+00:00",
-  "deployed_commit": "local-uncommitted",
+  "generated_at": "2026-08-12T13:57:37.261519+00:00",
+  "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -170,6 +170,11 @@
       "sha256": "189c5eef270b1c106777c0d4ad07486b0ff658a92fb3bafd0c938fda75c8dbcd"
     },
     {
+      "path": "data/forecasts/gfs/20260812.json",
+      "size_bytes": 346650,
+      "sha256": "65927e519610fa3380847c87594d3fd713720ca16202926a14eed80b42586cdc"
+    },
+    {
       "path": "data/formulas.json",
       "size_bytes": 3121,
       "sha256": "18c6162c4beef6ec38f60a6fc9d6d5f21ae0eaac6766ebaf5e89d809e41ced33"
@@ -291,8 +296,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 37454,
-      "sha256": "42aada1810b32bc484499a4f2d3333c38adf3379093a4f9b27ffa71a1781a462"
+      "size_bytes": 39212,
+      "sha256": "0596be8b0da250692028cae0a0da99b71b69fe4334e0d91eafab3c7269619efc"
     },
     {
       "path": "data/india-admin.json",
@@ -353,6 +358,11 @@
       "path": "data/regional/gfs/20260808.json",
       "size_bytes": 447634,
       "sha256": "0e8ebd984187cf9f028c2cf167301948e3d450269d56a7216e1142b757d6f681"
+    },
+    {
+      "path": "data/regional/gfs/20260812.json",
+      "size_bytes": 447762,
+      "sha256": "194f7a6f7abdcfefa11139ba4fb710354f1ef10717fc34d145735f0fad0377e1"
     },
     {
       "path": "data/sources.json",
@@ -473,6 +483,11 @@
       "path": "downloads/gfs/20260808/S2S_Research_India_Weeks1-4_GFS_20260808.pdf",
       "size_bytes": 2888139,
       "sha256": "35fcde35190f598419638b9de82d7e11684a6861b58f21a0d908f6a2d59b2b51"
+    },
+    {
+      "path": "downloads/gfs/20260812/S2S_Research_India_Weeks1-4_GFS_20260812.pdf",
+      "size_bytes": 2886860,
+      "sha256": "213bfabd801a3d529b6d6694060c05c46c46c20b294062f8e77e06a310312bae"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
