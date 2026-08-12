@@ -59,6 +59,14 @@
     "observation_verification": {
       "status": "not_available",
       "message": "Verification is withheld until every required observation day in a valid week is available."
+    },
+    "initialization_comparison": {
+      "status": "initialization_sensitivity_only",
+      "counterpart_source_id": "era5",
+      "comparison": "comparisons/20260805.json",
+      "week1_rainfall_gfs_minus_era5_mm_day": -1.5256,
+      "week1_temperature_gfs_minus_era5_deg_c": -0.3547,
+      "message": "GFS-minus-ERA5 differences measure sensitivity to the initial-state source. They do not show which forecast is better; skill requires observations for the complete valid period."
     }
   },
   "grid": {
