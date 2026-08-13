@@ -115,7 +115,7 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
   },
   wind850_anomaly: {
     label: "850 hPa wind anomaly",
-    short_label: "850 hPa wind",
+    short_label: "850 hPa wind anomaly",
     description: "Shading shows the weekly wind-speed anomaly; arrows show the U/V vector-component anomaly",
     units: "m s⁻¹",
     baseline: "Native reforecasts, 2002–2021",

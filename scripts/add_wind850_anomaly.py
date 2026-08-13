@@ -17,7 +17,7 @@ import xarray as xr
 PRODUCT_KEY = "wind850_anomaly"
 PRODUCT = {
     "label": "850 hPa wind anomaly",
-    "short_label": "850 hPa wind",
+    "short_label": "850 hPa wind anomaly",
     "description": (
         "Shading is the weekly-mean wind-speed anomaly; arrows are the "
         "weekly U/V vector-component anomaly"
