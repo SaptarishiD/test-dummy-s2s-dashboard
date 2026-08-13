@@ -113,6 +113,29 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
       over: "#730000",
     },
   },
+  wind850_anomaly: {
+    label: "850 hPa wind anomaly",
+    short_label: "850 hPa wind",
+    description: "Shading shows the weekly wind-speed anomaly; arrows show the U/V vector-component anomaly",
+    units: "m s⁻¹",
+    baseline: "Native reforecasts, 2002–2021",
+    legend: {
+      boundaries: [-8, -6, -4, -2, -1, 1, 2, 4, 6, 8],
+      colors: [
+        "#6f321e",
+        "#a8552f",
+        "#d98b57",
+        "#efc79f",
+        "#f7f5ef",
+        "#c9e2ee",
+        "#83bdd4",
+        "#3988b2",
+        "#14567f",
+      ],
+      under: "#421c12",
+      over: "#083653",
+    },
+  },
 };
 
 function friendlyDate(isoDate: string, includeYear = false): string {
@@ -414,8 +437,9 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     legend.style.setProperty("--legend-under", product.legend.under);
     legend.style.setProperty("--legend-over", product.legend.over);
     legend.replaceChildren(createLegend(product));
-    container.querySelector("#india-visual-note")!.textContent =
-      `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
+    container.querySelector("#india-visual-note")!.textContent = selectedProduct === "wind850_anomaly"
+      ? `${product.description}. Shading is visually interpolated 1.5°→0.25°; arrows are sampled every third native grid point and use one scale across all weeks. Hover values remain native-grid values.`
+      : `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation 1.5°→0.25°; hover values remain native-grid values.`;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
       ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
       : sourceId === "gfs"

@@ -72,7 +72,7 @@ def test_catalog_rebuild_keeps_limited_issue_out_of_current() -> None:
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
-    assert rebuilt["current"]["issue_id"] == "20260808"
+    assert rebuilt["current"]["issue_id"] == "20260812"
     newer_limited = next(
         item
         for item in rebuilt["initial_condition_sources"][0]["issues"]

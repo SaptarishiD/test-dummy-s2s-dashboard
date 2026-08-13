@@ -5,7 +5,8 @@ export type ProductKey =
   | "rainfall_total"
   | "rainfall_anomaly"
   | "temperature_mean"
-  | "temperature_anomaly";
+  | "temperature_anomaly"
+  | "wind850_anomaly";
 
 export type AvailableProductKey =
   | ProductKey
@@ -15,6 +16,7 @@ export type AvailableProductKey =
 export interface IssueCapabilities {
   raw_fields?: boolean;
   anomalies?: boolean;
+  wind850_anomaly?: boolean;
   regional_probabilities?: boolean;
   regional_probabilities_eligible?: boolean;
   pdf?: boolean;
@@ -77,6 +79,9 @@ export interface ForecastWeek {
   valid_end: string;
   fields: Partial<Record<ProductKey, number[]>>;
   summary: Partial<Record<ProductKey, FieldSummary>>;
+  vectors?: Partial<
+    Record<"wind850_anomaly", { u: number[]; v: number[] }>
+  >;
 }
 
 export interface ForecastData {

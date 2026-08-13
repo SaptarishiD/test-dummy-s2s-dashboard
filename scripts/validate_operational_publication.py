@@ -25,6 +25,7 @@ ISSUE_ID = re.compile(r"^\d{8}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
+WIND_PRODUCT = "wind850_anomaly"
 PRIVATE_TOKENS = ("/home/", "/storage/", "private key", "password", "secret")
 
 
@@ -396,6 +397,11 @@ def validate_forecast(
     )
     if anomaly_available != ANOMALY_PRODUCTS.issubset(products):
         raise ValueError(f"anomaly capability/product mismatch: {ref.source_id}/{ref.issue_id}")
+    wind_available = capability(
+        ref.record, WIND_PRODUCT, WIND_PRODUCT in products
+    )
+    if wind_available != (WIND_PRODUCT in products):
+        raise ValueError(f"wind capability/product mismatch: {ref.source_id}/{ref.issue_id}")
 
     expected_values = grid_size(forecast, "forecast")
     mask = forecast["grid"].get("india_mask")
@@ -425,6 +431,29 @@ def validate_forecast(
                     f"forecast field is not numeric: "
                     f"{ref.source_id}/{ref.issue_id}/{expected_week}/{product}"
                 )
+        vectors = week.get("vectors", {})
+        if WIND_PRODUCT in products:
+            wind = vectors.get(WIND_PRODUCT) if isinstance(vectors, dict) else None
+            if not isinstance(wind, dict) or set(wind) != {"u", "v"}:
+                raise ValueError(
+                    f"wind vectors are missing: {ref.source_id}/{ref.issue_id}/{expected_week}"
+                )
+            for component in ("u", "v"):
+                values = wind[component]
+                if not isinstance(values, list) or len(values) != expected_values:
+                    raise ValueError(
+                        f"wind vector has wrong size: "
+                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/{component}"
+                    )
+                if any(not isinstance(value, (int, float)) for value in values):
+                    raise ValueError(
+                        f"wind vector is not numeric: "
+                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/{component}"
+                    )
+        elif vectors:
+            raise ValueError(
+                f"orphan forecast vectors: {ref.source_id}/{ref.issue_id}/{expected_week}"
+            )
 
     regional = ref.record.get("regional_outlook")
     regional_capability = capability(ref.record, "regional_probabilities", bool(regional))

@@ -38,15 +38,15 @@ def test_checked_in_catalog_passes_issue_scoped_live_inventory() -> None:
         public_root=ROOT / "public",
         scope="issue",
         source="gfs",
-        issue="20260808",
-        expected_gfs_issue="20260808",
-        expected_era5_issue="20260802",
+        issue="20260812",
+        expected_gfs_issue="20260812",
+        expected_era5_issue="20260805",
         expected_forecast_sha256=None,
         live_inventory=True,
     )
     receipt = validate(args)
     assert receipt["status"] == "validated"
-    assert receipt["issues_validated"] == ["gfs/20260808"]
+    assert receipt["issues_validated"] == ["gfs/20260812"]
     assert receipt["catalog_schema"] >= 3
 
 

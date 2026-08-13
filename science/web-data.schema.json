@@ -102,7 +102,7 @@
         "temperature_mean"
       ],
       "minProperties": 2,
-      "maxProperties": 4
+      "maxProperties": 5
     },
     "weeks": {
       "type": "array",
@@ -139,6 +139,38 @@
                 "type": "number"
               }
             }
+          },
+          "vectors": {
+            "type": "object",
+            "properties": {
+              "wind850_anomaly": {
+                "type": "object",
+                "required": [
+                  "u",
+                  "v"
+                ],
+                "properties": {
+                  "u": {
+                    "type": "array",
+                    "minItems": 729,
+                    "maxItems": 729,
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "v": {
+                    "type": "array",
+                    "minItems": 729,
+                    "maxItems": 729,
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
           }
         }
       }

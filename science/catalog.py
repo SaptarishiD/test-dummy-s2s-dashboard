@@ -166,6 +166,7 @@ def enrich_issue(
             "capabilities": {
                 "raw_fields": True,
                 "anomalies": anomalies,
+                "wind850_anomaly": "wind850_anomaly" in product_set,
                 "regional_probabilities": regional_available,
                 "pdf": pdf_available,
             },

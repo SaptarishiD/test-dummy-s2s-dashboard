@@ -14,6 +14,9 @@ const LON_MAX = 99.75;
 const LAT_MIN = -0.75;
 const LAT_MAX = 39.75;
 const VISUAL_GRID_SIZE = 162;
+const WIND_VECTOR_STRIDE = 3;
+const WIND_REFERENCE_SPEED = 5;
+const WIND_REFERENCE_LENGTH = 32;
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
   tag: K,
@@ -72,10 +75,87 @@ export class ForecastMap {
     this.addInterpolatedField(svg, productKey, week, product);
     this.addWorldBoundaries(svg);
     this.addGraticules(svg);
+    if (productKey === "wind850_anomaly") {
+      this.addWindVectors(svg, week);
+    }
     this.addInteraction(svg, productKey, week, product);
     this.addOutline(svg);
     this.addIndiaAdmin(svg);
     this.container.prepend(svg);
+  }
+
+  private addWindVectors(svg: SVGSVGElement, week: ForecastWeek): void {
+    const vectors = week.vectors?.wind850_anomaly;
+    if (!vectors) throw new Error(`wind vectors are unavailable for Week ${week.week}`);
+    const { latitude, longitude } = this.forecast.grid;
+    const expected = latitude.length * longitude.length;
+    if (vectors.u.length !== expected || vectors.v.length !== expected) {
+      throw new Error(`wind vectors have an invalid size for Week ${week.week}`);
+    }
+
+    const definitions = svgElement("defs");
+    const marker = svgElement("marker");
+    marker.setAttribute("id", `wind-arrow-${week.week}`);
+    marker.setAttribute("viewBox", "0 0 8 8");
+    marker.setAttribute("refX", "7");
+    marker.setAttribute("refY", "4");
+    marker.setAttribute("markerWidth", "5");
+    marker.setAttribute("markerHeight", "5");
+    marker.setAttribute("orient", "auto-start-reverse");
+    const head = svgElement("path");
+    head.setAttribute("d", "M 0 0 L 8 4 L 0 8 z");
+    head.setAttribute("class", "map-wind-arrowhead");
+    marker.append(head);
+    definitions.append(marker);
+    svg.append(definitions);
+
+    const group = svgElement("g");
+    group.setAttribute("class", "map-wind-vectors");
+    for (let row = 1; row < latitude.length; row += WIND_VECTOR_STRIDE) {
+      for (let column = 1; column < longitude.length; column += WIND_VECTOR_STRIDE) {
+        const index = row * longitude.length + column;
+        const u = vectors.u[index];
+        const v = vectors.v[index];
+        const magnitude = Math.hypot(u, v);
+        if (!Number.isFinite(magnitude) || magnitude < 0.2) continue;
+        const scale = Math.min(magnitude / WIND_REFERENCE_SPEED, 1.5);
+        const length = WIND_REFERENCE_LENGTH * scale;
+        const dx = (u / magnitude) * length;
+        const dy = (-v / magnitude) * length;
+        const x = mapX(longitude[column]);
+        const y = mapY(latitude[row]);
+        const line = svgElement("line");
+        line.setAttribute("x1", String(x - dx / 2));
+        line.setAttribute("y1", String(y - dy / 2));
+        line.setAttribute("x2", String(x + dx / 2));
+        line.setAttribute("y2", String(y + dy / 2));
+        line.setAttribute("marker-end", `url(#wind-arrow-${week.week})`);
+        line.setAttribute("class", "map-wind-vector");
+        group.append(line);
+      }
+    }
+    svg.append(group);
+
+    const key = svgElement("g");
+    key.setAttribute("class", "map-wind-key");
+    const background = svgElement("rect");
+    background.setAttribute("x", "438");
+    background.setAttribute("y", "18");
+    background.setAttribute("width", "164");
+    background.setAttribute("height", "42");
+    const keyLine = svgElement("line");
+    keyLine.setAttribute("x1", "452");
+    keyLine.setAttribute("y1", "39");
+    keyLine.setAttribute("x2", String(452 + WIND_REFERENCE_LENGTH));
+    keyLine.setAttribute("y2", "39");
+    keyLine.setAttribute("marker-end", `url(#wind-arrow-${week.week})`);
+    keyLine.setAttribute("class", "map-wind-vector");
+    const keyLabel = svgElement("text");
+    keyLabel.setAttribute("x", "494");
+    keyLabel.setAttribute("y", "43");
+    keyLabel.textContent = `${WIND_REFERENCE_SPEED} m s⁻¹ anomaly`;
+    key.append(background, keyLine, keyLabel);
+    svg.append(key);
   }
 
   private addInterpolatedField(
@@ -207,9 +287,17 @@ export class ForecastMap {
       const lat = latitude[latIndex];
       const lon = longitude[lonIndex];
       const value = values[latIndex * longitude.length + lonIndex];
+      const vector = productKey === "wind850_anomaly"
+        ? week.vectors?.wind850_anomaly
+        : undefined;
+      const vectorIndex = latIndex * longitude.length + lonIndex;
+      const vectorDetail = vector
+        ? `<small>U ${vector.u[vectorIndex].toFixed(1)} · V ${vector.v[vectorIndex].toFixed(1)} m s⁻¹</small>`
+        : "";
       this.tooltip.innerHTML = `
         <strong>${formatValue(value, product.units)}</strong>
         <span>${lat.toFixed(1)}°N · ${lon.toFixed(1)}°E</span>
+        ${vectorDetail}
         <small>Native 1.5° grid cell</small>
       `;
       this.tooltip.hidden = false;

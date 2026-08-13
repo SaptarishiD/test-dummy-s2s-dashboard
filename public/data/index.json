@@ -107,6 +107,7 @@
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
+      "wind850_anomaly": false,
       "regional_probabilities": true,
       "pdf": true
     },
@@ -115,7 +116,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-13T05:45:26Z",
+  "generated_at": "2026-08-13T10:23:19Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -163,6 +164,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -204,6 +206,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -245,6 +248,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -286,6 +290,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -325,6 +330,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -366,6 +372,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -405,6 +412,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -444,6 +452,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -485,6 +494,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -526,6 +536,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -565,6 +576,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -604,6 +616,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -645,6 +658,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -684,6 +698,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -733,11 +748,13 @@
             "rainfall_total",
             "temperature_mean",
             "rainfall_anomaly",
-            "temperature_anomaly"
+            "temperature_anomaly",
+            "wind850_anomaly"
           ],
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": true,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -747,11 +764,11 @@
             "member_class": "limited"
           },
           "checksums": {
-            "forecast_sha256": "f16fdae88b67a7a77723f8dd79a52b37b1a849fd85dd4864012e7bfaa166ba34",
-            "pdf_sha256": "52051a2c2461a7a96a048b525cb5e805b8d1cf9adbf59440a5e6f61e9dc42f48"
+            "forecast_sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b",
+            "pdf_sha256": "fc02c33579bb17327dddb0dc7d356da33080518823a04a54870821c75e229662"
           },
           "valid_through": "2026-09-16",
-          "published_at": "2026-08-13T05:45:18.947670+00:00",
+          "published_at": "2026-08-13T10:21:37.379753+00:00",
           "pdf": "downloads/era5/20260806/S2S_Research_India_Weeks1-4_ERA5_20260806.pdf",
           "archive": {
             "interactive_available": true,
@@ -778,6 +795,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -819,6 +837,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -860,6 +879,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -899,6 +919,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -938,6 +959,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -977,6 +999,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -1018,6 +1041,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -1057,6 +1081,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
           },
@@ -1096,6 +1121,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -1144,6 +1170,7 @@
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
+      "wind850_anomaly": false,
       "regional_probabilities": true,
       "pdf": true
     },

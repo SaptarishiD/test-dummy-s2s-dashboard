@@ -62,6 +62,13 @@ uses a separate exact-28-July, lead-matched 2002–2021
 model climatology for
 precipitation, 2 m temperature, and Z500 anomalies on the full global grid.
 
+The limited 6 August 2026 ERA5 issue also publishes weekly 850 hPa wind
+anomalies. Shading is the signed wind-speed departure; arrows are the U/V
+component departure. Both use the same model-state calendar interpolation
+between the native 4 and 8 August slots, with one 51-member mean per year and
+equal weighting across 2002–2021. This issue-specific five-member product is
+shown for Weeks 1–4 by default and is included as page five of its PDF.
+
 ## Rebuild and validate
 
 From this directory:

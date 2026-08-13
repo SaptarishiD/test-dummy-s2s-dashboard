@@ -85,6 +85,22 @@ PRODUCTS = {
         "operation": "identity",
         "note": "Difference from the model's typical temperature for the same season and forecast lead (2002–2021).",
     },
+    "wind850_anomaly": {
+        "title": "850 hPa wind anomaly",
+        "units": "m s⁻¹",
+        "boundaries": [-8, -6, -4, -2, -1, 1, 2, 4, 6, 8],
+        "colors": [
+            "#6f321e", "#a8552f", "#d98b57", "#efc79f", "#f7f5ef",
+            "#c9e2ee", "#83bdd4", "#3988b2", "#14567f",
+        ],
+        "under": "#421c12",
+        "over": "#083653",
+        "operation": "identity",
+        "note": (
+            "Shading: weekly wind-speed anomaly; arrows: weekly U/V "
+            "vector-component anomaly relative to 2002–2021."
+        ),
+    },
 }
 
 
@@ -235,7 +251,7 @@ def build_pdf(
         "Title": f"S2S Research India experimental forecast · {source_id.upper()} · {issue_id}",
         "Author": "S2S Research",
         "Subject": "Experimental India subseasonal forecast guidance, Weeks 1–4",
-        "Keywords": "India, S2S, rainfall, temperature, anomaly, experimental",
+        "Keywords": "India, S2S, rainfall, temperature, 850 hPa wind, anomaly, experimental",
     }
     available_products = [
         key for key in PRODUCTS if key in forecast.get("products", {})
@@ -332,6 +348,43 @@ def build_pdf(
                     zorder=1,
                 )
                 draw_geometry(axes, world_segments, "#777777", 0.38)
+                if product_key == "wind850_anomaly":
+                    vectors = week.get("vectors", {}).get(product_key)
+                    if not isinstance(vectors, dict) or set(vectors) != {"u", "v"}:
+                        raise ValueError(
+                            f"{forecast_path}: Week {week['week']} lacks wind vectors"
+                        )
+                    u = np.asarray(vectors["u"], dtype=np.float64).reshape(27, 27)
+                    v = np.asarray(vectors["v"], dtype=np.float64).reshape(27, 27)
+                    latitude = np.asarray(forecast["grid"]["latitude"], dtype=np.float64)
+                    longitude = np.asarray(forecast["grid"]["longitude"], dtype=np.float64)
+                    stride = slice(1, None, 3)
+                    quiver = axes.quiver(
+                        longitude[stride],
+                        latitude[stride],
+                        u[stride, stride],
+                        v[stride, stride],
+                        angles="xy",
+                        scale_units="xy",
+                        scale=2.4,
+                        pivot="middle",
+                        width=0.0042,
+                        headwidth=4.0,
+                        headlength=5.0,
+                        color="#111b25",
+                        zorder=3,
+                    )
+                    axes.quiverkey(
+                        quiver,
+                        0.79,
+                        0.95,
+                        5.0,
+                        "5 m s⁻¹ anomaly",
+                        coordinates="axes",
+                        labelpos="E",
+                        fontproperties={"size": 6.5, "weight": "bold"},
+                        color="#111b25",
+                    )
                 draw_geometry(axes, outline_segments, "#161616", 1.0)
                 draw_geometry(axes, admin_segments, "#333333", 0.38)
                 axes.set_xlim(59.25, 99.75)

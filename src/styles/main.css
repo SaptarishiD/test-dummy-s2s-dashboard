@@ -511,6 +511,10 @@ a {
   background: linear-gradient(90deg, #4965ae, #edf0ec, #c84331);
 }
 
+.product-swatch--wind850_anomaly {
+  background: linear-gradient(90deg, #6f321e, #f7f5ef, #3988b2);
+}
+
 .control-footnote {
   margin-top: auto;
   color: #7b8a8d;
@@ -3169,6 +3173,10 @@ a {
   background: linear-gradient(90deg, #383880, #dcdcf7, #fffacd, #ff7605, #c30400);
 }
 
+.india-product-tabs .product-swatch--wind850_anomaly {
+  background: linear-gradient(90deg, #6f321e, #efc79f, #f7f5ef, #83bdd4, #14567f);
+}
+
 .india-range-tabs button {
   padding: 8px 13px;
   font-size: 9px;
@@ -3259,6 +3267,34 @@ a {
 .india-map-frame .map-india-admin {
   stroke: #333;
   stroke-width: 0.55;
+}
+
+.india-map-frame .map-wind-vectors,
+.india-map-frame .map-wind-key {
+  pointer-events: none;
+}
+
+.india-map-frame .map-wind-vector {
+  stroke: #111b25;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.india-map-frame .map-wind-arrowhead {
+  fill: #111b25;
+}
+
+.india-map-frame .map-wind-key rect {
+  fill: rgb(255 255 255 / 82%);
+  stroke: #52606b;
+  stroke-width: 0.6;
+}
+
+.india-map-frame .map-wind-key text {
+  fill: #111b25;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .india-map-frame .map-cell {
