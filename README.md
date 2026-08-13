@@ -128,7 +128,9 @@ briefing, and checksums. The website presents only compact derived fields and
 the PDF download. Raw initial conditions, NetCDF files, and ensemble-member
 fields are never published.
 
-JJAS PDFs contain four product pages; raw-only out-of-season PDFs contain two.
+Standard JJAS PDFs contain four rainfall/temperature pages; an issue with the
+850 hPa wind capability adds a fifth wind page. Raw-only out-of-season PDFs
+contain two pages.
 Each page uses a 2 × 2 Weeks 1–4 map layout. The interactive website retains all
 six forecast weeks for exploratory research.
 
