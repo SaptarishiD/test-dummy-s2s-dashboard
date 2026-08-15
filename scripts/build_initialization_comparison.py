@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build a matched GFS-versus-ERA5 initialization-sensitivity comparison.
+"""Build matched ERA5/GFS/IFS initialization-sensitivity maps and metrics.
 
-This is not a forecast-skill score. It quantifies how two 100-member FuXi
-ensembles differ when the issue date and model are fixed but the initial-state
-source changes. Skill can only be scored after observations are available.
+This is not a forecast-skill score. It isolates how the same FuXi-S2S model
+changes when its initial-condition source changes. Skill requires observations
+for the completed valid periods.
 """
 
 from __future__ import annotations
@@ -25,6 +25,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 PUBLIC = ROOT / "public"
 DATA = PUBLIC / "data"
+SOURCE_IDS = ("gfs", "era5", "ifs")
+PAIR_IDS = (
+    ("ifs", "era5"),
+    ("gfs", "era5"),
+    ("ifs", "gfs"),
+)
 
 from science.catalog import build_catalog  # noqa: E402
 from science.validators import write_json as write_catalog_json  # noqa: E402
@@ -83,6 +89,8 @@ def weighted_pattern_correlation(
     x = left[selected]
     y = right[selected]
     w = weights[selected]
+    if x.size == 0:
+        raise ValueError("comparison has no common finite values")
     w = w / w.sum()
     x = x - np.sum(w * x)
     y = y - np.sum(w * y)
@@ -93,22 +101,22 @@ def weighted_pattern_correlation(
 def weekly_fields(path: Path) -> dict[str, Any]:
     with xr.open_dataset(path) as dataset:
         members = int(dataset.sizes.get("member", 0))
+        leads = int(dataset.sizes.get("lead_day", 0))
+        latitude_count = int(dataset.sizes.get("latitude", 0))
+        longitude_count = int(dataset.sizes.get("longitude", 0))
         if members not in {5, 100}:
             raise ValueError(f"{path}: expected 5 or 100 members, found {members}")
-        required_sizes = {"lead_day": 42, "latitude": 27, "longitude": 27}
-        for dimension, expected in required_sizes.items():
-            if dataset.sizes.get(dimension) != expected:
-                raise ValueError(
-                    f"{path}: {dimension} expected {expected}, found "
-                    f"{dataset.sizes.get(dimension)}"
-                )
-        rain = dataset.tp.values.astype(np.float64) * 24.0
-        temperature = dataset.t2m.values.astype(np.float64) - 273.15
-        rain = rain.reshape(members, 6, 7, 27, 27).mean(axis=2)
-        temperature = temperature.reshape(members, 6, 7, 27, 27).mean(axis=2)
+        if leads != 42 or latitude_count < 1 or longitude_count < 1:
+            raise ValueError(
+                f"{path}: expected 42 leads and a non-empty grid; found "
+                f"{leads}, {latitude_count}x{longitude_count}"
+            )
+        shape = (members, 6, 7, latitude_count, longitude_count)
+        rain = dataset.tp.values.astype(np.float64).reshape(shape).mean(axis=2) * 24.0
+        temperature = (
+            dataset.t2m.values.astype(np.float64).reshape(shape).mean(axis=2) - 273.15
+        )
         return {
-            "rain_members": rain,
-            "temperature_members": temperature,
             "rain_mean": rain.mean(axis=0),
             "temperature_mean": temperature.mean(axis=0),
             "rain_spread": rain.std(axis=0, ddof=0),
@@ -123,136 +131,145 @@ def weekly_fields(path: Path) -> dict[str, Any]:
         }
 
 
+def validate_matched(fields: dict[str, dict[str, Any]]) -> None:
+    reference = fields[SOURCE_IDS[0]]
+    for source in SOURCE_IDS[1:]:
+        candidate = fields[source]
+        if candidate["members"] != reference["members"]:
+            raise ValueError("comparison sources have different ensemble sizes")
+        for coordinate in ("latitude", "longitude", "valid_start", "valid_end"):
+            if not np.array_equal(candidate[coordinate], reference[coordinate]):
+                raise ValueError(f"comparison sources have different {coordinate} values")
+
+
+def pair_metrics(
+    left: dict[str, Any],
+    right: dict[str, Any],
+    variable: str,
+    week: int,
+    weights: np.ndarray,
+) -> dict[str, Any]:
+    mean_key = f"{variable}_mean"
+    spread_key = f"{variable}_spread"
+    difference = left[mean_key][week] - right[mean_key][week]
+    return {
+        "difference_field": np.round(difference.ravel(), 4).tolist(),
+        "area_weighted_mean_difference": round(weighted_mean(difference, weights), 4),
+        "mean_absolute_difference": round(
+            weighted_mean(np.abs(difference), weights), 4
+        ),
+        "ensemble_mean_pattern_correlation": round(
+            weighted_pattern_correlation(
+                left[mean_key][week], right[mean_key][week], weights
+            ),
+            4,
+        ),
+        "left_mean_spread": round(weighted_mean(left[spread_key][week], weights), 4),
+        "right_mean_spread": round(weighted_mean(right[spread_key][week], weights), 4),
+    }
+
+
 def build(
     date: str,
-    gfs_forecast: Path | None = None,
-    era5_forecast: Path | None = None,
+    forecast_paths: dict[str, Path] | None = None,
 ) -> Path:
     public_paths = {
-        source: DATA / "forecasts" / source / f"{date}.json"
-        for source in ("gfs", "era5")
+        source: DATA / "forecasts" / source / f"{date}.json" for source in SOURCE_IDS
     }
+    missing_public = [str(path) for path in public_paths.values() if not path.is_file()]
+    if missing_public:
+        raise FileNotFoundError(
+            "three-source comparison requires every public forecast: "
+            + ", ".join(missing_public)
+        )
     public_forecasts = {
         source: json.loads(path.read_text(encoding="utf-8"))
         for source, path in public_paths.items()
     }
-    private_paths = {
-        "gfs": gfs_forecast or private_forecast_path(public_forecasts["gfs"]),
-        "era5": era5_forecast or private_forecast_path(public_forecasts["era5"]),
+    issue_ids = {
+        forecast["issue"]["initialization"][:10].replace("-", "")
+        for forecast in public_forecasts.values()
     }
-    fields = {source: weekly_fields(path) for source, path in private_paths.items()}
-    if not np.array_equal(fields["gfs"]["latitude"], fields["era5"]["latitude"]):
-        raise ValueError("GFS and ERA5 latitude grids differ")
-    if not np.array_equal(fields["gfs"]["longitude"], fields["era5"]["longitude"]):
-        raise ValueError("GFS and ERA5 longitude grids differ")
-    if not np.array_equal(fields["gfs"]["valid_start"], fields["era5"]["valid_start"]):
-        raise ValueError("GFS and ERA5 forecast periods differ")
+    members = {int(forecast["issue"]["members"]) for forecast in public_forecasts.values()}
+    if issue_ids != {date} or len(members) != 1:
+        raise ValueError("public forecasts are not identical-date, identical-member runs")
+    private_paths = forecast_paths or {
+        source: private_forecast_path(public_forecasts[source]) for source in SOURCE_IDS
+    }
+    fields = {source: weekly_fields(private_paths[source]) for source in SOURCE_IDS}
+    validate_matched(fields)
 
-    mask = np.asarray(public_forecasts["gfs"]["grid"]["india_mask"], dtype=bool).reshape(27, 27)
-    latitude = fields["gfs"]["latitude"]
-    weights = np.cos(np.deg2rad(latitude))[:, None] * mask
-    weeks = []
-    for week in range(6):
-        rain_difference = fields["gfs"]["rain_mean"][week] - fields["era5"]["rain_mean"][week]
-        temperature_difference = (
-            fields["gfs"]["temperature_mean"][week]
-            - fields["era5"]["temperature_mean"][week]
-        )
-        weeks.append(
+    grid_shape = (len(fields["gfs"]["latitude"]), len(fields["gfs"]["longitude"]))
+    mask_values = public_forecasts["gfs"]["grid"].get("india_mask")
+    if not isinstance(mask_values, list) or len(mask_values) != np.prod(grid_shape):
+        raise ValueError("GFS public forecast does not contain a matching India mask")
+    mask = np.asarray(mask_values, dtype=bool).reshape(grid_shape)
+    weights = np.cos(np.deg2rad(fields["gfs"]["latitude"]))[:, None] * mask
+
+    pairs: list[dict[str, Any]] = []
+    for left_id, right_id in PAIR_IDS:
+        weeks = []
+        for week in range(6):
+            weeks.append(
+                {
+                    "week": week + 1,
+                    "valid_start": str(fields[left_id]["valid_start"][week]),
+                    "valid_end": str(fields[left_id]["valid_end"][week]),
+                    "rainfall": pair_metrics(
+                        fields[left_id], fields[right_id], "rain", week, weights
+                    ),
+                    "temperature": pair_metrics(
+                        fields[left_id], fields[right_id], "temperature", week, weights
+                    ),
+                }
+            )
+        pairs.append(
             {
-                "week": week + 1,
-                "valid_start": str(fields["gfs"]["valid_start"][week]),
-                "valid_end": str(fields["gfs"]["valid_end"][week]),
-                "rainfall": {
-                    "gfs_minus_era5_india_mean_mm_day": round(
-                        weighted_mean(rain_difference, weights), 4
-                    ),
-                    "mean_absolute_difference_mm_day": round(
-                        weighted_mean(np.abs(rain_difference), weights), 4
-                    ),
-                    "ensemble_mean_pattern_correlation": round(
-                        weighted_pattern_correlation(
-                            fields["gfs"]["rain_mean"][week],
-                            fields["era5"]["rain_mean"][week],
-                            weights,
-                        ),
-                        4,
-                    ),
-                    "gfs_mean_spread_mm_day": round(
-                        weighted_mean(fields["gfs"]["rain_spread"][week], weights), 4
-                    ),
-                    "era5_mean_spread_mm_day": round(
-                        weighted_mean(fields["era5"]["rain_spread"][week], weights), 4
-                    ),
-                },
-                "temperature": {
-                    "gfs_minus_era5_india_mean_deg_c": round(
-                        weighted_mean(temperature_difference, weights), 4
-                    ),
-                    "mean_absolute_difference_deg_c": round(
-                        weighted_mean(np.abs(temperature_difference), weights), 4
-                    ),
-                    "ensemble_mean_pattern_correlation": round(
-                        weighted_pattern_correlation(
-                            fields["gfs"]["temperature_mean"][week],
-                            fields["era5"]["temperature_mean"][week],
-                            weights,
-                        ),
-                        4,
-                    ),
-                    "gfs_mean_spread_deg_c": round(
-                        weighted_mean(
-                            fields["gfs"]["temperature_spread"][week], weights
-                        ),
-                        4,
-                    ),
-                    "era5_mean_spread_deg_c": round(
-                        weighted_mean(
-                            fields["era5"]["temperature_spread"][week], weights
-                        ),
-                        4,
-                    ),
-                },
+                "id": f"{left_id}_minus_{right_id}",
+                "left_source_id": left_id,
+                "right_source_id": right_id,
+                "label": f"{left_id.upper()} − {right_id.upper()}",
+                "weeks": weeks,
             }
         )
 
     output = DATA / "comparisons" / f"{date}.json"
+    interpretation = (
+        "Pairwise differences measure sensitivity to the initial-condition source. "
+        "They do not show which forecast is better; skill requires observations "
+        "for each complete valid period."
+    )
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "issue_date": f"{date[:4]}-{date[4:6]}-{date[6:]}T00:00:00Z",
         "comparison_type": "matched_initialization_source_sensitivity",
         "skill_status": "not_yet_verifiable",
-        "interpretation": (
-            "GFS-minus-ERA5 differences measure sensitivity to the initial-state "
-            "source. They do not show which forecast is better; skill requires "
-            "observations for the complete valid period."
-        ),
+        "interpretation": interpretation,
+        "grid": {
+            "shape": list(grid_shape),
+            "latitude": fields["gfs"]["latitude"].tolist(),
+            "longitude": fields["gfs"]["longitude"].tolist(),
+            "value_order": "latitude-major row order",
+        },
         "sources": {
             source: {
                 "members": fields[source]["members"],
                 "forecast_sha256": fields[source]["forecast_sha256"],
+                "public_forecast": public_paths[source].relative_to(DATA).as_posix(),
             }
-            for source in ("gfs", "era5")
+            for source in SOURCE_IDS
         },
-        "weeks": weeks,
+        "pairs": pairs,
     }
     write_json(output, payload)
-
-    week_one = weeks[0]
     for source, forecast_path in public_paths.items():
         forecast = public_forecasts[source]
         forecast["issue"]["initialization_comparison"] = {
             "status": "initialization_sensitivity_only",
-            "counterpart_source_id": "era5" if source == "gfs" else "gfs",
+            "compared_source_ids": list(SOURCE_IDS),
             "comparison": output.relative_to(DATA).as_posix(),
-            "week1_rainfall_gfs_minus_era5_mm_day": week_one["rainfall"][
-                "gfs_minus_era5_india_mean_mm_day"
-            ],
-            "week1_temperature_gfs_minus_era5_deg_c": week_one["temperature"][
-                "gfs_minus_era5_india_mean_deg_c"
-            ],
-            "message": payload["interpretation"],
+            "message": interpretation,
         }
         write_json(forecast_path, forecast)
     index_path = DATA / "index.json"
@@ -270,12 +287,25 @@ def build(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--date", required=True, help="Issue date YYYYMMDD")
-    parser.add_argument("--gfs-forecast", type=Path)
-    parser.add_argument("--era5-forecast", type=Path)
+    for source in SOURCE_IDS:
+        parser.add_argument(f"--{source}-forecast", type=Path)
     args = parser.parse_args()
     if len(args.date) != 8 or not args.date.isdigit():
         raise SystemExit("date must use YYYYMMDD")
-    print(build(args.date, args.gfs_forecast, args.era5_forecast))
+    overrides = {
+        source: getattr(args, f"{source}_forecast") for source in SOURCE_IDS
+    }
+    paths = None if not any(overrides.values()) else {
+        source: overrides[source] or private_forecast_path(
+            json.loads(
+                (DATA / "forecasts" / source / f"{args.date}.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        )
+        for source in SOURCE_IDS
+    }
+    print(build(args.date, paths))
     return 0
 
 

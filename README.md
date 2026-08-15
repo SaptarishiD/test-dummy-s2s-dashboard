@@ -2,9 +2,9 @@
 
 A static, source-aware India subseasonal research forecast interface with a
 separate dated Global Demo. India is the default page. It separates
-near-real-time GFS-proxy initializations from delayed ERA5 reference
-initializations, exposes the available issue dates and ensemble sizes, and
-provides compact issue-level downloads.
+near-real-time GFS-proxy initializations, delayed ERA5 references, and a gated
+IFS-initialized pilot, exposes the available issue dates and ensemble sizes,
+and provides compact issue-level downloads.
 
 The **Models** page separates the model powering current guidance from models
 used only in historical research. FuXi-S2S supplies the published forecast
@@ -31,6 +31,10 @@ Each forecast package records its initialization-source family explicitly:
 - **ERA5 reanalysis reference** uses scientifically matched but delayed inputs
   for reference experiments and initialization-sensitivity comparisons. It is
   not a near-real-time forecast.
+- **IFS operational initialization** is a staged experimental source built from
+  ECMWF Open Data. IFS skin temperature over ocean is used as the disclosed SST
+  proxy. It remains pilot-only until a 5-member smoke run and matched
+  100-member validation case pass.
 
 The 22 July 2026 issue is available from both sources with 100 members, giving
 one controlled comparison in which the source is changed without changing the
@@ -122,7 +126,7 @@ six week records, and flattened row-major fields. Every displayed field
 contains exactly `latitude.length × longitude.length` finite values.
 
 Source-aware packages live under
-`public/data/forecasts/{gfs,era5}/YYYYMMDD.json`. Each issue links to compact
+`public/data/forecasts/{gfs,era5,ifs}/YYYYMMDD.json`. Each issue links to compact
 web JSON, an optional regional-probability package, a product-aware PDF
 briefing, and checksums. The website presents only compact derived fields and
 the PDF download. Raw initial conditions, NetCDF files, and ensemble-member
@@ -143,6 +147,25 @@ values.
 The site has no backend. Hash navigation keeps the GitHub Pages deployment
 portable, and a failed validation status blocks forecast rendering while
 the scientific checks remain internal to the publication workflow.
+
+## Configured domains
+
+`public/data/domains.json` registers named static forecast domains; India stays
+the default. To export another 1.5° grid-aligned, non-antimeridian bounding box,
+copy `config/custom-domain.example.json` and run:
+
+```bash
+python scripts/build_custom_domain.py \
+  --config config/my-domain.json \
+  --forecast /private/path/to/completed-forecast.nc \
+  --source gfs
+```
+
+The exporter verifies that the completed FuXi output grid exactly matches the
+configured center-coordinate bounds, then writes raw Weeks 1–6 rainfall and
+temperature JSON, pre-projected Natural Earth geography, a Weeks 1–4 PDF, and
+the domain catalog entry. Custom-domain v1 intentionally withholds anomalies,
+probabilities, regional summaries, and verification.
 
 ## Automation
 

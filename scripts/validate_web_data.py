@@ -189,8 +189,9 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
 
     index = load_json(public_data / "index.json")
     sources = index["initial_condition_sources"]
-    if [source["id"] for source in sources] != ["gfs", "era5"]:
-        raise ValueError("initial-condition sources must be explicit GFS then ERA5")
+    source_ids = [source["id"] for source in sources]
+    if source_ids not in (["gfs", "era5"], ["gfs", "era5", "ifs"]):
+        raise ValueError("initial-condition sources must be GFS, ERA5, then optional IFS")
     if index["default_source"] != "gfs" or index["default_view"] != "india":
         raise ValueError("India/GFS defaults are not locked")
     schema = load_json(ROOT / "science/web-data.schema.json")
@@ -199,7 +200,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     public_root = public_data.parent
     matched_22 = set()
     for source in sources:
-        if not source["issues"]:
+        if not source["issues"] and source["id"] != "ifs":
             raise ValueError(f"{source['id']} has no registered issues")
         for issue in source["issues"]:
             issue_count += 1
@@ -330,7 +331,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     if matched_22 != {"gfs", "era5"}:
         raise ValueError("the matched 22 July GFS/ERA5 IC pair is incomplete")
     return (
-        "GFS and ERA5 issues are source-separated with PDF-only public briefings.",
+        "GFS, ERA5, and staged IFS sources are separated with PDF-only public briefings.",
         {
             "sources": len(sources),
             "issues": issue_count,

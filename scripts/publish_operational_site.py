@@ -26,7 +26,7 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = ("gfs", "era5")
+SOURCES = ("gfs", "era5", "ifs")
 
 
 def parse_args() -> argparse.Namespace:
@@ -176,6 +176,7 @@ def allowed_change(
         "public/data/operations.json",
         f"public/data/forecasts/gfs/{issue}.json",
         f"public/data/forecasts/era5/{issue}.json",
+        f"public/data/forecasts/ifs/{issue}.json",
         f"public/data/regional/{source}/{issue}.json",
         f"public/data/comparisons/{issue}.json",
     }
@@ -200,9 +201,9 @@ def allowed_retention_change(
         path = path.relative_to(prefix)
     normalized = path.as_posix()
     patterns = (
-        (r"^public/data/forecasts/(?:gfs|era5)/(\d{8})\.json$", 56),
-        (r"^public/data/regional/(?:gfs|era5)/(\d{8})\.json$", 365),
-        (r"^public/downloads/(?:gfs|era5)/(\d{8})/.+\.pdf$", 56),
+        (r"^public/data/forecasts/(?:gfs|era5|ifs)/(\d{8})\.json$", 56),
+        (r"^public/data/regional/(?:gfs|era5|ifs)/(\d{8})\.json$", 365),
+        (r"^public/downloads/(?:gfs|era5|ifs)/(\d{8})/.+\.pdf$", 56),
     )
     for pattern, days in patterns:
         match = re.fullmatch(pattern, normalized)

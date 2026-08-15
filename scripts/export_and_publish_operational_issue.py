@@ -31,7 +31,7 @@ from scripts.publish_operational_site import (  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=("gfs", "era5"), required=True)
+    parser.add_argument("--source", choices=("gfs", "era5", "ifs"), required=True)
     parser.add_argument("--issue", required=True, help="Initialization YYYYMMDD.")
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument(
@@ -82,11 +82,11 @@ def load_config(path: Path, source: str, issue: str) -> dict[str, Any]:
     if len(issue) != 8 or not issue.isdigit():
         raise ValueError("issue must use YYYYMMDD")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    configured_source = (
-        "gfs"
-        if payload.get("input", {}).get("builder") == "gfs_daily_proxy"
-        else "era5"
-    )
+    configured_source = {
+        "gfs_daily_proxy": "gfs",
+        "ifs_daily_proxy": "ifs",
+        "era5_daily": "era5",
+    }.get(payload.get("input", {}).get("builder", "era5_daily"), "era5")
     if configured_source != source:
         raise ValueError(f"config source is {configured_source}, expected {source}")
     if int(payload.get("members", 0)) != 100:

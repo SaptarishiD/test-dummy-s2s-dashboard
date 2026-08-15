@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
         default="current",
         help="Validate current pointers, the complete archive, or one issue.",
     )
-    parser.add_argument("--source", choices=("gfs", "era5"))
+    parser.add_argument("--source", choices=("gfs", "era5", "ifs"))
     parser.add_argument("--issue", help="YYYYMMDD issue id for --scope issue.")
     parser.add_argument("--expected-gfs-issue")
     parser.add_argument("--expected-era5-issue")
@@ -158,8 +158,8 @@ def source_map(index: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if source_id in result:
             raise ValueError(f"duplicate source id: {source_id}")
         result[str(source_id)] = source
-    if set(result) != {"gfs", "era5"}:
-        raise ValueError("catalog must expose exactly GFS and ERA5 sources")
+    if set(result) not in ({"gfs", "era5"}, {"gfs", "era5", "ifs"}):
+        raise ValueError("catalog must expose GFS, ERA5, and optional staged IFS")
     return result
 
 
@@ -167,7 +167,7 @@ def issue_records(sources: dict[str, dict[str, Any]]) -> dict[tuple[str, str], I
     records: dict[tuple[str, str], IssueRef] = {}
     for source_id, source in sources.items():
         issues = source.get("issues")
-        if not isinstance(issues, list) or not issues:
+        if not isinstance(issues, list) or (not issues and source_id != "ifs"):
             raise ValueError(f"{source_id} has no issue catalog")
         previous = "99999999"
         for record in issues:
@@ -476,7 +476,8 @@ def validate_forecast(
             if (
                 str(comparison.get("issue_date", ""))[:10].replace("-", "")
                 != ref.issue_id
-                or set(comparison.get("sources", {})) != {"gfs", "era5"}
+                or set(comparison.get("sources", {}))
+                not in ({"gfs", "era5"}, {"gfs", "era5", "ifs"})
             ):
                 raise ValueError(f"comparison identity mismatch: {asset}")
 
@@ -516,8 +517,9 @@ def choose_scope(
         raise ValueError("current GFS issue must be a 100-member publication")
     if records[("era5", era5_id)].record.get("members") != 100:
         raise ValueError("latest ERA5 reference must be a 100-member publication")
-    if dt.datetime.strptime(gfs_id, "%Y%m%d").weekday() not in {2, 5}:
-        raise ValueError("current GFS pointer is not a Wednesday/Saturday issue")
+    for label, issue_id in (("current GFS", gfs_id), ("latest ERA5", era5_id)):
+        if dt.datetime.strptime(issue_id, "%Y%m%d").weekday() not in {2, 5}:
+            raise ValueError(f"{label} pointer is not a Wednesday/Saturday issue")
     if args.expected_gfs_issue and args.expected_gfs_issue != gfs_id:
         raise ValueError(
             f"expected GFS {args.expected_gfs_issue}, catalog points to {gfs_id}"

@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--expected-gfs-issue")
     parser.add_argument("--expected-era5-issue")
-    parser.add_argument("--expected-source", choices=("gfs", "era5"))
+    parser.add_argument("--expected-source", choices=("gfs", "era5", "ifs"))
     parser.add_argument("--expected-issue")
     parser.add_argument("--attempts", type=int, default=6)
     parser.add_argument("--timeout", type=float, default=15.0)
@@ -150,7 +150,7 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
     if bool(expected_source) != bool(expected_issue):
         raise ValueError("--expected-source and --expected-issue must be used together")
     if expected_source:
-        actual_selected = actual_gfs if expected_source == "gfs" else actual_era5
+        actual_selected = pointer_id(index, expected_source)
         if actual_selected != expected_issue:
             raise ValueError(
                 f"deployed {expected_source.upper()} issue is {actual_selected}, "

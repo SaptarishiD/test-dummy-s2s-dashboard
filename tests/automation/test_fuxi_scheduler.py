@@ -114,9 +114,10 @@ class FakeRunner:
             value = queue.pop(0)
             if isinstance(value, Exception):
                 raise value
-            required_key = "required_files" if source == "gfs" else "required_objects"
-            present_key = "present_files" if source == "gfs" else "present_objects"
-            count = 16 if source == "gfs" else 768
+            file_probe = source in {"gfs", "ifs"}
+            required_key = "required_files" if file_probe else "required_objects"
+            present_key = "present_files" if file_probe else "present_objects"
+            count = 16 if file_probe else 768
             payload = [
                 {
                     "source": source,
@@ -132,7 +133,13 @@ class FakeRunner:
             date = command[command.index("--date") + 1]
             path = self.config_root / f"fuxi_{source}_{date}_ens100.json"
             path.parent.mkdir(parents=True, exist_ok=True)
-            input_contract = {"builder": "gfs_daily_proxy"} if source == "gfs" else {}
+            builders = {
+                "gfs": "gfs_daily_proxy",
+                "ifs": "ifs_daily_proxy",
+            }
+            input_contract = (
+                {"builder": builders[source]} if source in builders else {}
+            )
             path.write_text(
                 json.dumps(
                     {
@@ -217,6 +224,31 @@ def test_gfs_ignores_wrong_day_and_outside_window(tmp_path: Path) -> None:
     assert "Wednesday/Saturday" in monday[0]["reason"]
     assert "before the configured" in too_early[0]["reason"]
     assert runner.commands == []
+
+
+def test_ifs_pilot_is_explicit_cadenced_and_submitted_once(tmp_path: Path) -> None:
+    config = settings(tmp_path)
+    runner = FakeRunner(config.generated_config_root)
+    runner.availability("ifs", "20260805", True)
+    controller = Controller(config, runner=runner)
+
+    off_cadence = controller.ifs_pilot(
+        utc("2026-08-06T12:00:00Z"), dt.date(2026, 8, 6)
+    )
+    submitted = controller.ifs_pilot(
+        utc("2026-08-05T12:00:00Z"), dt.date(2026, 8, 5)
+    )
+    duplicate = controller.ifs_pilot(
+        utc("2026-08-05T12:05:00Z"), dt.date(2026, 8, 5)
+    )
+
+    assert "Wednesday/Saturday" in off_cadence[0]["reason"]
+    assert submitted[0]["stage"] == "submitted"
+    assert duplicate[0]["outcome"] == "skipped"
+    assert [command[2] for command in runner.commands].count("submit") == 1
+    create = next(command for command in runner.commands if command[2] == "create")
+    assert create[create.index("--source") + 1] == "ifs"
+    assert "--ifs-probe" in create
 
 
 def test_era5_watcher_backfills_ready_dates_independently(tmp_path: Path) -> None:

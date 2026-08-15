@@ -1,0 +1,12 @@
+{
+  "id": "east-africa",
+  "label": "East Africa",
+  "bounds": {
+    "north": 21.0,
+    "south": -15.0,
+    "west": 22.5,
+    "east": 52.5
+  },
+  "products": ["rainfall_total", "temperature_mean"],
+  "pdf": true
+}

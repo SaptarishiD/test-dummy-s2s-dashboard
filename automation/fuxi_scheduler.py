@@ -388,7 +388,7 @@ class StateStore:
 
 
 def _validate_record(record: dict[str, Any], source: str, date: dt.date) -> None:
-    if source not in {"gfs", "era5"}:
+    if source not in {"gfs", "era5", "ifs"}:
         raise SchedulerError(f"invalid state source {source!r}")
     if record.get("source") != source or record.get("issue_date") != issue_id(date):
         raise SchedulerError("state record identity does not match its path")
@@ -611,6 +611,17 @@ class Controller:
             probed += 1
         return results
 
+    def ifs_pilot(self, now: dt.datetime, date: dt.date) -> list[dict[str, Any]]:
+        """Run one explicitly requested 100-member IFS pilot; never poll automatically."""
+
+        if date.weekday() not in SCHEDULED_WEEKDAYS:
+            return [self._skip("ifs", date, "not a Wednesday/Saturday issue")]
+        if date > now.date():
+            return [self._skip("ifs", date, "future issue dates are not eligible")]
+        if date < self.settings.start_date:
+            return [self._skip("ifs", date, "before configured automation start")]
+        return [self._process_pending("ifs", date, now)]
+
     def reconcile(self, now: dt.datetime) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
         for record in list(self.store.records()):
@@ -826,9 +837,10 @@ class Controller:
                 completed.stdout,
                 "probe identity does not match requested source/date",
             )
-        required_key = "required_files" if source == "gfs" else "required_objects"
-        present_key = "present_files" if source == "gfs" else "present_objects"
-        expected = 16 if source == "gfs" else 768
+        file_probe = source in {"gfs", "ifs"}
+        required_key = "required_files" if file_probe else "required_objects"
+        present_key = "present_files" if file_probe else "present_objects"
+        expected = 16 if file_probe else 768
         if probe.get("available") and (
             int(probe.get(required_key, -1)) != expected
             or int(probe.get(present_key, -1)) != expected
@@ -875,6 +887,11 @@ class Controller:
             _atomic_json_write(receipt, probe)
             command.extend(["--era5-probe", str(receipt)])
             record["artifacts"]["availability_probe"] = str(receipt)
+        elif source == "ifs":
+            receipt = self.settings.state_root / "probes" / source / f"{issue_id(date)}.json"
+            _atomic_json_write(receipt, probe)
+            command.extend(["--ifs-probe", str(receipt)])
+            record["artifacts"]["availability_probe"] = str(receipt)
         try:
             completed = self.runner.run(
                 command, timeout_seconds=self.settings.create_timeout_seconds
@@ -915,11 +932,11 @@ class Controller:
             raise SchedulerError(f"generated config is outside the configured root: {path}")
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
-            configured_source = (
-                "gfs"
-                if payload.get("input", {}).get("builder") == "gfs_daily_proxy"
-                else "era5"
-            )
+            configured_source = {
+                "gfs_daily_proxy": "gfs",
+                "ifs_daily_proxy": "ifs",
+                "era5_daily": "era5",
+            }.get(payload.get("input", {}).get("builder", "era5_daily"), "era5")
             valid = (
                 int(payload.get("members", 0)) == 100
                 and configured_source == source
@@ -1516,11 +1533,16 @@ def build_parser() -> argparse.ArgumentParser:
     era5 = commands.add_parser("era5-watch", help="Backfill ready delayed ERA5 issues")
     era5.add_argument("--date", type=parse_issue_date)
 
+    ifs = commands.add_parser(
+        "ifs-pilot", help="Submit one explicit IFS pilot after its 5-member smoke run"
+    )
+    ifs.add_argument("--date", type=parse_issue_date, required=True)
+
     commands.add_parser("reconcile", help="Advance submitted/validated issue states")
     commands.add_parser("status", help="Print private scheduler state summary")
 
     mark = commands.add_parser("mark", help="Record an externally completed stage")
-    mark.add_argument("--source", choices=("gfs", "era5"), required=True)
+    mark.add_argument("--source", choices=("gfs", "era5", "ifs"), required=True)
     mark.add_argument("--date", type=parse_issue_date, required=True)
     mark.add_argument(
         "--stage", choices=("validated", "exported", "pushed", "deployed"), required=True
@@ -1529,7 +1551,7 @@ def build_parser() -> argparse.ArgumentParser:
     mark.add_argument("--reason")
 
     resume = commands.add_parser("resume", help="Explicitly resume one failed issue")
-    resume.add_argument("--source", choices=("gfs", "era5"), required=True)
+    resume.add_argument("--source", choices=("gfs", "era5", "ifs"), required=True)
     resume.add_argument("--date", type=parse_issue_date, required=True)
     resume.add_argument("--acknowledge-safe-to-resubmit", action="store_true")
     return parser
@@ -1547,6 +1569,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 result: Any = controller.gfs_poll(now, args.date)
             elif args.command == "era5-watch":
                 result = controller.era5_watch(now, args.date)
+            elif args.command == "ifs-pilot":
+                result = controller.ifs_pilot(now, args.date)
             elif args.command == "reconcile":
                 result = controller.reconcile(now)
             elif args.command == "status":

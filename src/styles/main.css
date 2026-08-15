@@ -2888,6 +2888,25 @@ a {
   border-bottom: 1px solid #dbe2ec;
 }
 
+.india-domain-select {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #596579;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.india-domain-select select {
+  min-width: 180px;
+  padding: 8px 10px;
+  color: #173f8a;
+  font: inherit;
+  background: #fff;
+  border: 1px solid #b9c7dc;
+}
+
 .india-run-console__heading > div {
   display: grid;
   gap: 4px;
@@ -2918,11 +2937,12 @@ a {
 
 .india-source-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
 
-.india-source-tabs a {
+.india-source-tabs a,
+.india-source-tabs > .is-pending {
   display: grid;
   gap: 3px;
   min-height: 52px;
@@ -2933,6 +2953,13 @@ a {
   border: 1px solid #d4dce8;
   border-radius: 3px;
   transition: 140ms ease;
+}
+
+.india-source-tabs > .is-pending {
+  color: #7a8494;
+  cursor: not-allowed;
+  background: #f0f2f5;
+  border-style: dashed;
 }
 
 .india-source-tabs a:hover {
@@ -3021,7 +3048,7 @@ a {
 
 .india-ic-comparison {
   display: grid;
-  grid-template-columns: minmax(300px, 1.5fr) minmax(300px, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: center;
   margin: 14px 0 22px;
@@ -3029,6 +3056,80 @@ a {
   background: #fff8ec;
   border: 1px solid #ecd6ae;
   border-radius: 4px;
+}
+
+.india-ic-comparison--pending {
+  background: #f7f8fa;
+  border-color: #d8dee8;
+}
+
+.india-comparison-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+
+.india-comparison-toolbar button,
+.india-comparison-toolbar select {
+  padding: 7px 10px;
+  color: #4c5e77;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 750;
+  background: #fff;
+  border: 1px solid #c7d0dc;
+}
+
+.india-comparison-toolbar button.is-active {
+  color: #fff;
+  background: #173f8a;
+  border-color: #173f8a;
+}
+
+.india-comparison-toolbar label {
+  display: grid;
+  gap: 4px;
+  color: #6c5d49;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.india-ic-comparison h3 {
+  margin: 18px 0 8px;
+  color: #3f4d61;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.india-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.india-comparison-panel {
+  min-width: 0;
+  padding: 10px;
+  background: rgb(255 255 255 / 76%);
+  border: 1px solid #ead9bc;
+}
+
+.india-comparison-panel h4 {
+  margin: 0 0 8px;
+  color: #523512;
+  font-size: 11px;
+}
+
+.india-comparison-panel .india-map-frame {
+  padding: 4px;
+}
+
+.india-comparison-panel dl {
+  grid-template-columns: 1fr 1fr;
+  margin-top: 8px;
 }
 
 .india-ic-comparison span {
@@ -3426,6 +3527,10 @@ a {
   }
 
   .india-ic-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .india-comparison-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -3505,6 +3610,10 @@ a {
   }
 
   .india-ic-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .india-comparison-grid {
     grid-template-columns: 1fr;
   }
 

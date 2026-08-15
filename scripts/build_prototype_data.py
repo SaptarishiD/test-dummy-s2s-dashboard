@@ -82,6 +82,21 @@ INITIAL_CONDITION_SOURCES: dict[str, dict[str, str]] = {
             "reforecast system; research reference, not near-real-time guidance."
         ),
     },
+    "ifs": {
+        "label": "IFS operational initialization",
+        "short_label": "IFS",
+        "category": "operational_initialization",
+        "availability": "near_real_time",
+        "description": (
+            "Operational ECMWF IFS fields aggregated into the model's two "
+            "daily input states. Ocean skin temperature is used as the "
+            "disclosed SST proxy. Experimental."
+        ),
+        "scientific_status": (
+            "Experimental IFS initialization; skin temperature is the ocean "
+            "SST proxy and no matched IFS-initialized hindcast calibration is available."
+        ),
+    },
 }
 
 PRODUCTS: dict[str, dict[str, Any]] = {
@@ -227,7 +242,8 @@ def sha256(path: Path) -> str:
 def source_id_for(input_source: str, requested: str | None) -> str:
     """Resolve the declared initialization source without silent guessing."""
 
-    inferred = "gfs" if "gfs" in input_source.lower() else "era5"
+    normalized = input_source.lower()
+    inferred = "ifs" if "ifs" in normalized else ("gfs" if "gfs" in normalized else "era5")
     if requested is not None and requested != inferred:
         raise ValueError(
             f"declared source {requested!r} conflicts with forecast metadata {input_source!r}"

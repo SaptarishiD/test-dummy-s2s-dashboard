@@ -234,10 +234,13 @@ def build_catalog(
 
     payload = deepcopy(existing)
     sources = payload.get("initial_condition_sources", [])
-    if [source.get("id") for source in sources] != ["gfs", "era5"]:
-        raise ValueError("catalog sources must be ordered GFS then ERA5")
+    source_ids = [source.get("id") for source in sources]
+    if source_ids not in (["gfs", "era5"], ["gfs", "era5", "ifs"]):
+        raise ValueError("catalog sources must be ordered GFS, ERA5, then optional IFS")
 
-    complete_by_source: dict[str, list[dict[str, Any]]] = {"gfs": [], "era5": []}
+    complete_by_source: dict[str, list[dict[str, Any]]] = {
+        source_id: [] for source_id in source_ids
+    }
     for source in sources:
         source_id = str(source["id"])
         enriched: list[dict[str, Any]] = []
@@ -253,6 +256,14 @@ def build_catalog(
                 "mode": "delayed_reference",
                 "typical_lag_days": "5–7",
                 "notice": "ERA5 is a delayed research reference, never live guidance.",
+            }
+        elif source_id == "ifs":
+            source["availability"] = {
+                "mode": "staged_experimental",
+                "notice": (
+                    "IFS initialization remains experimental while the ocean "
+                    "skin-temperature SST proxy is evaluated."
+                ),
             }
 
     if not complete_by_source["gfs"]:

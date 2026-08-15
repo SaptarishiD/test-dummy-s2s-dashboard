@@ -8,12 +8,7 @@ import type {
 } from "../types";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const MAP_SIZE = 620;
-const LON_MIN = 59.25;
-const LON_MAX = 99.75;
-const LAT_MIN = -0.75;
-const LAT_MAX = 39.75;
-const VISUAL_GRID_SIZE = 162;
+const MAP_WIDTH = 620;
 const WIND_VECTOR_STRIDE = 3;
 const WIND_REFERENCE_SPEED = 5;
 const WIND_REFERENCE_LENGTH = 32;
@@ -24,12 +19,14 @@ function svgElement<K extends keyof SVGElementTagNameMap>(
   return document.createElementNS(SVG_NS, tag);
 }
 
-function mapX(longitude: number): number {
-  return ((longitude - LON_MIN) / (LON_MAX - LON_MIN)) * MAP_SIZE;
-}
-
-function mapY(latitude: number): number {
-  return ((LAT_MAX - latitude) / (LAT_MAX - LAT_MIN)) * MAP_SIZE;
+function graticuleValues(minimum: number, maximum: number): number[] {
+  const span = maximum - minimum;
+  const steps = [1, 2, 5, 10, 20, 30, 45, 90];
+  const step = steps.find((candidate) => span / candidate <= 5) ?? 90;
+  const first = Math.ceil(minimum / step) * step;
+  const values: number[] = [];
+  for (let value = first; value <= maximum; value += step) values.push(value);
+  return values;
 }
 
 export class ForecastMap {
@@ -37,6 +34,11 @@ export class ForecastMap {
   private readonly forecast: ForecastData;
   private readonly geography: IndiaMapGeographyData;
   private readonly tooltip: HTMLDivElement;
+  private readonly longitudeMinimum: number;
+  private readonly longitudeMaximum: number;
+  private readonly latitudeMinimum: number;
+  private readonly latitudeMaximum: number;
+  private readonly mapHeight: number;
 
   constructor(
     container: HTMLElement,
@@ -46,6 +48,15 @@ export class ForecastMap {
     this.container = container;
     this.forecast = forecast;
     this.geography = geography;
+    const { latitude, longitude, spacing_degrees: spacing } = forecast.grid;
+    this.longitudeMinimum = longitude[0] - spacing / 2;
+    this.longitudeMaximum = longitude.at(-1)! + spacing / 2;
+    this.latitudeMaximum = latitude[0] + spacing / 2;
+    this.latitudeMinimum = latitude.at(-1)! - spacing / 2;
+    const aspect =
+      (this.latitudeMaximum - this.latitudeMinimum) /
+      (this.longitudeMaximum - this.longitudeMinimum);
+    this.mapHeight = Math.max(260, Math.min(760, Math.round(MAP_WIDTH * aspect)));
     this.tooltip = document.createElement("div");
     this.tooltip.className = "map-tooltip";
     this.tooltip.hidden = true;
@@ -59,7 +70,7 @@ export class ForecastMap {
   ): void {
     this.container.querySelector("svg")?.remove();
     const svg = svgElement("svg");
-    svg.setAttribute("viewBox", `0 0 ${MAP_SIZE} ${MAP_SIZE}`);
+    svg.setAttribute("viewBox", `0 0 ${MAP_WIDTH} ${this.mapHeight}`);
     svg.setAttribute("role", "img");
     svg.setAttribute(
       "aria-label",
@@ -68,8 +79,8 @@ export class ForecastMap {
     svg.classList.add("forecast-map");
 
     const ocean = svgElement("rect");
-    ocean.setAttribute("width", String(MAP_SIZE));
-    ocean.setAttribute("height", String(MAP_SIZE));
+    ocean.setAttribute("width", String(MAP_WIDTH));
+    ocean.setAttribute("height", String(this.mapHeight));
     ocean.setAttribute("class", "map-ocean");
     svg.append(ocean);
     this.addInterpolatedField(svg, productKey, week, product);
@@ -122,8 +133,8 @@ export class ForecastMap {
         const length = WIND_REFERENCE_LENGTH * scale;
         const dx = (u / magnitude) * length;
         const dy = (-v / magnitude) * length;
-        const x = mapX(longitude[column]);
-        const y = mapY(latitude[row]);
+        const x = this.mapX(longitude[column]);
+        const y = this.mapY(latitude[row]);
         const line = svgElement("line");
         line.setAttribute("x1", String(x - dx / 2));
         line.setAttribute("y1", String(y - dy / 2));
@@ -168,8 +179,8 @@ export class ForecastMap {
     if (!values) throw new Error(`${productKey} is unavailable for Week ${week.week}`);
     const { latitude, longitude } = this.forecast.grid;
     const canvas = document.createElement("canvas");
-    canvas.width = VISUAL_GRID_SIZE;
-    canvas.height = VISUAL_GRID_SIZE;
+    canvas.width = Math.max(2, (longitude.length - 1) * 6);
+    canvas.height = Math.max(2, (latitude.length - 1) * 6);
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas rendering is unavailable");
 
@@ -179,13 +190,17 @@ export class ForecastMap {
       return values[safeRow * longitude.length + safeColumn];
     };
 
-    for (let y = 0; y < VISUAL_GRID_SIZE; y += 1) {
-      const lat = LAT_MAX - ((y + 0.5) / VISUAL_GRID_SIZE) * (LAT_MAX - LAT_MIN);
+    for (let y = 0; y < canvas.height; y += 1) {
+      const lat = this.latitudeMaximum -
+        ((y + 0.5) / canvas.height) *
+        (this.latitudeMaximum - this.latitudeMinimum);
       const row = (latitude[0] - lat) / this.forecast.grid.spacing_degrees;
       const row0 = Math.floor(row);
       const rowWeight = row - row0;
-      for (let x = 0; x < VISUAL_GRID_SIZE; x += 1) {
-        const lon = LON_MIN + ((x + 0.5) / VISUAL_GRID_SIZE) * (LON_MAX - LON_MIN);
+      for (let x = 0; x < canvas.width; x += 1) {
+        const lon = this.longitudeMinimum +
+          ((x + 0.5) / canvas.width) *
+          (this.longitudeMaximum - this.longitudeMinimum);
         const column = (lon - longitude[0]) / this.forecast.grid.spacing_degrees;
         const column0 = Math.floor(column);
         const columnWeight = column - column0;
@@ -204,8 +219,8 @@ export class ForecastMap {
     const image = svgElement("image");
     image.setAttribute("x", "0");
     image.setAttribute("y", "0");
-    image.setAttribute("width", String(MAP_SIZE));
-    image.setAttribute("height", String(MAP_SIZE));
+    image.setAttribute("width", String(MAP_WIDTH));
+    image.setAttribute("height", String(this.mapHeight));
     image.setAttribute("preserveAspectRatio", "none");
     image.setAttribute("href", canvas.toDataURL("image/png"));
     image.setAttribute("class", "map-raster");
@@ -213,38 +228,43 @@ export class ForecastMap {
   }
 
   private addGraticules(svg: SVGSVGElement): void {
-    for (const longitude of [70, 80, 90, 100]) {
-      const x = longitude === 100 ? MAP_SIZE - 1 : mapX(longitude);
+    for (const longitude of graticuleValues(
+      this.longitudeMinimum,
+      this.longitudeMaximum,
+    )) {
+      const x = this.mapX(longitude);
       const line = svgElement("line");
       line.setAttribute("x1", String(x));
       line.setAttribute("x2", String(x));
       line.setAttribute("y1", "0");
-      line.setAttribute("y2", String(MAP_SIZE));
+      line.setAttribute("y2", String(this.mapHeight));
       line.setAttribute("class", "map-graticule");
       svg.append(line);
 
       const label = svgElement("text");
-      label.setAttribute("x", String(longitude === 100 ? x - 5 : x + 5));
-      label.setAttribute("y", String(MAP_SIZE - 10));
+      label.setAttribute("x", String(x + 5));
+      label.setAttribute("y", String(this.mapHeight - 10));
       label.setAttribute("class", "map-coordinate");
-      if (longitude === 100) label.setAttribute("text-anchor", "end");
-      label.textContent = `${longitude}°E`;
+      label.textContent = `${Math.abs(longitude)}°${longitude < 0 ? "W" : "E"}`;
       svg.append(label);
     }
-    for (const latitude of [10, 20, 30]) {
+    for (const latitude of graticuleValues(
+      this.latitudeMinimum,
+      this.latitudeMaximum,
+    )) {
       const line = svgElement("line");
       line.setAttribute("x1", "0");
-      line.setAttribute("x2", String(MAP_SIZE));
-      line.setAttribute("y1", String(mapY(latitude)));
-      line.setAttribute("y2", String(mapY(latitude)));
+      line.setAttribute("x2", String(MAP_WIDTH));
+      line.setAttribute("y1", String(this.mapY(latitude)));
+      line.setAttribute("y2", String(this.mapY(latitude)));
       line.setAttribute("class", "map-graticule");
       svg.append(line);
 
       const label = svgElement("text");
       label.setAttribute("x", "8");
-      label.setAttribute("y", String(mapY(latitude) - 7));
+      label.setAttribute("y", String(this.mapY(latitude) - 7));
       label.setAttribute("class", "map-coordinate");
-      label.textContent = `${latitude}°N`;
+      label.textContent = `${Math.abs(latitude)}°${latitude < 0 ? "S" : "N"}`;
       svg.append(label);
     }
   }
@@ -267,8 +287,10 @@ export class ForecastMap {
         const bounds = svg.getBoundingClientRect();
         const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
         const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
-        const hoveredLongitude = LON_MIN + x * (LON_MAX - LON_MIN);
-        const hoveredLatitude = LAT_MAX - y * (LAT_MAX - LAT_MIN);
+        const hoveredLongitude = this.longitudeMinimum +
+          x * (this.longitudeMaximum - this.longitudeMinimum);
+        const hoveredLatitude = this.latitudeMaximum -
+          y * (this.latitudeMaximum - this.latitudeMinimum);
         lonIndex = Math.max(
           0,
           Math.min(
@@ -298,7 +320,7 @@ export class ForecastMap {
         <strong>${formatValue(value, product.units)}</strong>
         <span>${lat.toFixed(1)}°N · ${lon.toFixed(1)}°E</span>
         ${vectorDetail}
-        <small>Native 1.5° grid cell</small>
+        <small>Native ${this.forecast.grid.spacing_degrees}° grid cell</small>
       `;
       this.tooltip.hidden = false;
       svg.setAttribute(
@@ -325,7 +347,24 @@ export class ForecastMap {
     });
   }
 
+  private mapX(longitude: number): number {
+    return (
+      ((longitude - this.longitudeMinimum) /
+        (this.longitudeMaximum - this.longitudeMinimum)) *
+      MAP_WIDTH
+    );
+  }
+
+  private mapY(latitude: number): number {
+    return (
+      ((this.latitudeMaximum - latitude) /
+        (this.latitudeMaximum - this.latitudeMinimum)) *
+      this.mapHeight
+    );
+  }
+
   private addWorldBoundaries(svg: SVGSVGElement): void {
+    if (!this.geography.world_path) return;
     const path = svgElement("path");
     path.setAttribute("d", this.geography.world_path);
     path.setAttribute("class", "map-world-outline");
@@ -334,6 +373,7 @@ export class ForecastMap {
   }
 
   private addOutline(svg: SVGSVGElement): void {
+    if (!this.geography.india_outline_path) return;
     const path = svgElement("path");
     path.setAttribute("d", this.geography.india_outline_path);
     path.setAttribute("class", "map-outline");
@@ -342,6 +382,7 @@ export class ForecastMap {
   }
 
   private addIndiaAdmin(svg: SVGSVGElement): void {
+    if (!this.geography.india_admin_path) return;
     const path = svgElement("path");
     path.setAttribute("d", this.geography.india_admin_path);
     path.setAttribute("class", "map-india-admin");

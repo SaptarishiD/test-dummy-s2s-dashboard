@@ -1150,6 +1150,20 @@
       "label": "ERA5 reanalysis reference",
       "short_label": "ERA5",
       "status": "reference"
+    },
+    {
+      "category": "operational_initialization",
+      "default_issue": "",
+      "description": "Experimental FuXi-S2S initialization from ECMWF IFS Open Data. Ocean skin temperature is used as the disclosed SST proxy during the staged pilot.",
+      "id": "ifs",
+      "issues": [],
+      "label": "IFS operational initialization",
+      "short_label": "IFS",
+      "status": "experimental",
+      "availability": {
+        "mode": "staged_experimental",
+        "notice": "Pilot pending: a 5-member smoke run and matched 100-member validation case must pass before rolling publication."
+      }
     }
   ],
   "latest_reference": {

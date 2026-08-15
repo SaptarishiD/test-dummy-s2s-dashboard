@@ -31,12 +31,16 @@ function friendlyDate(value: string): string {
   }).format(new Date(value));
 }
 
-function issueUrl(source: CatalogSource, issue: CatalogIssue): string {
-  return `./?source=${source.id}&issue=${issue.id}#india`;
+function issueUrl(
+  source: CatalogSource,
+  issue: CatalogIssue,
+  domainId?: string,
+): string {
+  return `./?source=${source.id}&issue=${issue.id}${domainId && domainId !== "india" ? `&domain=${domainId}` : ""}#india`;
 }
 
 export function renderArchivePage(container: HTMLElement, data: AppData): void {
-  const { index } = data;
+  const { index, domainCatalog, activeDomain } = data;
   if (!index) {
     container.innerHTML = `
       <section class="blocked-state">
@@ -64,10 +68,10 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
         <div>
           <span class="archive-eyebrow">Validated issue catalogue</span>
           <h1>Forecast archive</h1>
-          <p>Browse past FuXi-S2S runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
+          <p>${activeDomain?.label ?? "India"} · Browse past FuXi-S2S runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
         </div>
         ${current ? `
-          <a class="archive-current-link" href="./#india">
+          <a class="archive-current-link" href="./${activeDomain?.id && activeDomain.id !== "india" ? `?domain=${activeDomain.id}` : ""}#india">
             <span>Current forecast</span>
             <strong>${friendlyDate(current.initialization)}</strong>
             <small>GFS proxy · 100 members →</small>
@@ -83,12 +87,12 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
       </section>
 
       <section class="archive-controls" aria-label="Archive filters">
+        ${domainCatalog && domainCatalog.domains.length > 1 ? `<label><span>Domain</span><select id="archive-domain-filter">${domainCatalog.domains.map((domain) => `<option value="${domain.id}" ${domain.id === activeDomain?.id ? "selected" : ""}>${domain.label}</option>`).join("")}</select></label>` : ""}
         <label>
           <span>Source</span>
           <select id="archive-source-filter">
             <option value="all">All sources</option>
-            <option value="gfs">GFS current/proxy</option>
-            <option value="era5">ERA5 delayed reference</option>
+            ${activeIndex.initial_condition_sources.map((source) => `<option value="${source.id}">${source.label}</option>`).join("")}
           </select>
         </label>
         <label>
@@ -120,6 +124,16 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
   const sourceFilter = container.querySelector<HTMLSelectElement>(
     "#archive-source-filter",
   )!;
+  container.querySelector<HTMLSelectElement>("#archive-domain-filter")
+    ?.addEventListener("change", (event) => {
+      const parameters = new URLSearchParams(window.location.search);
+      const domainId = (event.currentTarget as HTMLSelectElement).value;
+      if (domainId === domainCatalog?.default_domain) parameters.delete("domain");
+      else parameters.set("domain", domainId);
+      parameters.delete("source");
+      parameters.delete("issue");
+      window.location.assign(`./?${parameters.toString()}#archive`);
+    });
   const yearFilter = container.querySelector<HTMLSelectElement>(
     "#archive-year-filter",
   )!;
@@ -178,7 +192,7 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
           </div>
           <div class="archive-card__actions">
             ${interactive
-              ? `<a class="archive-open" href="${issueUrl(source, issue)}">Open maps →</a>`
+              ? `<a class="archive-open" href="${issueUrl(source, issue, activeDomain?.id)}">Open maps →</a>`
               : `<span class="archive-expired">Metadata only</span>`}
             ${pdfPath && issuePdfAvailable(issue)
               ? `<a href="${checksumVersionedPath(`./${pdfPath}`, issueChecksum(issue, "pdf"))}" download>PDF briefing ↓</a>`

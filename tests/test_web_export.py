@@ -101,7 +101,11 @@ def test_initial_condition_sources_are_never_conflated() -> None:
     assert index["default_view"] == "india"
     assert index["default_source"] == "gfs"
     sources = index["initial_condition_sources"]
-    assert [source["id"] for source in sources] == ["gfs", "era5"]
+    assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
+    ifs = sources[-1]
+    assert ifs["category"] == "operational_initialization"
+    assert ifs["issues"] == []
+    assert "SST proxy" in ifs["description"]
     assert {issue["id"] for source in sources for issue in source["issues"]} >= {
         "20260715",
         "20260722",

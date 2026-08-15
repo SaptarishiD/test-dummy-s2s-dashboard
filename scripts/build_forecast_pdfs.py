@@ -109,7 +109,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--index", type=Path, default=DATA / "index.json", help="Issue catalog"
     )
-    parser.add_argument("--source", choices=("gfs", "era5"))
+    parser.add_argument("--source", choices=("gfs", "era5", "ifs"))
     parser.add_argument("--issue", help="Optional YYYYMMDD issue filter")
     return parser.parse_args()
 

@@ -2,11 +2,14 @@ import "./styles/main.css";
 import type {
   AppData,
   ForecastData,
+  ForecastDomainCatalog,
   GlobalForecastData,
   GlobalMetadata,
   GlobalVariableKey,
   IndiaAdminData,
   IndiaMapGeographyData,
+  InitializationComparisonData,
+  InitialConditionSourceId,
   IssueIndexData,
   RegionalOutlookData,
   ValidationData,
@@ -171,9 +174,26 @@ async function loadData(): Promise<AppData> {
   const route = currentRoute();
   if (route === "models") return {};
 
+  const domainCatalog = await fetchJson<ForecastDomainCatalog>(
+    "./data/domains.json",
+    "no-store",
+  );
+  const parameters = new URLSearchParams(window.location.search);
+  const activeDomain = domainCatalog.domains.find(
+    (domain) => domain.id === parameters.get("domain"),
+  ) ?? domainCatalog.domains.find(
+    (domain) => domain.id === domainCatalog.default_domain,
+  );
+  if (!activeDomain) throw new Error("No forecast domain is configured");
+
   if (route === "archive") {
     return {
-      index: await fetchJson<IssueIndexData>("./data/index.json", "no-store"),
+      index: await fetchJson<IssueIndexData>(
+        `./data/${activeDomain.catalog}`,
+        "no-store",
+      ),
+      domainCatalog,
+      activeDomain,
     };
   }
 
@@ -184,11 +204,13 @@ async function loadData(): Promise<AppData> {
       fetchJson<IndiaAdminData>("./data/india-admin.json"),
     ]);
     const global = await fetchGlobalData(globalMetadata, true);
-    return { global, world, indiaAdmin };
+    return { global, world, indiaAdmin, domainCatalog, activeDomain };
   }
 
-  const index = await fetchJson<IssueIndexData>("./data/index.json", "no-store");
-  const parameters = new URLSearchParams(window.location.search);
+  const index = await fetchJson<IssueIndexData>(
+    `./data/${activeDomain.catalog}`,
+    "no-store",
+  );
   const selection = findIssue(
     index,
     parameters.get("source"),
@@ -197,7 +219,7 @@ async function loadData(): Promise<AppData> {
   if (!selection) throw new Error("No forecast issue is available");
   const { source, issue } = selection;
   const regionalPromise: Promise<RegionalOutlookData | undefined> =
-    issueHasRegionalOutlook(index, issue)
+    activeDomain.id === "india" && issueHasRegionalOutlook(index, issue)
       ? fetchJson<RegionalOutlookData>(checksumVersionedPath(
         `./data/${issue.regional_outlook}`,
         issueChecksum(issue, "regional_outlook"),
@@ -212,13 +234,48 @@ async function loadData(): Promise<AppData> {
       issue.validation ? `./data/${issue.validation}` : "./data/validation.json",
       issueChecksum(issue, "validation"),
     ), issue.validation ? undefined : "no-store"),
-    fetchJson<IndiaMapGeographyData>("./data/india-map-geography.json"),
+    fetchJson<IndiaMapGeographyData>(`./data/${activeDomain.geography}`),
     regionalPromise,
   ]);
   if (forecast.issue.initial_condition_source.id !== source.id) {
     throw new Error("Forecast source does not match the selected initialization source");
   }
-  return { index, forecast, validation, indiaGeography, regionalOutlook };
+  const comparisonPath = forecast.issue.initialization_comparison?.comparison;
+  const comparedSourceIds =
+    forecast.issue.initialization_comparison?.compared_source_ids;
+  let initializationComparison: InitializationComparisonData | undefined;
+  let comparisonForecasts:
+    | Partial<Record<InitialConditionSourceId, ForecastData>>
+    | undefined;
+  if (
+    activeDomain.id === "india" &&
+    comparisonPath &&
+    comparedSourceIds?.length === 3
+  ) {
+    initializationComparison = await fetchJson<InitializationComparisonData>(
+      `./data/${comparisonPath}`,
+    );
+    const entries = await Promise.all(
+      Object.entries(initializationComparison.sources).map(async ([sourceId, record]) => [
+        sourceId as InitialConditionSourceId,
+        await fetchJson<ForecastData>(`./data/${record.public_forecast}`),
+      ] as const),
+    );
+    comparisonForecasts = Object.fromEntries(entries) as Partial<
+      Record<InitialConditionSourceId, ForecastData>
+    >;
+  }
+  return {
+    index,
+    forecast,
+    validation,
+    indiaGeography,
+    regionalOutlook,
+    initializationComparison,
+    comparisonForecasts,
+    domainCatalog,
+    activeDomain,
+  };
 }
 
 function shell(): string {
