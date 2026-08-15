@@ -116,7 +116,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-13T10:23:19Z",
+  "generated_at": "2026-08-15T16:13:28Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -738,12 +738,13 @@
       "id": "era5",
       "issues": [
         {
-          "forecast": "forecasts/era5/20260806.json",
-          "id": "20260806",
-          "initialization": "2026-08-06T00:00:00Z",
-          "members": 5,
-          "role": "rapid_prototype",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-06T00:00:00Z",
+            "pdf_until": "2026-10-01T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -758,25 +759,24 @@
             "regional_probabilities": false,
             "pdf": true
           },
+          "checksums": {
+            "forecast_sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b",
+            "pdf_sha256": "fc02c33579bb17327dddb0dc7d356da33080518823a04a54870821c75e229662"
+          },
+          "forecast": "forecasts/era5/20260806.json",
+          "id": "20260806",
+          "initialization": "2026-08-06T00:00:00Z",
+          "members": 5,
+          "pdf": "downloads/era5/20260806/S2S_Research_India_Weeks1-4_ERA5_20260806.pdf",
           "presentation": {
             "section": "archive",
             "label": "Limited experiment",
             "member_class": "limited"
           },
-          "checksums": {
-            "forecast_sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b",
-            "pdf_sha256": "fc02c33579bb17327dddb0dc7d356da33080518823a04a54870821c75e229662"
-          },
-          "valid_through": "2026-09-16",
           "published_at": "2026-08-13T10:21:37.379753+00:00",
-          "pdf": "downloads/era5/20260806/S2S_Research_India_Weeks1-4_ERA5_20260806.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-08-06T00:00:00Z",
-            "pdf_until": "2026-10-01T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "role": "rapid_prototype",
+          "status": "warning",
+          "valid_through": "2026-09-16"
         },
         {
           "archive": {
@@ -1152,18 +1152,59 @@
       "status": "reference"
     },
     {
+      "availability": {
+        "mode": "staged_experimental",
+        "notice": "IFS initialization remains experimental while the ocean skin-temperature SST proxy is evaluated."
+      },
       "category": "operational_initialization",
       "default_issue": "",
       "description": "Experimental FuXi-S2S initialization from ECMWF IFS Open Data. Ocean skin temperature is used as the disclosed SST proxy during the staged pilot.",
       "id": "ifs",
-      "issues": [],
+      "issues": [
+        {
+          "forecast": "forecasts/ifs/20260815.json",
+          "id": "20260815",
+          "initialization": "2026-08-15T00:00:00Z",
+          "members": 5,
+          "role": "rapid_prototype",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_anomaly": false,
+            "regional_probabilities": false,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Limited experiment",
+            "member_class": "limited"
+          },
+          "checksums": {
+            "forecast_sha256": "59e834ab786c89e05db9ead47b94b2a4b02d5bc26cb74571cbec7e432c43fdbf",
+            "pdf_sha256": "34a0ba9a483bda7536f6793b641f44539dbeecad4720eb35103041d10da48fe2"
+          },
+          "valid_through": "2026-09-25",
+          "published_at": "2026-08-15T16:13:22.551405+00:00",
+          "pdf": "downloads/ifs/20260815/S2S_Research_India_Weeks1-4_IFS_20260815.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-15T00:00:00Z",
+            "pdf_until": "2026-10-10T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        }
+      ],
       "label": "IFS operational initialization",
       "short_label": "IFS",
-      "status": "experimental",
-      "availability": {
-        "mode": "staged_experimental",
-        "notice": "Pilot pending: a 5-member smoke run and matched 100-member validation case must pass before rolling publication."
-      }
+      "status": "experimental"
     }
   ],
   "latest_reference": {
