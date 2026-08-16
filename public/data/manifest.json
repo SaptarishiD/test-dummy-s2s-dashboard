@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-15T17:23:15.179803+00:00",
+  "generated_at": "2026-08-16T08:27:25.430196+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -123,6 +123,11 @@
       "path": "data/forecasts/era5/20260806.json",
       "size_bytes": 607153,
       "sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b"
+    },
+    {
+      "path": "data/forecasts/era5/20260808.json",
+      "size_bytes": 344772,
+      "sha256": "00e400b1206073fc390ce07f048e5e8954a79c3db8317bd3e6acfa6c534c392e"
     },
     {
       "path": "data/forecasts/gfs/20260720.json",
@@ -321,8 +326,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 45305,
-      "sha256": "97e8ed5035e0b6b28ee9ec4c3510d056d1157a14a34636523084855cbdb5eb48"
+      "size_bytes": 46929,
+      "sha256": "a025868062296466e7aa9c499b08876ead8d62574891f247bae77e25e64e5560"
     },
     {
       "path": "data/india-admin.json",
@@ -358,6 +363,11 @@
       "path": "data/regional/era5/20260805.json",
       "size_bytes": 447881,
       "sha256": "50cd3631646f209a80ffc10d2e5750035f73b11d84462d582e524aae7ff5e634"
+    },
+    {
+      "path": "data/regional/era5/20260808.json",
+      "size_bytes": 448368,
+      "sha256": "1810b65b2cd8c5ce406b1bae40f402f20481653abb1bc8a1751f00841512353f"
     },
     {
       "path": "data/regional/gfs/20260722.json",
@@ -458,6 +468,11 @@
       "path": "downloads/era5/20260806/S2S_Research_India_Weeks1-4_ERA5_20260806.pdf",
       "size_bytes": 3614589,
       "sha256": "fc02c33579bb17327dddb0dc7d356da33080518823a04a54870821c75e229662"
+    },
+    {
+      "path": "downloads/era5/20260808/S2S_Research_India_Weeks1-4_ERA5_20260808.pdf",
+      "size_bytes": 2875511,
+      "sha256": "13b877b8c7c75329811d6ef726e7c3662eb448f5f5678baf332f29c13881c07e"
     },
     {
       "path": "downloads/gfs/20260720/S2S_Research_India_Weeks1-4_GFS_20260720.pdf",
