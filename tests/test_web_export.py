@@ -63,7 +63,7 @@ def test_public_baselines_are_never_conflated() -> None:
     }
     forecast = load(PUBLIC_DATA / "forecasts/20260728.json")
     for product in ("rainfall_anomaly", "temperature_anomaly"):
-        assert forecast["products"][product]["baseline"].startswith("FuXi-S2S")
+        assert forecast["products"][product]["baseline"] == "Native model reforecasts, 2002–2021"
 
 
 def test_failed_validation_would_block_presentation() -> None:
@@ -104,7 +104,10 @@ def test_initial_condition_sources_are_never_conflated() -> None:
     assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
     ifs = sources[-1]
     assert ifs["category"] == "operational_initialization"
-    assert ifs["issues"] == []
+    assert ifs["default_issue"] == "20260815"
+    assert [(issue["id"], issue["members"]) for issue in ifs["issues"]] == [
+        ("20260815", 100),
+    ]
     assert "SST proxy" in ifs["description"]
     assert {issue["id"] for source in sources for issue in source["issues"]} >= {
         "20260715",

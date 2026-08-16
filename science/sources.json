@@ -3,8 +3,8 @@
   "sources": [
     {
       "id": "fuxi_forecast_20260728",
-      "name": "FuXi-S2S 100-member GFS-proxy forecast",
-      "product": "FuXi-S2S experimental forecast",
+      "name": "100-member GFS-proxy subseasonal forecast",
+      "product": "Experimental subseasonal forecast",
       "period": "2026-07-28 through 2026-09-07",
       "grid": "27 × 27, 1.5°, 39°N–0°, 60°E–99°E",
       "units": {
@@ -15,7 +15,7 @@
     },
     {
       "id": "fuxi_climatology_2002_2021",
-      "name": "FuXi-S2S native reforecast model climatology",
+      "name": "Native reforecast model climatology",
       "product": "20 equally weighted yearly ensemble means",
       "period": "2002–2021; JJAS native initialization slots",
       "grid": "27 × 27, 1.5°, forecast grid",

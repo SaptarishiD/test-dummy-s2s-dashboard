@@ -170,7 +170,7 @@ def validate_forecast(path: Path, expected_sha256: str) -> ValidationCheck:
         }
     return ValidationCheck(
         id="fuxi_forecast",
-        label="FuXi forecast",
+        label="Model forecast",
         group="source",
         status="green",
         summary="100 members, 42 lead days, timing, units, grid, physics, and spread validated.",
@@ -272,10 +272,10 @@ def validate_fuxi_climatology(
         }
     return ValidationCheck(
         id="fuxi_climatology",
-        label="FuXi climatology",
+        label="Model climatology",
         group="source",
         status="warning",
-        summary="Validated for this JJAS issue; full-year FuXi climatology is not yet available.",
+        summary="Validated for this JJAS issue; a full-year model climatology is not yet available.",
         details=details,
     )
 

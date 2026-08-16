@@ -23,7 +23,7 @@ PRODUCT = {
         "weekly U/V vector-component anomaly"
     ),
     "units": "m s-1",
-    "baseline": "FuXi-S2S native reforecasts, 2002–2021",
+    "baseline": "Native model reforecasts, 2002–2021",
     "legend": {
         "boundaries": [-8, -6, -4, -2, -1, 1, 2, 4, 6, 8],
         "colors": [

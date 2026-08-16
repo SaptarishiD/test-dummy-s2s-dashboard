@@ -6,12 +6,6 @@ near-real-time GFS-proxy initializations, delayed ERA5 references, and a gated
 IFS-initialized pilot, exposes the available issue dates and ensemble sizes,
 and provides compact issue-level downloads.
 
-The **Models** page separates the model powering current guidance from models
-used only in historical research. FuXi-S2S supplies the published forecast
-maps. NeuralGCM is represented as a 2020–2025, 10-member historical
-precipitation benchmark; it is not presented as a live forecast source and no
-unsupported NeuralGCM 2 m temperature product is implied.
-
 The dated Global Demo animates a pinned 28 July 2026 set of 42 daily
 ensemble-mean fields for
 precipitation, 2 m temperature, 500 hPa geopotential height, 850 hPa wind,
@@ -56,7 +50,7 @@ brand assets are stored under `scripts/assets/`, remain the property of their
 respective owners, and are not covered by any source-code licence for this
 prototype. The web interface itself retains the neutral S2S Research identity.
 
-The India anomalies use a calendar-interpolated, lead-matched FuXi 2002–2021
+The India anomalies use a calendar-interpolated, lead-matched 2002–2021 model
 native reforecast climatology. They are not IMD or IMERG anomalies. The
 validated native climatology currently covers JJAS initialization slots.
 Outside that window, year-round automation publishes only raw weekly rainfall
@@ -161,7 +155,7 @@ python scripts/build_custom_domain.py \
   --source gfs
 ```
 
-The exporter verifies that the completed FuXi output grid exactly matches the
+The exporter verifies that the completed forecast output grid exactly matches the
 configured center-coordinate bounds, then writes raw Weeks 1–6 rainfall and
 temperature JSON, pre-projected Natural Earth geography, a Weeks 1–4 PDF, and
 the domain catalog entry. Custom-domain v1 intentionally withholds anomalies,

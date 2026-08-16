@@ -291,7 +291,7 @@ def weighted_spatial_correlation(
 FORMULA_DEFINITIONS: dict[str, dict[str, Any]] = {
     "rain_mm_day": {
         "expression": "tp_mm_hour × 24",
-        "description": "FuXi 24-hour mean precipitation rate converted to daily rainfall.",
+        "description": "Model 24-hour mean precipitation rate converted to daily rainfall.",
     },
     "weekly_total_mm": {
         "expression": "sum(seven daily rain_mm_day values)",
@@ -327,7 +327,7 @@ FORMULA_DEFINITIONS: dict[str, dict[str, Any]] = {
     },
     "model_anomaly": {
         "expression": "forecast weekly mean − matched model-climatology weekly mean",
-        "description": "FuXi model anomaly; not an IMD or IMERG anomaly.",
+        "description": "Model anomaly; not an IMD or IMERG anomaly.",
     },
     "imd_anomaly": {
         "expression": "IMD observation − IMD 1991–2020 calendar-day climatology",

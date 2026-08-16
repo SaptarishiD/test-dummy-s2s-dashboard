@@ -65,14 +65,15 @@ def test_catalog_assets_are_checksum_versioned_and_capability_scoped() -> None:
             assert issue["archive"]["metadata"] == "indefinite"
 
 
-def test_catalog_rebuild_keeps_limited_issue_out_of_current() -> None:
+def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() -> None:
     index = load(DATA / "index.json")
     rebuilt = build_catalog(
         index,
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
-    assert rebuilt["current"]["issue_id"] == "20260812"
+    assert rebuilt["current"]["source_id"] == "gfs"
+    assert rebuilt["current"]["issue_id"] == "20260815"
     newer_limited = next(
         item
         for item in rebuilt["initial_condition_sources"][0]["issues"]

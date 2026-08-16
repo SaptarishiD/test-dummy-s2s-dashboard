@@ -101,7 +101,7 @@
     "initialization": "2026-08-15T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/gfs/20260815.json",
-    "forecast_sha256": "523e831cf5aff34a618cead4f1bedd7191876f83a03583e9ad2f8b8c53030e3c",
+    "forecast_sha256": "35359e67bab93bd4fd95583a0b7fff45e0304bdf43647c7a734ed99bb0da91f0",
     "valid_through": "2026-09-25",
     "published_at": "2026-08-16T08:30:09.215476+00:00",
     "available_products": [
@@ -122,7 +122,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-16T08:31:22Z",
+  "generated_at": "2026-08-16T10:02:34Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -175,7 +175,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "523e831cf5aff34a618cead4f1bedd7191876f83a03583e9ad2f8b8c53030e3c",
+            "forecast_sha256": "35359e67bab93bd4fd95583a0b7fff45e0304bdf43647c7a734ed99bb0da91f0",
             "regional_sha256": "11bae2b0b802a6ff3422e6d5f9de228d7cf6741790874b3fe94af64e846236b2",
             "pdf_sha256": "ca65b0d2a0fe7f0013593318a3312c0b2a9bfe69504f9281651c15adb2d0c358"
           },
@@ -217,7 +217,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "65927e519610fa3380847c87594d3fd713720ca16202926a14eed80b42586cdc",
+            "forecast_sha256": "8fd35313ec691479c5f6e6afdbda42bd97f8dc28ce183e7c525eb3eb1e548b52",
             "regional_sha256": "194f7a6f7abdcfefa11139ba4fb710354f1ef10717fc34d145735f0fad0377e1",
             "pdf_sha256": "213bfabd801a3d529b6d6694060c05c46c46c20b294062f8e77e06a310312bae"
           },
@@ -259,7 +259,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "189c5eef270b1c106777c0d4ad07486b0ff658a92fb3bafd0c938fda75c8dbcd",
+            "forecast_sha256": "7c3140ec334451557bbb401a1eeef6f5834c0ae2c6aef5a012c0c3eccd5fa817",
             "regional_sha256": "0e8ebd984187cf9f028c2cf167301948e3d450269d56a7216e1142b757d6f681",
             "pdf_sha256": "35fcde35190f598419638b9de82d7e11684a6861b58f21a0d908f6a2d59b2b51"
           },
@@ -301,7 +301,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "7de1479ba223fd667c61cb0181dddf148b497c2718cd5b2efe9bb292873858f3",
+            "forecast_sha256": "8b5c0959f2f1c741f9a86e0e34acf57eb92a1b487e2da3228b1e03655f0b7d8c",
             "regional_sha256": "3a3b635690a37b330345d50bf315c5359b7869769f22323c758c02c41ea5f5a7",
             "pdf_sha256": "ad10e9f7f375a59e119e5966620d116fbec6746f0ee3972bf45077a5104991a3"
           },
@@ -343,7 +343,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "2f3ffe389ea342b9119defc77d4ff133142a520e42ec4cbf9558d35d9e178511",
+            "forecast_sha256": "0c635d48224ad47cc7fd9845481579d324b6b8b9e729f7110099725eede7906f",
             "pdf_sha256": "5866c363c11735a27010f953a7c6d579c79ff6c08071429819fa00cb20ce8a01"
           },
           "forecast": "forecasts/gfs/20260802.json",
@@ -383,7 +383,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "74ff3ec200315910b0fcb3391711d69ba03adb6ddc05c62bd1b8fbd3343af6a3",
+            "forecast_sha256": "1e94b95c5e5db4e02962aecbad5df7c4cbf6849683391435b2b97977f9583af8",
             "regional_sha256": "91e001ae9b1bfafe189fd74ef0fe68bec35a1d9277bbda718aed53ac2068acd8",
             "pdf_sha256": "24a4a7a7215e6a6832c07bffdecf6ab1a25b527673a03de70705185a40771447"
           },
@@ -425,7 +425,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "660daab06c04ef08d695b54df9071a08a1c27e6ea61697632b9ebee612711f64",
+            "forecast_sha256": "beee0113d52b9b762859790845f2e6a2f38decb2a54c2929a9be018211c1a380",
             "pdf_sha256": "eb65b892579887263fd930f465c04a9bbad748e86f4f35d8af443369b3384777"
           },
           "forecast": "forecasts/gfs/20260731.json",
@@ -465,7 +465,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "706d62e5562225eb677cc32d2f5738f8b1df7562fba761574266d55cab8af1ae",
+            "forecast_sha256": "08297176ea20e2e2c11ad5acfc90265c64bc712cfc82f1d3f5bd5e5905f3ecf3",
             "pdf_sha256": "55c5ab9fdc25a2357d93d1d5035441fed72d4e0b4aad93b73dbab645fb849592"
           },
           "forecast": "forecasts/gfs/20260730.json",
@@ -505,7 +505,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "c1509cd571b074f44a728f549a555898531b975c1d564ef579f00897752b6b89",
+            "forecast_sha256": "0f6f613a99e3cc537fb31f5e47beca6c9b84e29403e13466b4b53506775eb672",
             "regional_sha256": "19c2401525fc551711c2577f67104a9864465eeb0edf4669da88270e90a7f859",
             "pdf_sha256": "7f53977384daa7926c0df7d8fcb6277eee95fede1dfe32723811f2168c900da7"
           },
@@ -547,7 +547,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "45838687a237cfc89d96624a714efdddcf1657bfb33024e03e6691df100087f0",
+            "forecast_sha256": "012ec5d052fbf0b39e4c4e18fd9b813cac46328bd8b36ae1e8f2ce3d278ad165",
             "regional_sha256": "38716f83bed0340be24fc24860e7baa5f97a54eb3e8f3d1919defab79349c9f2",
             "pdf_sha256": "aaafb0e5d1d8cf4174b83dd5ab7cf6c885ed3a740b1f81e13aa8a31e290dd537"
           },
@@ -589,7 +589,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "67faaa1c3a81ab9a4954186ef4f4cc6ec32ab61e11c28cc08393e0560eb39474",
+            "forecast_sha256": "9e82a61c681934a7b84d910b7d24bae6ba2e68a8eb928c797625d77aeb509dd1",
             "pdf_sha256": "2fc3bbd2e7640153d1d81ea8d8a20abeb52410b50df154fb5c9d9b6471ef51c1"
           },
           "forecast": "forecasts/gfs/20260724.json",
@@ -629,7 +629,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "34dd0c3e585b378c0ed4ae2e60a879528831f09d89a0e20911720d53a22ae4c1",
+            "forecast_sha256": "71e6f122a20914c8d6ee96f855b0d33e93075c30cf6577c9b9b73333d9b6dd5f",
             "pdf_sha256": "742188116294eb2b96f0c745f956ff063e0f295679bfed06f08e8adbf4b1fa22"
           },
           "forecast": "forecasts/gfs/20260723.json",
@@ -669,7 +669,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "2f8ee70e57fe68a51a32516e789d53ca7d212bf171edbb831ffa4b991886f451",
+            "forecast_sha256": "4ba52d2cb40c5a6ceede8dc73fcbb6e71a18d1cd2791210caf7e7e8be9d317f8",
             "regional_sha256": "da03bc3abe89d5ef9f4e039acdacc9559473da5211cd721c852bcff111e29056",
             "pdf_sha256": "9e041155767a36e84481bbe87113c4d63cc2850f5eff0bdaa4639d1dd6498793"
           },
@@ -711,7 +711,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "8db7c07116e5d21d3787985626b67f91c81b3826b8e5322a20bb321ba60de57e",
+            "forecast_sha256": "515097503c80102c6d284bce8447f655a6b757b34fe93e9bda403eb324dd5864",
             "pdf_sha256": "2a0d33caf87e99ac700b1e9ee64c8d5e10e3d0b62751db5ce7084022b9a00687"
           },
           "forecast": "forecasts/gfs/20260721.json",
@@ -751,7 +751,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "f2fc67530a8a58d0cc762f34915ae92336e81c3cc4691a3df26d318f1928a669",
+            "forecast_sha256": "e6f32219ae2fd54744d2eb7be688ae5ad9d897a8432f032f5a63f30fc56d179f",
             "pdf_sha256": "dd2a9f293a22266a7a873293a9dd83f8d4f4f730055ad85de4b463d86cbc5348"
           },
           "forecast": "forecasts/gfs/20260720.json",
@@ -807,7 +807,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "57e4d7aa30730d4de03c2784c7faef4f09ec2b8144da4eb3f441db4b65b53ed0",
+            "forecast_sha256": "585987863503d984ccf59754954e70954d29885144fbc2aa64e4ac14fa4e9357",
             "regional_sha256": "1a93c1341bed805b395c1bc0aa7f16cd245f000a25017d1e4ef68694d86a1ade",
             "pdf_sha256": "c6bc281d82897ed4ffdb17c8d31229bdbf106a4f85b1058dc6d7eaf2d38979b5"
           },
@@ -850,7 +850,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b",
+            "forecast_sha256": "4e6e9ae7efd13d58442a61e7e676ddee4bc22941182d7f35708c651840055fd3",
             "pdf_sha256": "fc02c33579bb17327dddb0dc7d356da33080518823a04a54870821c75e229662"
           },
           "forecast": "forecasts/era5/20260806.json",
@@ -890,7 +890,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "8fef85f6e7b8f5e28e5c74a0561ec77879f56aa3992826ed37ad64b5f29f79b1",
+            "forecast_sha256": "eeb39b5c6fbbd51aa2426cf4b5cddbed41159c496d13c8202b3be155c3852389",
             "regional_sha256": "50cd3631646f209a80ffc10d2e5750035f73b11d84462d582e524aae7ff5e634",
             "pdf_sha256": "7b2a043a5b417f9d02472b399e2d3ce1924b4291fec3da240be6ac283175f42e"
           },
@@ -932,7 +932,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "f186ca2b5ebe5d7a474dfca81b7a356078db38ca9daa22b69f478e9385f77dae",
+            "forecast_sha256": "8282e0e7e440551d4d3fb25adfd05e8815b3c890fd7e83d8590a1651f674ef70",
             "regional_sha256": "3802d9d954657ef25a3315ced281a1a32d5ba5e676013e543c87c3a15c869340",
             "pdf_sha256": "f8ee02cc158e67b0c920dfa30504b1e3971acbed2a9613bee4c3ae8821112481"
           },
@@ -974,7 +974,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "988645b89caee23f333dffda47003d8fdd3567b7ba447286baf16756d578f358",
+            "forecast_sha256": "e8e9c3bd539f7a2073a965aa585a6dd09a2be8efd74b0ae281eeefe19c89f664",
             "pdf_sha256": "e8f80025cf48aaa347474d4dc6358dd5bf512359ee9ca66074085e33a15357a6"
           },
           "forecast": "forecasts/era5/20260730.json",
@@ -1014,7 +1014,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "d860a556f0e7a27533857459302e198abb47f954b9a2a943bb77dd5b09005106",
+            "forecast_sha256": "5c88c6c7698fdf7eae10abb7519f87a519f72ab322413843aa74bdd79f3a8b9e",
             "pdf_sha256": "ba4691e02863d6896e607de807c7ff5c9b4f03980c2d2432f9bc7858fd67e770"
           },
           "forecast": "forecasts/era5/20260724.json",
@@ -1054,7 +1054,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "a80b773e2a6bcb6e890bd5875ddfca56e7d9771f1f15e3cfc5b1c76183e505e1",
+            "forecast_sha256": "2439f187809b27bf771c9e0f084bffa6adba3d0a29d0c2927b5701cfe98081a0",
             "pdf_sha256": "333b94a3551016d1e23c2e68cf740e1b1ed7a5d3a3158d38b3332d8dcf8620a1"
           },
           "forecast": "forecasts/era5/20260723.json",
@@ -1094,7 +1094,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "e22dc44f501cf106bab38883759a2a8851bc64b2a9730997de5cf634e0e1db96",
+            "forecast_sha256": "e9cea81dee08a9b37311b05bafcf9696ccb7d7ae4e720734201d9242f155a675",
             "regional_sha256": "df56cad45f68f073cf486bc7570cdc813ef5b3582508184846b69fae159d4b95",
             "pdf_sha256": "84a88d6169336ecc5bc353771830f3c85ac81429e0434848bd118c7be9cfeb1a"
           },
@@ -1136,7 +1136,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "83ffe0fdd929388beb7017daf227fa447799119a7bcbda1b9dd8fec4341f464d",
+            "forecast_sha256": "49d5aedfab9bfba03894d18884ddcd373e994157c75f4d2573578767e54b7ebb",
             "pdf_sha256": "1dde216a36c29bb9690ce0f2a6421fd17342196a51943fde8f36bfbabd6c207c"
           },
           "forecast": "forecasts/era5/20260721.json",
@@ -1176,7 +1176,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "11f79185842eb898c4d88ba794f84c26c05eb4c52e7e773eba6dbbc58060bd2b",
+            "forecast_sha256": "533a3a36ef7cf21ccbcb17d5c0341b696cbb9f02c7d86a3f965b0b2c6c903f87",
             "pdf_sha256": "8bc76a12c90002e38cd9cdde2a12ace6197db4b3a07b5e8aa796be8dba3dddf2"
           },
           "forecast": "forecasts/era5/20260720.json",
@@ -1216,7 +1216,7 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "c1a452a41b5138cfdabd54a6eccb0a842972610f59a5e2e43c0fd83fe548d2eb",
+            "forecast_sha256": "133aea36b7dc3d9a7547f7042c37e882f2f3b32c84c43024b1e87c0125841d41",
             "regional_sha256": "a27887238056171b78dceb323697e72cb63b02e8cdd04e8132c7562af1cbb85d",
             "pdf_sha256": "70856291f98d6f9145ca3d59a06b799a71df7cc97643a563b849955a5a60de44"
           },
@@ -1248,7 +1248,7 @@
       },
       "category": "operational_initialization",
       "default_issue": "20260815",
-      "description": "Experimental FuXi-S2S initialization from ECMWF IFS Open Data. Ocean skin temperature is used as the disclosed SST proxy during the staged pilot.",
+      "description": "Experimental AI subseasonal system initialization from ECMWF IFS Open Data. Ocean skin temperature is used as the disclosed SST proxy during the staged pilot.",
       "id": "ifs",
       "issues": [
         {
@@ -1278,7 +1278,7 @@
             "member_class": "production"
           },
           "checksums": {
-            "forecast_sha256": "625f854bb354938650b4a24b2b23731513e8b2e47b29d1335b0d54625e00580d",
+            "forecast_sha256": "85f3e95ac6f21690031b1ae6e03c4cae173b54819f7f0e07963bd498138df534",
             "regional_sha256": "d12462c5ac10e6c128e9c1c0f7945d49f1a9d966fb13f0720e980b192f443dd6",
             "pdf_sha256": "e2936ee21496d4f07bfb54c9df654c7ee952c040636192604dc0450a166e89f9"
           },
@@ -1305,7 +1305,7 @@
     "initialization": "2026-08-08T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/era5/20260808.json",
-    "forecast_sha256": "57e4d7aa30730d4de03c2784c7faef4f09ec2b8144da4eb3f441db4b65b53ed0",
+    "forecast_sha256": "585987863503d984ccf59754954e70954d29885144fbc2aa64e4ac14fa4e9357",
     "valid_through": "2026-09-18",
     "published_at": "2026-08-16T08:28:05.655698+00:00",
     "available_products": [

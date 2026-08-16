@@ -126,9 +126,9 @@ PRODUCTS: dict[str, dict[str, Any]] = {
     "rainfall_anomaly": {
         "label": "Rainfall anomaly",
         "short_label": "Rain anomaly",
-        "description": "Weekly-mean forecast minus lead-matched FuXi model climatology",
+        "description": "Weekly-mean forecast minus lead-matched model climatology",
         "units": "mm / day",
-        "baseline": "FuXi-S2S native reforecasts, 2002–2021",
+        "baseline": "Native model reforecasts, 2002–2021",
         "legend": {
             "boundaries": [-20, -15, -10, -5, -2, 2, 5, 10, 15, 20],
             "colors": [
@@ -176,9 +176,9 @@ PRODUCTS: dict[str, dict[str, Any]] = {
     "temperature_anomaly": {
         "label": "Temperature anomaly",
         "short_label": "Temp anomaly",
-        "description": "Weekly-mean forecast minus lead-matched FuXi model climatology",
+        "description": "Weekly-mean forecast minus lead-matched model climatology",
         "units": "°C",
-        "baseline": "FuXi-S2S native reforecasts, 2002–2021",
+        "baseline": "Native model reforecasts, 2002–2021",
         "legend": {
             "boundaries": [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
             "colors": [

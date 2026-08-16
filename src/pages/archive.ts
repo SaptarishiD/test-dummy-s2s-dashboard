@@ -68,7 +68,7 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
         <div>
           <span class="archive-eyebrow">Validated issue catalogue</span>
           <h1>Forecast archive</h1>
-          <p>${activeDomain?.label ?? "India"} · Browse past FuXi-S2S runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
+          <p>${activeDomain?.label ?? "India"} · Browse past forecast runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
         </div>
         ${current ? `
           <a class="archive-current-link" href="./${activeDomain?.id && activeDomain.id !== "india" ? `?domain=${activeDomain.id}` : ""}#india">

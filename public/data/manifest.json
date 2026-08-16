@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-16T08:31:25.962014+00:00",
-  "deployed_commit": "pending-ci",
+  "generated_at": "2026-08-16T10:02:35.542934+00:00",
+  "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -61,158 +61,158 @@
     },
     {
       "path": "data/forecasts/20260728.json",
-      "size_bytes": 346879,
-      "sha256": "45838687a237cfc89d96624a714efdddcf1657bfb33024e03e6691df100087f0"
+      "size_bytes": 346888,
+      "sha256": "012ec5d052fbf0b39e4c4e18fd9b813cac46328bd8b36ae1e8f2ce3d278ad165"
     },
     {
       "path": "data/forecasts/20260730.json",
-      "size_bytes": 346224,
-      "sha256": "b237eb1b2e786e1fc29322e310bd7a74f6e562e6b0d737d59134ac1936982614"
+      "size_bytes": 346234,
+      "sha256": "f075fd20e8f114a5a6e8efa5828100b34cc1d44917358d3ddd1339267b673428"
     },
     {
       "path": "data/forecasts/20260731.json",
-      "size_bytes": 346176,
-      "sha256": "d6fd4cd59b0c612f6fab31c2b9e733c6fb34b8b8adc4b3481bfca5a039895fc5"
+      "size_bytes": 346186,
+      "sha256": "a6bb5dbd7ebb7ee9abfb4a57237f6615562d4b08e793813ef2555a993bbf13c0"
     },
     {
       "path": "data/forecasts/era5/20260715.json",
-      "size_bytes": 344763,
-      "sha256": "c1a452a41b5138cfdabd54a6eccb0a842972610f59a5e2e43c0fd83fe548d2eb"
+      "size_bytes": 344759,
+      "sha256": "133aea36b7dc3d9a7547f7042c37e882f2f3b32c84c43024b1e87c0125841d41"
     },
     {
       "path": "data/forecasts/era5/20260720.json",
-      "size_bytes": 345272,
-      "sha256": "11f79185842eb898c4d88ba794f84c26c05eb4c52e7e773eba6dbbc58060bd2b"
+      "size_bytes": 345268,
+      "sha256": "533a3a36ef7cf21ccbcb17d5c0341b696cbb9f02c7d86a3f965b0b2c6c903f87"
     },
     {
       "path": "data/forecasts/era5/20260721.json",
-      "size_bytes": 345485,
-      "sha256": "83ffe0fdd929388beb7017daf227fa447799119a7bcbda1b9dd8fec4341f464d"
+      "size_bytes": 345481,
+      "sha256": "49d5aedfab9bfba03894d18884ddcd373e994157c75f4d2573578767e54b7ebb"
     },
     {
       "path": "data/forecasts/era5/20260722.json",
-      "size_bytes": 345203,
-      "sha256": "e22dc44f501cf106bab38883759a2a8851bc64b2a9730997de5cf634e0e1db96"
+      "size_bytes": 345199,
+      "sha256": "e9cea81dee08a9b37311b05bafcf9696ccb7d7ae4e720734201d9242f155a675"
     },
     {
       "path": "data/forecasts/era5/20260723.json",
-      "size_bytes": 345281,
-      "sha256": "a80b773e2a6bcb6e890bd5875ddfca56e7d9771f1f15e3cfc5b1c76183e505e1"
+      "size_bytes": 345277,
+      "sha256": "2439f187809b27bf771c9e0f084bffa6adba3d0a29d0c2927b5701cfe98081a0"
     },
     {
       "path": "data/forecasts/era5/20260724.json",
-      "size_bytes": 345256,
-      "sha256": "d860a556f0e7a27533857459302e198abb47f954b9a2a943bb77dd5b09005106"
+      "size_bytes": 345252,
+      "sha256": "5c88c6c7698fdf7eae10abb7519f87a519f72ab322413843aa74bdd79f3a8b9e"
     },
     {
       "path": "data/forecasts/era5/20260730.json",
-      "size_bytes": 344504,
-      "sha256": "988645b89caee23f333dffda47003d8fdd3567b7ba447286baf16756d578f358"
+      "size_bytes": 344500,
+      "sha256": "e8e9c3bd539f7a2073a965aa585a6dd09a2be8efd74b0ae281eeefe19c89f664"
     },
     {
       "path": "data/forecasts/era5/20260802.json",
-      "size_bytes": 345089,
-      "sha256": "f186ca2b5ebe5d7a474dfca81b7a356078db38ca9daa22b69f478e9385f77dae"
+      "size_bytes": 345085,
+      "sha256": "8282e0e7e440551d4d3fb25adfd05e8815b3c890fd7e83d8590a1651f674ef70"
     },
     {
       "path": "data/forecasts/era5/20260805.json",
-      "size_bytes": 344997,
-      "sha256": "8fef85f6e7b8f5e28e5c74a0561ec77879f56aa3992826ed37ad64b5f29f79b1"
+      "size_bytes": 344993,
+      "sha256": "eeb39b5c6fbbd51aa2426cf4b5cddbed41159c496d13c8202b3be155c3852389"
     },
     {
       "path": "data/forecasts/era5/20260806.json",
-      "size_bytes": 607153,
-      "sha256": "45965a7864b9287d42aed928d02c1a291281ce461efbc7410f86997b625a759b"
+      "size_bytes": 607146,
+      "sha256": "4e6e9ae7efd13d58442a61e7e676ddee4bc22941182d7f35708c651840055fd3"
     },
     {
       "path": "data/forecasts/era5/20260808.json",
-      "size_bytes": 344772,
-      "sha256": "57e4d7aa30730d4de03c2784c7faef4f09ec2b8144da4eb3f441db4b65b53ed0"
+      "size_bytes": 344768,
+      "sha256": "585987863503d984ccf59754954e70954d29885144fbc2aa64e4ac14fa4e9357"
     },
     {
       "path": "data/forecasts/gfs/20260720.json",
-      "size_bytes": 347663,
-      "sha256": "f2fc67530a8a58d0cc762f34915ae92336e81c3cc4691a3df26d318f1928a669"
+      "size_bytes": 347672,
+      "sha256": "e6f32219ae2fd54744d2eb7be688ae5ad9d897a8432f032f5a63f30fc56d179f"
     },
     {
       "path": "data/forecasts/gfs/20260721.json",
-      "size_bytes": 347662,
-      "sha256": "8db7c07116e5d21d3787985626b67f91c81b3826b8e5322a20bb321ba60de57e"
+      "size_bytes": 347671,
+      "sha256": "515097503c80102c6d284bce8447f655a6b757b34fe93e9bda403eb324dd5864"
     },
     {
       "path": "data/forecasts/gfs/20260722.json",
-      "size_bytes": 347414,
-      "sha256": "2f8ee70e57fe68a51a32516e789d53ca7d212bf171edbb831ffa4b991886f451"
+      "size_bytes": 347423,
+      "sha256": "4ba52d2cb40c5a6ceede8dc73fcbb6e71a18d1cd2791210caf7e7e8be9d317f8"
     },
     {
       "path": "data/forecasts/gfs/20260723.json",
-      "size_bytes": 347581,
-      "sha256": "34dd0c3e585b378c0ed4ae2e60a879528831f09d89a0e20911720d53a22ae4c1"
+      "size_bytes": 347590,
+      "sha256": "71e6f122a20914c8d6ee96f855b0d33e93075c30cf6577c9b9b73333d9b6dd5f"
     },
     {
       "path": "data/forecasts/gfs/20260724.json",
-      "size_bytes": 347610,
-      "sha256": "67faaa1c3a81ab9a4954186ef4f4cc6ec32ab61e11c28cc08393e0560eb39474"
+      "size_bytes": 347619,
+      "sha256": "9e82a61c681934a7b84d910b7d24bae6ba2e68a8eb928c797625d77aeb509dd1"
     },
     {
       "path": "data/forecasts/gfs/20260728.json",
-      "size_bytes": 346879,
-      "sha256": "45838687a237cfc89d96624a714efdddcf1657bfb33024e03e6691df100087f0"
+      "size_bytes": 346888,
+      "sha256": "012ec5d052fbf0b39e4c4e18fd9b813cac46328bd8b36ae1e8f2ce3d278ad165"
     },
     {
       "path": "data/forecasts/gfs/20260729.json",
-      "size_bytes": 346924,
-      "sha256": "c1509cd571b074f44a728f549a555898531b975c1d564ef579f00897752b6b89"
+      "size_bytes": 346933,
+      "sha256": "0f6f613a99e3cc537fb31f5e47beca6c9b84e29403e13466b4b53506775eb672"
     },
     {
       "path": "data/forecasts/gfs/20260730.json",
-      "size_bytes": 346854,
-      "sha256": "706d62e5562225eb677cc32d2f5738f8b1df7562fba761574266d55cab8af1ae"
+      "size_bytes": 346863,
+      "sha256": "08297176ea20e2e2c11ad5acfc90265c64bc712cfc82f1d3f5bd5e5905f3ecf3"
     },
     {
       "path": "data/forecasts/gfs/20260731.json",
-      "size_bytes": 346806,
-      "sha256": "660daab06c04ef08d695b54df9071a08a1c27e6ea61697632b9ebee612711f64"
+      "size_bytes": 346815,
+      "sha256": "beee0113d52b9b762859790845f2e6a2f38decb2a54c2929a9be018211c1a380"
     },
     {
       "path": "data/forecasts/gfs/20260801.json",
-      "size_bytes": 346878,
-      "sha256": "74ff3ec200315910b0fcb3391711d69ba03adb6ddc05c62bd1b8fbd3343af6a3"
+      "size_bytes": 346887,
+      "sha256": "1e94b95c5e5db4e02962aecbad5df7c4cbf6849683391435b2b97977f9583af8"
     },
     {
       "path": "data/forecasts/gfs/20260802.json",
-      "size_bytes": 347325,
-      "sha256": "2f3ffe389ea342b9119defc77d4ff133142a520e42ec4cbf9558d35d9e178511"
+      "size_bytes": 347334,
+      "sha256": "0c635d48224ad47cc7fd9845481579d324b6b8b9e729f7110099725eede7906f"
     },
     {
       "path": "data/forecasts/gfs/20260805.json",
-      "size_bytes": 346945,
-      "sha256": "7de1479ba223fd667c61cb0181dddf148b497c2718cd5b2efe9bb292873858f3"
+      "size_bytes": 346954,
+      "sha256": "8b5c0959f2f1c741f9a86e0e34acf57eb92a1b487e2da3228b1e03655f0b7d8c"
     },
     {
       "path": "data/forecasts/gfs/20260808.json",
-      "size_bytes": 346843,
-      "sha256": "189c5eef270b1c106777c0d4ad07486b0ff658a92fb3bafd0c938fda75c8dbcd"
+      "size_bytes": 346852,
+      "sha256": "7c3140ec334451557bbb401a1eeef6f5834c0ae2c6aef5a012c0c3eccd5fa817"
     },
     {
       "path": "data/forecasts/gfs/20260812.json",
-      "size_bytes": 346650,
-      "sha256": "65927e519610fa3380847c87594d3fd713720ca16202926a14eed80b42586cdc"
+      "size_bytes": 346659,
+      "sha256": "8fd35313ec691479c5f6e6afdbda42bd97f8dc28ce183e7c525eb3eb1e548b52"
     },
     {
       "path": "data/forecasts/gfs/20260815.json",
-      "size_bytes": 346581,
-      "sha256": "523e831cf5aff34a618cead4f1bedd7191876f83a03583e9ad2f8b8c53030e3c"
+      "size_bytes": 346590,
+      "sha256": "35359e67bab93bd4fd95583a0b7fff45e0304bdf43647c7a734ed99bb0da91f0"
     },
     {
       "path": "data/forecasts/ifs/20260815.json",
-      "size_bytes": 344866,
-      "sha256": "625f854bb354938650b4a24b2b23731513e8b2e47b29d1335b0d54625e00580d"
+      "size_bytes": 344875,
+      "sha256": "85f3e95ac6f21690031b1ae6e03c4cae173b54819f7f0e07963bd498138df534"
     },
     {
       "path": "data/formulas.json",
-      "size_bytes": 3121,
-      "sha256": "18c6162c4beef6ec38f60a6fc9d6d5f21ae0eaac6766ebaf5e89d809e41ced33"
+      "size_bytes": 3123,
+      "sha256": "f1a188e9f4626deed103fc4d317bf5972d3636b8aa0e3a2690ec2282d8c9c4b7"
     },
     {
       "path": "data/global/metadata.json",
@@ -331,8 +331,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 48910,
-      "sha256": "801cd29dc248df5ae649e99e062bbcd5263703fdec3ebad354ebefe6791a6c79"
+      "size_bytes": 48923,
+      "sha256": "31341e08d95631d2c1f634c7452ed7e751ca250a69a2252ccb613eb8b80f7ff9"
     },
     {
       "path": "data/india-admin.json",
@@ -421,13 +421,13 @@
     },
     {
       "path": "data/sources.json",
-      "size_bytes": 2358,
-      "sha256": "ffc1a5ef83e38810b5a492d01861efb9ea73468d3fae232e4b5b0dcd37bec318"
+      "size_bytes": 2397,
+      "sha256": "dee2d6cfe5852ff9d3d5aad80eb39f155be862bd32f55cc84d2822992c312126"
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5937,
-      "sha256": "e91145eb82ac1af9d783c0a7886c11e74be4296698e8414a57e9686a7c192474"
+      "size_bytes": 5941,
+      "sha256": "3a7349a5a2efedddf9b06ecc80c3c8ff79613c018d5d33d4dcdf577bb4dd0dc8"
     },
     {
       "path": "data/world-countries.geojson",

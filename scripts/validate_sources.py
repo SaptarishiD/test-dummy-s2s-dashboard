@@ -77,14 +77,14 @@ def main() -> int:
     jobs = (
         (
             "fuxi_forecast",
-            "FuXi forecast",
+            "Model forecast",
             validate_forecast,
             args.forecast,
             SOURCE_DIGESTS["forecast"],
         ),
         (
             "fuxi_climatology",
-            "FuXi climatology",
+            "Model climatology",
             validate_fuxi_climatology,
             args.fuxi_climatology,
             SOURCE_DIGESTS["fuxi_climo"],

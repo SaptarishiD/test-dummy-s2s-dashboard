@@ -24,7 +24,6 @@ def test_public_copy_contains_only_the_approved_contact_email() -> None:
             "src/pages/archive.ts",
             "src/pages/forecast.ts",
             "src/pages/global.ts",
-            "src/pages/models.ts",
             "src/pages/outlook.ts",
             "public/meeting.html",
         )
@@ -47,7 +46,6 @@ def test_dated_global_demo_copy_is_consistent() -> None:
             "index.html",
             "README.md",
             "src/pages/global.ts",
-            "src/pages/models.ts",
         )
     )
     assert "global beta" not in copy.casefold()
@@ -58,7 +56,30 @@ def test_dated_global_demo_copy_is_consistent() -> None:
 def test_navigation_does_not_use_lab_branding() -> None:
     shell = read("src/main.ts")
     assert "S2S Lab" not in shell
-    assert '<a href="./#models" data-route="models">Models</a>' in shell
+    assert 'data-route="models"' not in shell
+
+
+def test_public_facing_copy_does_not_use_model_brand_names() -> None:
+    public_copy = "\n".join(
+        read(path)
+        for path in (
+            "index.html",
+            "src/main.ts",
+            "src/pages/archive.ts",
+            "src/pages/forecast.ts",
+            "src/pages/global.ts",
+            "src/pages/outlook.ts",
+        )
+    )
+    assert "FuXi" not in public_copy
+    assert "NeuralGCM" not in public_copy
+
+    public_data = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "public/data").rglob("*.json"))
+    )
+    assert "FuXi" not in public_data
+    assert "NeuralGCM" not in public_data
 
 
 def test_plan_is_explicitly_a_historical_record() -> None:
