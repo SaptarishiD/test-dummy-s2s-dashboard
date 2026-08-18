@@ -122,7 +122,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-16T14:32:00Z",
+  "generated_at": "2026-08-18T14:12:47Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -781,10 +781,52 @@
         "notice": "ERA5 is a delayed research reference, never live guidance."
       },
       "category": "reanalysis_reference",
-      "default_issue": "20260808",
+      "default_issue": "20260812",
       "description": "Delayed, scientifically matched reanalysis initializations for reference experiments and IC-sensitivity comparisons; not near-real-time guidance.",
       "id": "era5",
       "issues": [
+        {
+          "forecast": "forecasts/era5/20260812.json",
+          "id": "20260812",
+          "initialization": "2026-08-12T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/era5/20260812.json",
+          "role": "reference",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_anomaly": false,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "8233f4da5385a61ba7513db4e68eae633c82046eb7c78b18e8fde786b97f2ca2",
+            "regional_sha256": "368c362ad2df9eb95b4ad41b8bf3aebf161fa4db842cfd5def8bbac2b383944a",
+            "pdf_sha256": "851f296e22cf26b0bfe7325ad3284c12f62a25210e46d58c693c2cd35f81f04b"
+          },
+          "valid_through": "2026-09-22",
+          "published_at": "2026-08-18T14:12:32.225825+00:00",
+          "pdf": "downloads/era5/20260812/S2S_Research_India_Weeks1-4_ERA5_20260812.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-12T00:00:00Z",
+            "pdf_until": "2026-10-07T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
         {
           "archive": {
             "interactive_available": true,
@@ -1252,13 +1294,13 @@
       "id": "ifs",
       "issues": [
         {
-          "forecast": "forecasts/ifs/20260815.json",
-          "id": "20260815",
-          "initialization": "2026-08-15T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/ifs/20260815.json",
-          "role": "operational_experimental",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-15T00:00:00Z",
+            "pdf_until": "2026-10-10T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -1273,26 +1315,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "archive",
-            "label": "Archived guidance",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "039b9222123c7dde9352c73d5e497799b9233ccc610003e759e23ab0614b6c6a",
             "regional_sha256": "d12462c5ac10e6c128e9c1c0f7945d49f1a9d966fb13f0720e980b192f443dd6",
             "pdf_sha256": "1a14d7f0c0849339a9876c34dead503ede1fe6c13b64b46155abdd805fd9b981"
           },
-          "valid_through": "2026-09-25",
-          "published_at": "2026-08-16T14:31:50.927086+00:00",
+          "forecast": "forecasts/ifs/20260815.json",
+          "id": "20260815",
+          "initialization": "2026-08-15T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/ifs/20260815/S2S_Research_India_Weeks1-4_IFS_20260815.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-08-15T00:00:00Z",
-            "pdf_until": "2026-10-10T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Archived guidance",
+            "member_class": "production"
+          },
+          "published_at": "2026-08-16T14:31:50.927086+00:00",
+          "regional_outlook": "regional/ifs/20260815.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "valid_through": "2026-09-25"
         }
       ],
       "label": "IFS operational initialization",
@@ -1302,13 +1344,13 @@
   ],
   "latest_reference": {
     "source_id": "era5",
-    "issue_id": "20260808",
-    "initialization": "2026-08-08T00:00:00Z",
+    "issue_id": "20260812",
+    "initialization": "2026-08-12T00:00:00Z",
     "members": 100,
-    "forecast": "forecasts/era5/20260808.json",
-    "forecast_sha256": "585987863503d984ccf59754954e70954d29885144fbc2aa64e4ac14fa4e9357",
-    "valid_through": "2026-09-18",
-    "published_at": "2026-08-16T08:28:05.655698+00:00",
+    "forecast": "forecasts/era5/20260812.json",
+    "forecast_sha256": "8233f4da5385a61ba7513db4e68eae633c82046eb7c78b18e8fde786b97f2ca2",
+    "valid_through": "2026-09-22",
+    "published_at": "2026-08-18T14:12:32.225825+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
@@ -1322,8 +1364,8 @@
       "regional_probabilities": true,
       "pdf": true
     },
-    "regional_outlook": "regional/era5/20260808.json",
-    "pdf": "downloads/era5/20260808/S2S_Research_India_Weeks1-4_ERA5_20260808.pdf"
+    "regional_outlook": "regional/era5/20260812.json",
+    "pdf": "downloads/era5/20260812/S2S_Research_India_Weeks1-4_ERA5_20260812.pdf"
   },
   "latest_successful_issue": "20260815",
   "operations": {
