@@ -64,7 +64,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
   },
 ];
 
-function renderMember(member: TeamMember): string {
+function renderMember(member: TeamMember, index: number): string {
   const imageStyle = member.imagePosition
     ? ` style="object-position: ${member.imagePosition}"`
     : "";
@@ -82,7 +82,10 @@ function renderMember(member: TeamMember): string {
         <span aria-hidden="true">View profile ↗</span>
       </a>
       <div class="team-person-card__body">
-        <span class="team-card-label">${member.affiliation}</span>
+        <div class="team-person-card__meta">
+          <span class="team-card-label">${member.affiliation}</span>
+          <span class="team-person-card__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+        </div>
         <h3>${member.name}</h3>
         <p class="team-person-card__role">${member.role}</p>
         <p>${member.expertise}</p>
@@ -103,11 +106,18 @@ export function renderTeamPage(container: HTMLElement): void {
           <span class="team-eyebrow">People behind the forecast</span>
           <h1 id="team-title">The team behind the forecast.</h1>
         </div>
-        <p>
-          S2S Research brings atmospheric science, machine learning, forecast
-          verification, and careful public communication together in one
-          experimental service.
-        </p>
+        <div class="team-hero__aside">
+          <p>
+            S2S Research brings atmospheric science, machine learning, forecast
+            verification, and careful public communication together in one
+            experimental service.
+          </p>
+          <dl class="team-hero__stats" aria-label="Team overview">
+            <div><dt>06</dt><dd>Team members</dd></div>
+            <div><dt>04</dt><dd>Institutions</dd></div>
+            <div><dt>01</dt><dd>Shared forecast mission</dd></div>
+          </dl>
+        </div>
       </header>
 
       <section class="team-roster" aria-labelledby="team-roster-title">
@@ -125,8 +135,8 @@ export function renderTeamPage(container: HTMLElement): void {
 
       <article class="team-lead team-manager" aria-labelledby="team-manager-name">
         <div class="team-lead__portrait team-lead__portrait--photo">
-          <img src="./team/ayush-raj.png" alt="Ayush Raj" loading="lazy" />
-          <small>Main lead</small>
+          <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="lazy" decoding="async" />
+          <small>Project manager · Main lead</small>
         </div>
         <div class="team-lead__content">
           <span class="team-card-label">Project management &amp; research engineering</span>
@@ -146,7 +156,6 @@ export function renderTeamPage(container: HTMLElement): void {
             </a>
           </div>
         </div>
-        <div class="team-lead__mark" aria-hidden="true">Main</div>
       </article>
 
       <aside class="team-institution-band" aria-label="Institutional collaboration">
