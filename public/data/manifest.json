@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-18T14:12:51.753045+00:00",
+  "generated_at": "2026-08-19T01:12:51.672009+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -210,6 +210,11 @@
       "sha256": "35359e67bab93bd4fd95583a0b7fff45e0304bdf43647c7a734ed99bb0da91f0"
     },
     {
+      "path": "data/forecasts/gfs/20260819.json",
+      "size_bytes": 346404,
+      "sha256": "a6c6cb210dd58446ff54ef1f3ef0e96264b8661595866508542556299b752dc9"
+    },
+    {
       "path": "data/forecasts/ifs/20260815.json",
       "size_bytes": 606641,
       "sha256": "039b9222123c7dde9352c73d5e497799b9233ccc610003e759e23ab0614b6c6a"
@@ -336,8 +341,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 50583,
-      "sha256": "c6b0e961d3b1f48ae8ce341a0c148315c1924836fa2b90f58847845e8d553d7b"
+      "size_bytes": 52379,
+      "sha256": "892b87ae09d32327cb82b1fe0fb69e1a94679e46eea1f9a0962a53d6293a6262"
     },
     {
       "path": "data/india-admin.json",
@@ -423,6 +428,11 @@
       "path": "data/regional/gfs/20260815.json",
       "size_bytes": 447566,
       "sha256": "11bae2b0b802a6ff3422e6d5f9de228d7cf6741790874b3fe94af64e846236b2"
+    },
+    {
+      "path": "data/regional/gfs/20260819.json",
+      "size_bytes": 447416,
+      "sha256": "4b7fd5ec3bb97967ea2a71ffab4d297c715a768243aa92af82b784d7477d7ec9"
     },
     {
       "path": "data/regional/ifs/20260815.json",
@@ -578,6 +588,11 @@
       "path": "downloads/gfs/20260815/S2S_Research_India_Weeks1-4_GFS_20260815.pdf",
       "size_bytes": 2887706,
       "sha256": "ca65b0d2a0fe7f0013593318a3312c0b2a9bfe69504f9281651c15adb2d0c358"
+    },
+    {
+      "path": "downloads/gfs/20260819/S2S_Research_India_Weeks1-4_GFS_20260819.pdf",
+      "size_bytes": 2886364,
+      "sha256": "0b92f0ae27d2f0faf615e1c84b1d4c72622f1ab562d971b684c927805020e16f"
     },
     {
       "path": "downloads/ifs/20260815/S2S_Research_India_Weeks1-4_IFS_20260815.pdf",
