@@ -43,6 +43,16 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     email: "parthasarathym@iiserbpr.ac.in",
   },
   {
+    name: "Dr. Manmeet Singh",
+    role: "Assistant Professor · Director, DSOC AI Laboratory",
+    affiliation: "Western Kentucky University",
+    expertise: "AI for climate and disaster science, weather prediction, and Earth system modelling.",
+    image: "./team/manmeet-singh.jpg",
+    imagePosition: "center 18%",
+    profile: "https://www.wku.edu/eeas/staff/manmeet_singh",
+    email: "manmeet.singh@wku.edu",
+  },
+  {
     name: "Saptarishi Dhanuka",
     role: "Pre-doctoral Fellow",
     affiliation: "SCDLDS · Ashoka University",
@@ -100,32 +110,6 @@ export function renderTeamPage(container: HTMLElement): void {
         </p>
       </header>
 
-      <article class="team-lead" aria-labelledby="team-lead-name">
-        <div class="team-lead__portrait" aria-hidden="true">
-          <span>AR</span>
-          <small>Project lead</small>
-        </div>
-        <div class="team-lead__content">
-          <span class="team-card-label">Lead researcher &amp; developer</span>
-          <h2 id="team-lead-name">Ayush Raj</h2>
-          <p class="team-lead__affiliation">
-            IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
-          </p>
-          <p>
-            Ayush leads the research engineering behind S2S Research—from forecast
-            pipelines and scientific validation to operational automation and the
-            public-facing products that make subseasonal guidance easier to use.
-          </p>
-          <div class="team-lead__links">
-            <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
-            <a href="https://in.linkedin.com/in/ayush-raj-7608a424a" target="_blank" rel="noreferrer">
-              LinkedIn <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-        </div>
-        <div class="team-lead__mark" aria-hidden="true">01</div>
-      </article>
-
       <section class="team-roster" aria-labelledby="team-roster-title">
         <header class="team-section-heading">
           <div>
@@ -138,6 +122,32 @@ export function renderTeamPage(container: HTMLElement): void {
           ${SCIENTIFIC_TEAM.map(renderMember).join("")}
         </div>
       </section>
+
+      <article class="team-lead team-manager" aria-labelledby="team-manager-name">
+        <div class="team-lead__portrait" aria-hidden="true">
+          <span>AR</span>
+          <small>Main lead</small>
+        </div>
+        <div class="team-lead__content">
+          <span class="team-card-label">Project management &amp; research engineering</span>
+          <h2 id="team-manager-name">Ayush Raj</h2>
+          <p class="team-lead__affiliation">
+            IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
+          </p>
+          <p>
+            Ayush is the project manager and main lead for S2S Research, coordinating
+            forecast pipelines, scientific validation, operational automation, and
+            the public-facing products that make subseasonal guidance easier to use.
+          </p>
+          <div class="team-lead__links">
+            <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
+            <a href="https://in.linkedin.com/in/ayush-raj-7608a424a" target="_blank" rel="noreferrer">
+              LinkedIn <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+        <div class="team-lead__mark" aria-hidden="true">Main</div>
+      </article>
 
       <aside class="team-institution-band" aria-label="Institutional collaboration">
         <div class="team-institution-band__logos">

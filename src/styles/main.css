@@ -1996,7 +1996,7 @@ a {
 }
 
 .team-roster {
-  margin-bottom: 72px;
+  margin: 72px 0;
 }
 
 .team-section-heading {
@@ -2022,18 +2022,23 @@ a {
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-top: 1px solid #cbd4d0;
   border-left: 1px solid #cbd4d0;
 }
 
 .team-person-card {
   display: flex;
+  grid-column: span 2;
   min-width: 0;
   flex-direction: column;
   background: rgb(255 254 249 / 80%);
   border-right: 1px solid #cbd4d0;
   border-bottom: 1px solid #cbd4d0;
+}
+
+.team-person-card:nth-last-child(-n + 2) {
+  grid-column: span 3;
 }
 
 .team-person-card__portrait {
@@ -2124,6 +2129,10 @@ a {
   padding: 25px 30px;
   color: #dce8e7;
   background: #102d3c;
+}
+
+.team-manager {
+  margin: 0 0 82px;
 }
 
 .team-institution-band__logos {
@@ -2255,6 +2264,11 @@ a {
 
   .team-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .team-person-card,
+  .team-person-card:nth-last-child(-n + 2) {
+    grid-column: span 1;
   }
 
   .team-person-card h3,
