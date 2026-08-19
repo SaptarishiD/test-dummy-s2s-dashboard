@@ -124,8 +124,8 @@ export function renderTeamPage(container: HTMLElement): void {
       </section>
 
       <article class="team-lead team-manager" aria-labelledby="team-manager-name">
-        <div class="team-lead__portrait" aria-hidden="true">
-          <span>AR</span>
+        <div class="team-lead__portrait team-lead__portrait--photo">
+          <img src="./team/ayush-raj.png" alt="Ayush Raj" loading="lazy" />
           <small>Main lead</small>
         </div>
         <div class="team-lead__content">

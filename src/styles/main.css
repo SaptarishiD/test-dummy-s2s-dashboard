@@ -1920,6 +1920,35 @@ a {
     #126d72;
 }
 
+.team-lead__portrait--photo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.team-lead__portrait--photo img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 24%;
+}
+
+.team-lead__portrait--photo small {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  z-index: 1;
+  margin: 0;
+  padding: 9px 12px;
+  color: #fff;
+  background: rgb(16 45 60 / 88%);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
 .team-lead__portrait span {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(72px, 10vw, 126px);
@@ -2302,6 +2331,10 @@ a {
 
   .team-lead__portrait {
     min-height: 265px;
+  }
+
+  .team-lead__mark {
+    display: none;
   }
 
   .team-grid {
