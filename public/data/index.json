@@ -128,7 +128,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-19T01:12:45Z",
+  "generated_at": "2026-08-19T22:52:04Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -160,13 +160,13 @@
       "id": "gfs",
       "issues": [
         {
-          "forecast": "forecasts/gfs/20260819.json",
-          "id": "20260819",
-          "initialization": "2026-08-19T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/gfs/20260819.json",
-          "role": "operational_experimental",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-19T00:00:00Z",
+            "pdf_until": "2026-10-14T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -180,26 +180,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "current",
-            "label": "Current guidance",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "a6c6cb210dd58446ff54ef1f3ef0e96264b8661595866508542556299b752dc9",
             "regional_sha256": "4b7fd5ec3bb97967ea2a71ffab4d297c715a768243aa92af82b784d7477d7ec9",
             "pdf_sha256": "0b92f0ae27d2f0faf615e1c84b1d4c72622f1ab562d971b684c927805020e16f"
           },
-          "valid_through": "2026-09-29",
-          "published_at": "2026-08-19T01:12:31.523963+00:00",
+          "forecast": "forecasts/gfs/20260819.json",
+          "id": "20260819",
+          "initialization": "2026-08-19T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/gfs/20260819/S2S_Research_India_Weeks1-4_GFS_20260819.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-08-19T00:00:00Z",
-            "pdf_until": "2026-10-14T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "current",
+            "label": "Current guidance",
+            "member_class": "production"
+          },
+          "published_at": "2026-08-19T01:12:31.523963+00:00",
+          "regional_outlook": "regional/gfs/20260819.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "valid_through": "2026-09-29"
         },
         {
           "archive": {
@@ -1337,10 +1337,52 @@
         "notice": "IFS initialization remains experimental while the ocean skin-temperature SST proxy is evaluated."
       },
       "category": "operational_initialization",
-      "default_issue": "20260815",
+      "default_issue": "20260819",
       "description": "Experimental AI subseasonal system initialization from ECMWF IFS Open Data. Ocean skin temperature is used as the disclosed SST proxy during the staged pilot.",
       "id": "ifs",
       "issues": [
+        {
+          "forecast": "forecasts/ifs/20260819.json",
+          "id": "20260819",
+          "initialization": "2026-08-19T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/ifs/20260819.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_anomaly": false,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Archived guidance",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "c7911f875a36fa18d6dcaf3e890a77d4d480531c24490083d47e0bd029ff0448",
+            "regional_sha256": "2d3104cfa0f3e74c6270ed9007db0d63c2400e2b6541af33b71ecdd588717605",
+            "pdf_sha256": "5314ab133f0947f6a63d8d7bd7cef0f070de20c6b138eb3d307faed4f17e4a8e"
+          },
+          "valid_through": "2026-09-29",
+          "published_at": "2026-08-19T22:51:47.293565+00:00",
+          "pdf": "downloads/ifs/20260819/S2S_Research_India_Weeks1-4_IFS_20260819.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-19T00:00:00Z",
+            "pdf_until": "2026-10-14T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
         {
           "archive": {
             "interactive_available": true,

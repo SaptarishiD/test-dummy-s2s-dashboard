@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T01:12:51.672009+00:00",
+  "generated_at": "2026-08-19T22:52:09.025407+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -220,6 +220,11 @@
       "sha256": "039b9222123c7dde9352c73d5e497799b9233ccc610003e759e23ab0614b6c6a"
     },
     {
+      "path": "data/forecasts/ifs/20260819.json",
+      "size_bytes": 344576,
+      "sha256": "c7911f875a36fa18d6dcaf3e890a77d4d480531c24490083d47e0bd029ff0448"
+    },
+    {
       "path": "data/formulas.json",
       "size_bytes": 3123,
       "sha256": "f1a188e9f4626deed103fc4d317bf5972d3636b8aa0e3a2690ec2282d8c9c4b7"
@@ -341,8 +346,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 52379,
-      "sha256": "892b87ae09d32327cb82b1fe0fb69e1a94679e46eea1f9a0962a53d6293a6262"
+      "size_bytes": 54015,
+      "sha256": "3915723ce20c649b579db6d815ab3e63abc3a39cade3da4afc69f17f258e25fd"
     },
     {
       "path": "data/india-admin.json",
@@ -438,6 +443,11 @@
       "path": "data/regional/ifs/20260815.json",
       "size_bytes": 448195,
       "sha256": "d12462c5ac10e6c128e9c1c0f7945d49f1a9d966fb13f0720e980b192f443dd6"
+    },
+    {
+      "path": "data/regional/ifs/20260819.json",
+      "size_bytes": 448095,
+      "sha256": "2d3104cfa0f3e74c6270ed9007db0d63c2400e2b6541af33b71ecdd588717605"
     },
     {
       "path": "data/sources.json",
@@ -600,6 +610,11 @@
       "sha256": "1a14d7f0c0849339a9876c34dead503ede1fe6c13b64b46155abdd805fd9b981"
     },
     {
+      "path": "downloads/ifs/20260819/S2S_Research_India_Weeks1-4_IFS_20260819.pdf",
+      "size_bytes": 2880154,
+      "sha256": "5314ab133f0947f6a63d8d7bd7cef0f070de20c6b138eb3d307faed4f17e4a8e"
+    },
+    {
       "path": "meeting/20260731/rainfall-anomaly.png",
       "size_bytes": 488714,
       "sha256": "890b59489a8bfeb1bbd6529a1d54d6b0f23dff057ee383a3c1038355508830c3"
@@ -623,6 +638,36 @@
       "path": "meeting.html",
       "size_bytes": 2661,
       "sha256": "0d79c6dc429b109e5102a320252e48b50c8f45a8f116d54fe22563510e3e3ae7"
+    },
+    {
+      "path": "team/ayush-raj.webp",
+      "size_bytes": 446428,
+      "sha256": "d4bf340bf7363d70e8a863541c4398d8bd1926f40f69151d0a5164b33faabea7"
+    },
+    {
+      "path": "team/bedartha-goswami.jpg",
+      "size_bytes": 249757,
+      "sha256": "7f45f1d01c99ae460c7964e62e30108f35f483b11bea2073b9b93ffb10ea44e1"
+    },
+    {
+      "path": "team/manmeet-singh.jpg",
+      "size_bytes": 30782,
+      "sha256": "5d6719261c3e491bf1056d86999fafc44ac1246dde81502239d66bc60acd9bd9"
+    },
+    {
+      "path": "team/parthasarathi-mukhopadhyay.jpg",
+      "size_bytes": 106067,
+      "sha256": "2a5ef5ccd91f7a3175198771bf344e8a3d77ec6e457f1ce78a4de55cfa46cb32"
+    },
+    {
+      "path": "team/sandeep-juneja.jpg",
+      "size_bytes": 12644,
+      "sha256": "6439982fedef755f8994298fc9bdb99c98b3f63ed157cf9218669f794c7dfa15"
+    },
+    {
+      "path": "team/saptarishi-dhanuka.jpg",
+      "size_bytes": 38913,
+      "sha256": "10db6d153076900e98551d2fe26bfff3d46467a667137c74d0e35bb6b3c09545"
     }
   ]
 }
