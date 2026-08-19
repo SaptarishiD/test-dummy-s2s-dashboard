@@ -23,13 +23,14 @@ import {
   issueHasRegionalOutlook,
 } from "./lib/catalog";
 
-type Route = "forecast" | "india" | "outlook" | "archive";
+type Route = "forecast" | "india" | "outlook" | "archive" | "team";
 
 const ROUTES = new Set<Route>([
   "forecast",
   "india",
   "outlook",
   "archive",
+  "team",
 ]);
 let routeCleanup: (() => void) | undefined;
 
@@ -171,6 +172,9 @@ async function fetchGlobalData(
 
 async function loadData(): Promise<AppData> {
   const route = currentRoute();
+  if (route === "team") {
+    return {};
+  }
   const domainCatalog = await fetchJson<ForecastDomainCatalog>(
     "./data/domains.json",
     "no-store",
@@ -290,6 +294,7 @@ function shell(): string {
         <a href="./#outlook" data-route="outlook">Regional</a>
         <a href="./?view=global#forecast" data-route="forecast">Global Demo</a>
         <a href="./#archive" data-route="archive">Archive</a>
+        <a href="./#team" data-route="team">Team</a>
       </nav>
       <div class="header-partner">
         <a
@@ -357,11 +362,14 @@ async function renderRoute(data: AppData): Promise<void> {
   document.body.classList.toggle("india-route", route === "india");
   document.body.classList.toggle("outlook-route", route === "outlook");
   document.body.classList.toggle("archive-route", route === "archive");
+  document.body.classList.toggle("team-route", route === "team");
   const statusDate = route === "forecast"
     ? data.global!.metadata.issue.initialization
     : data.forecast?.issue.initialization ??
       (data.index ? currentGfsIssue(data.index)?.initialization : undefined);
-  const statusLabel = statusDate
+  const statusLabel = route === "team"
+    ? "Research team"
+    : statusDate
     ? new Intl.DateTimeFormat("en-IN", {
       day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
     }).format(new Date(statusDate))
@@ -409,6 +417,10 @@ async function renderRoute(data: AppData): Promise<void> {
   if (route === "archive") {
     const { renderArchivePage } = await import("./pages/archive");
     renderArchivePage(content, data);
+  }
+  if (route === "team") {
+    const { renderTeamPage } = await import("./pages/team");
+    renderTeamPage(content);
   }
   window.scrollTo({ top: 0, behavior: "instant" });
 }
