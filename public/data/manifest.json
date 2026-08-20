@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T22:52:09.025407+00:00",
+  "generated_at": "2026-08-20T00:39:10.265147+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -211,8 +211,8 @@
     },
     {
       "path": "data/forecasts/gfs/20260819.json",
-      "size_bytes": 346404,
-      "sha256": "a6c6cb210dd58446ff54ef1f3ef0e96264b8661595866508542556299b752dc9"
+      "size_bytes": 608969,
+      "sha256": "118bd2b23040bd4d26b05282829cbe573c77d435d94ebdf6f858a2d135118dd3"
     },
     {
       "path": "data/forecasts/ifs/20260815.json",
@@ -346,8 +346,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 54015,
-      "sha256": "3915723ce20c649b579db6d815ab3e63abc3a39cade3da4afc69f17f258e25fd"
+      "size_bytes": 54069,
+      "sha256": "4958d8f2480975dd470cafbf58b04010f8d7f2d75bac466b0b60c524f26eaea3"
     },
     {
       "path": "data/india-admin.json",
@@ -601,8 +601,8 @@
     },
     {
       "path": "downloads/gfs/20260819/S2S_Research_India_Weeks1-4_GFS_20260819.pdf",
-      "size_bytes": 2886364,
-      "sha256": "0b92f0ae27d2f0faf615e1c84b1d4c72622f1ab562d971b684c927805020e16f"
+      "size_bytes": 3626057,
+      "sha256": "8de931a863b50b8a8cee330300c4d9d609787fad93a052a853e1b2665337928b"
     },
     {
       "path": "downloads/ifs/20260815/S2S_Research_India_Weeks1-4_IFS_20260815.pdf",

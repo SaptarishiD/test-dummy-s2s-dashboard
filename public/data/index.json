@@ -107,19 +107,20 @@
     "initialization": "2026-08-19T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/gfs/20260819.json",
-    "forecast_sha256": "a6c6cb210dd58446ff54ef1f3ef0e96264b8661595866508542556299b752dc9",
+    "forecast_sha256": "118bd2b23040bd4d26b05282829cbe573c77d435d94ebdf6f858a2d135118dd3",
     "valid_through": "2026-09-29",
-    "published_at": "2026-08-19T01:12:31.523963+00:00",
+    "published_at": "2026-08-20T00:38:31.918832+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
       "rainfall_anomaly",
-      "temperature_anomaly"
+      "temperature_anomaly",
+      "wind850_anomaly"
     ],
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
-      "wind850_anomaly": false,
+      "wind850_anomaly": true,
       "regional_probabilities": true,
       "pdf": true
     },
@@ -128,7 +129,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-19T22:52:04Z",
+  "generated_at": "2026-08-20T00:38:46Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -171,19 +172,20 @@
             "rainfall_total",
             "temperature_mean",
             "rainfall_anomaly",
-            "temperature_anomaly"
+            "temperature_anomaly",
+            "wind850_anomaly"
           ],
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
-            "wind850_anomaly": false,
+            "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "a6c6cb210dd58446ff54ef1f3ef0e96264b8661595866508542556299b752dc9",
+            "forecast_sha256": "118bd2b23040bd4d26b05282829cbe573c77d435d94ebdf6f858a2d135118dd3",
             "regional_sha256": "4b7fd5ec3bb97967ea2a71ffab4d297c715a768243aa92af82b784d7477d7ec9",
-            "pdf_sha256": "0b92f0ae27d2f0faf615e1c84b1d4c72622f1ab562d971b684c927805020e16f"
+            "pdf_sha256": "8de931a863b50b8a8cee330300c4d9d609787fad93a052a853e1b2665337928b"
           },
           "forecast": "forecasts/gfs/20260819.json",
           "id": "20260819",
@@ -195,7 +197,7 @@
             "label": "Current guidance",
             "member_class": "production"
           },
-          "published_at": "2026-08-19T01:12:31.523963+00:00",
+          "published_at": "2026-08-20T00:38:31.918832+00:00",
           "regional_outlook": "regional/gfs/20260819.json",
           "role": "operational_experimental",
           "status": "warning",
@@ -1460,7 +1462,7 @@
   "latest_successful_issue": "20260819",
   "operations": {
     "status": "on_schedule",
-    "last_successful_at": "2026-08-19T01:12:31.523963+00:00",
+    "last_successful_at": "2026-08-20T00:38:31.918832+00:00",
     "next_expected_at": "2026-08-22T12:00:00Z",
     "stale_after": "2026-08-23T00:00:00Z"
   },
@@ -1470,7 +1472,7 @@
       "Saturday"
     ],
     "target_time_utc": "12:00",
-    "last_successful_at": "2026-08-19T01:12:31.523963+00:00",
+    "last_successful_at": "2026-08-20T00:38:31.918832+00:00",
     "next_expected_at": "2026-08-22T12:00:00Z"
   },
   "retention": {
