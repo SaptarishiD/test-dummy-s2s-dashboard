@@ -4,6 +4,7 @@ interface TeamMember {
   name: string;
   role: string;
   affiliation: string;
+  scdldsRole?: string;
   expertise: string;
   image: string;
   imagePosition?: string;
@@ -15,7 +16,8 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
   {
     name: "Sandeep Juneja",
     role: "Professor of Computer Science · Centre Director",
-    affiliation: "Ashoka University · SCDLDS",
+    affiliation: "Ashoka University",
+    scdldsRole: "Centre Director",
     expertise: "Applied probability, machine learning, and monsoon weather modelling.",
     image: "./team/sandeep-juneja.jpg",
     profile: "https://www.ashoka.edu.in/profile/sandeep-juneja/",
@@ -36,6 +38,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     name: "Parthasarathi Mukhopadhyay",
     role: "Visiting Faculty · Earth & Environmental Sciences",
     affiliation: "IISER Berhampur · FASc",
+    scdldsRole: "Collaborator",
     expertise: "Numerical weather prediction, monsoon modelling, clouds, and convection.",
     image: "./team/parthasarathi-mukhopadhyay.jpg",
     imagePosition: "center 18%",
@@ -46,6 +49,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     name: "Dr. Manmeet Singh",
     role: "Assistant Professor · Director, DSOC AI Laboratory",
     affiliation: "Western Kentucky University",
+    scdldsRole: "Academic visitor",
     expertise: "AI for climate and disaster science, weather prediction, and Earth system modelling.",
     image: "./team/manmeet-singh.jpg",
     imagePosition: "center 18%",
@@ -55,7 +59,8 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
   {
     name: "Saptarishi Dhanuka",
     role: "Pre-doctoral Fellow",
-    affiliation: "SCDLDS · Ashoka University",
+    affiliation: "Ashoka University",
+    scdldsRole: "Pre-doctoral Fellow",
     expertise: "Artificial intelligence for weather, climate, and data-driven forecasting.",
     image: "./team/saptarishi-dhanuka.jpg",
     imagePosition: "center 20%",
@@ -78,12 +83,25 @@ function renderMember(member: TeamMember, index: number): string {
         rel="noreferrer"
         aria-label="View ${member.name}'s official profile"
       >
-        <img src="${member.image}" alt="${member.name}" loading="lazy"${imageStyle} />
-        <span aria-hidden="true">View profile ↗</span>
+        <img src="${member.image}" alt="${member.name}" loading="eager" decoding="async"${imageStyle} />
+        <span class="team-person-card__view" aria-hidden="true">View profile ↗</span>
       </a>
       <div class="team-person-card__body">
         <div class="team-person-card__meta">
-          <span class="team-card-label">${member.affiliation}</span>
+          <div class="team-person-card__affiliations">
+            <span class="team-card-label">${member.affiliation}</span>
+            ${
+              member.scdldsRole
+                ? `<a
+                    class="team-centre-affiliation"
+                    href="https://scdlds.ashoka.edu.in/"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="${member.scdldsRole}, Safexpress Centre for Data, Learning and Decision Sciences"
+                  ><span aria-hidden="true"></span>SCDLDS · ${member.scdldsRole}</a>`
+                : ""
+            }
+          </div>
           <span class="team-person-card__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
         </div>
         <h3>${member.name}</h3>
@@ -114,7 +132,7 @@ export function renderTeamPage(container: HTMLElement): void {
           </p>
           <dl class="team-hero__stats" aria-label="Team overview">
             <div><dt>06</dt><dd>Team members</dd></div>
-            <div><dt>04</dt><dd>Institutions</dd></div>
+            <div><dt>05</dt><dd>SCDLDS affiliated</dd></div>
             <div><dt>01</dt><dd>Shared forecast mission</dd></div>
           </dl>
         </div>
@@ -126,7 +144,7 @@ export function renderTeamPage(container: HTMLElement): void {
             <span class="team-eyebrow">Scientific leadership &amp; collaborators</span>
             <h2 id="team-roster-title">Expertise across weather, climate, data, and decisions.</h2>
           </div>
-          <p>Official institutional profiles and direct contact details are provided for every collaborator.</p>
+          <p>Centre-connected profiles carry an SCDLDS affiliation badge; institutional profiles and direct contact details remain one click away.</p>
         </header>
         <div class="team-grid">
           ${SCIENTIFIC_TEAM.map(renderMember).join("")}
@@ -135,11 +153,18 @@ export function renderTeamPage(container: HTMLElement): void {
 
       <article class="team-lead team-manager" aria-labelledby="team-manager-name">
         <div class="team-lead__portrait team-lead__portrait--photo">
-          <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="lazy" decoding="async" />
+          <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="eager" decoding="async" />
           <small>Project manager · Main lead</small>
         </div>
         <div class="team-lead__content">
           <span class="team-card-label">Project management &amp; research engineering</span>
+          <a
+            class="team-centre-affiliation team-centre-affiliation--lead"
+            href="https://scdlds.ashoka.edu.in/"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Project manager, Safexpress Centre for Data, Learning and Decision Sciences"
+          ><span aria-hidden="true"></span>SCDLDS · Project manager</a>
           <h2 id="team-manager-name">Ayush Raj</h2>
           <p class="team-lead__affiliation">
             IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences

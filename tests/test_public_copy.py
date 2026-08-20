@@ -59,6 +59,19 @@ def test_navigation_does_not_use_lab_branding() -> None:
     assert 'data-route="models"' not in shell
 
 
+def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> None:
+    team = read("src/pages/team.ts")
+    assert team.count("scdldsRole:") == 4
+    assert 'scdldsRole: "Centre Director"' in team
+    assert 'scdldsRole: "Collaborator"' in team
+    assert 'scdldsRole: "Academic visitor"' in team
+    assert 'scdldsRole: "Pre-doctoral Fellow"' in team
+    bedartha = team.split('name: "Bedartha Goswami"', 1)[1].split("  },", 1)[0]
+    assert "scdldsRole" not in bedartha
+    assert "SCDLDS · Project manager" in team
+    assert "SCDLDS affiliated" in team
+
+
 def test_public_facing_copy_does_not_use_model_brand_names() -> None:
     public_copy = "\n".join(
         read(path)
