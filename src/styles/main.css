@@ -1889,16 +1889,14 @@ a {
 }
 
 .team-researcher {
-  display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  gap: 30px;
+  display: flex;
   align-items: center;
-  max-width: 780px;
+  max-width: 500px;
   margin: 12px auto 64px;
-  padding: 28px 32px;
-  background: #fffef9;
-  border: 1px solid #ced7d3;
-  box-shadow: 0 12px 30px rgb(16 45 60 / 6%);
+  padding: 34px 16px 0;
+  flex-direction: column;
+  text-align: center;
+  border-top: 1px solid #cbd4d0;
 }
 
 .team-researcher__portrait {
@@ -1925,11 +1923,13 @@ a {
 }
 
 .team-researcher__content {
+  display: grid;
+  justify-items: center;
   min-width: 0;
 }
 
 .team-researcher__content > p:not(.team-researcher__affiliation) {
-  max-width: 560px;
+  max-width: 480px;
   margin: 14px 0 18px;
   color: #526870;
   font-size: 11px;
@@ -1952,6 +1952,10 @@ a {
   gap: 12px 22px;
 }
 
+.team-researcher__links {
+  justify-content: center;
+}
+
 .team-researcher__links a,
 .team-person-card__links a {
   color: #126d72;
@@ -1970,8 +1974,8 @@ a {
 }
 
 .team-researcher h2 {
-  margin-top: 8px;
-  font-size: clamp(30px, 4vw, 42px);
+  margin: 17px 0 9px;
+  font-size: clamp(28px, 3.5vw, 36px);
 }
 
 .team-roster {
@@ -2222,14 +2226,12 @@ a {
   }
 
   .team-researcher {
-    grid-template-columns: 124px minmax(0, 1fr);
-    gap: 24px;
     margin-bottom: 66px;
-    padding: 24px;
+    padding-top: 30px;
   }
 
   .team-researcher__portrait {
-    width: 124px;
+    width: 132px;
   }
 
   .team-grid {
@@ -2262,23 +2264,6 @@ a {
   .team-person-card__body {
     padding-right: 0;
     padding-left: 0;
-  }
-}
-
-@media (max-width: 560px) {
-  .team-researcher {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-  }
-
-  .team-researcher__content {
-    display: grid;
-    justify-items: center;
-  }
-
-  .team-researcher__links {
-    justify-content: center;
   }
 }
 

@@ -159,7 +159,11 @@ export function renderTeamPage(container: HTMLElement): void {
           <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="eager" decoding="async" />
         </a>
         <div class="team-researcher__content">
+          <h2 id="team-researcher-name">Ayush Raj</h2>
           <span class="team-card-label">Research · AI &amp; website maintenance</span>
+          <p class="team-researcher__affiliation">
+            IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
+          </p>
           <a
             class="team-centre-affiliation team-centre-affiliation--researcher"
             href="https://scdlds.ashoka.edu.in/"
@@ -167,10 +171,6 @@ export function renderTeamPage(container: HTMLElement): void {
             rel="noreferrer"
             aria-label="Researcher, Safexpress Centre for Data, Learning and Decision Sciences"
           ><span aria-hidden="true"></span>SCDLDS · Researcher</a>
-          <h2 id="team-researcher-name">Ayush Raj</h2>
-          <p class="team-researcher__affiliation">
-            IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
-          </p>
           <p>
             Ayush is a researcher completing an MS thesis in AI subseasonal-to-seasonal
             weather prediction. His work spans AI research, forecast evaluation, and
