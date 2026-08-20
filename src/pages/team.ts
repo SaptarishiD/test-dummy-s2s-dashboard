@@ -36,9 +36,9 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
   },
   {
     name: "Dr. Manmeet Singh",
-    role: "Assistant Professor · Director, DSOC AI Laboratory",
+    role: "Project Lead · Assistant Professor",
     affiliation: "Western Kentucky University",
-    scdldsRole: "Academic visitor",
+    scdldsRole: "Project Lead",
     expertise: "AI for climate and disaster science, weather prediction, and Earth system modelling.",
     image: "./team/manmeet-singh.jpg",
     imagePosition: "center 18%",
@@ -46,15 +46,14 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     email: "manmeet.singh@wku.edu",
   },
   {
-    name: "Bedartha Goswami",
-    role: "Assistant Professor · Data Science",
+    name: "Ayush Raj",
+    role: "MS Thesis Researcher · AI Weather Research",
     affiliation: "IISER Pune",
-    expertise: "Machine learning for weather and climate, with a focus on complex systems.",
-    image: "./team/bedartha-goswami.jpg",
-    imagePosition: "center 34%",
-    profile:
-      "https://www.iiserpune.ac.in/research/department/data-science/people/faculty/regular-faculty/bedartha-goswami/542",
-    email: "bedartha.goswami@iiserpune.ac.in",
+    scdldsRole: "Researcher",
+    expertise: "AI subseasonal-to-seasonal weather prediction and forecast website development.",
+    image: "./team/ayush-raj.webp",
+    profile: "https://in.linkedin.com/in/ayush-raj-7608a424a",
+    email: CONTACT_EMAIL,
   },
   {
     name: "Saptarishi Dhanuka",
@@ -66,18 +65,6 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     imagePosition: "center 20%",
     profile: "https://www.ashoka.edu.in/profile/saptarishi-dhanuka/",
     email: "saptarishi.dhanuka@ashoka.edu.in",
-  },
-  {
-    name: "Bharat",
-    role: "Summer Intern · AI Weather Research",
-    affiliation: "IISER Pune",
-    scdldsRole: "Summer Intern",
-    expertise: "MS thesis in AI subseasonal-to-seasonal weather prediction.",
-    image:
-      "https://scdlds.ashoka.edu.in/wp-content/uploads/2026/06/1000088900.png",
-    imagePosition: "center 24%",
-    profile: "https://scdlds.ashoka.edu.in/members/bharat/",
-    email: "bharat.20221074@students.iiserpune.ac.in",
   },
 ];
 
@@ -130,7 +117,7 @@ export function renderTeamPage(container: HTMLElement): void {
     <section class="team-page" aria-labelledby="team-title">
       <header class="team-hero">
         <span class="team-eyebrow">S2S Research</span>
-        <h1 id="team-title">Research group.</h1>
+        <h1 id="team-title">People behind the forecast.</h1>
         <p class="team-hero__intro">
           Atmospheric science, machine learning, and forecast verification for
           experimental subseasonal guidance.
@@ -147,42 +134,6 @@ export function renderTeamPage(container: HTMLElement): void {
           ${SCIENTIFIC_TEAM.map(renderMember).join("")}
         </div>
       </section>
-
-      <article class="team-researcher" aria-labelledby="team-researcher-name">
-        <a
-          class="team-researcher__portrait"
-          href="https://in.linkedin.com/in/ayush-raj-7608a424a"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="View Ayush Raj's LinkedIn profile"
-        >
-          <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="eager" decoding="async" />
-        </a>
-        <div class="team-researcher__content">
-          <h2 id="team-researcher-name">Ayush Raj</h2>
-          <span class="team-card-label">MS thesis · AI weather research</span>
-          <p class="team-researcher__affiliation">
-            IISER Pune · SCDLDS, Ashoka University
-          </p>
-          <a
-            class="team-centre-affiliation team-centre-affiliation--researcher"
-            href="https://scdlds.ashoka.edu.in/"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Researcher, Safexpress Centre for Data, Learning and Decision Sciences"
-          ><span aria-hidden="true"></span>SCDLDS · Researcher</a>
-          <p>
-            MS thesis researcher working on AI subseasonal-to-seasonal weather prediction
-            with guidance from the faculty team. Maintains the S2S website.
-          </p>
-          <div class="team-researcher__links">
-            <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
-            <a href="https://in.linkedin.com/in/ayush-raj-7608a424a" target="_blank" rel="noreferrer">
-              LinkedIn <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-        </div>
-      </article>
 
       <footer class="team-page-footer" aria-label="Institutional collaboration and contact">
         <div class="team-page-footer__logos">

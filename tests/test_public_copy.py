@@ -77,33 +77,28 @@ def test_navigation_does_not_use_lab_branding() -> None:
     assert 'data-route="models"' not in shell
 
 
-def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> None:
+def test_team_page_uses_the_approved_forecast_roster_and_order() -> None:
     team = read("src/pages/team.ts")
     shell = read("index.html")
     expected_order = (
         "Sandeep Juneja",
         "Parthasarathi Mukhopadhyay",
         "Dr. Manmeet Singh",
-        "Bedartha Goswami",
+        "Ayush Raj",
         "Saptarishi Dhanuka",
-        "Bharat",
     )
     positions = [team.index(f'name: "{name}"') for name in expected_order]
     assert positions == sorted(positions)
     assert team.count("scdldsRole:") == 5
     assert 'scdldsRole: "Centre Director"' in team
     assert 'scdldsRole: "Collaborator"' in team
-    assert 'scdldsRole: "Academic visitor"' in team
+    assert 'scdldsRole: "Project Lead"' in team
+    assert 'scdldsRole: "Researcher"' in team
     assert 'scdldsRole: "Pre-doctoral Fellow"' in team
-    assert 'scdldsRole: "Summer Intern"' in team
-    bedartha = team.split('name: "Bedartha Goswami"', 1)[1].split("  },", 1)[0]
-    assert "scdldsRole" not in bedartha
-    assert "SCDLDS · Researcher" in team
-    assert "with guidance from the faculty team" in team
-    assert "Maintains the S2S website." in team
-    assert "Project manager" not in team
-    assert 'class="team-researcher"' in team
-    assert "Research group." in team
+    assert "Bedartha Goswami" not in team
+    assert 'name: "Bharat"' not in team
+    assert 'class="team-researcher"' not in team
+    assert "People behind the forecast." in team
     assert "team-hero__stats" not in team
     assert "team-principles" not in team
     assert 'class="team-page-footer"' in team
