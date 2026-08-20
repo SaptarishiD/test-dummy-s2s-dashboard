@@ -2103,11 +2103,11 @@ a {
   transform: translateY(-3px);
 }
 
-.team-person-card:nth-last-child(2) {
+.team-person-card:nth-child(4):nth-last-child(2) {
   grid-column: 2 / span 2;
 }
 
-.team-person-card:last-child {
+.team-person-card:nth-child(5):last-child {
   grid-column: 4 / span 2;
 }
 
@@ -2400,8 +2400,8 @@ a {
   }
 
   .team-person-card,
-  .team-person-card:nth-last-child(2),
-  .team-person-card:last-child {
+  .team-person-card:nth-child(4):nth-last-child(2),
+  .team-person-card:nth-child(5):last-child {
     grid-column: span 1;
   }
 

@@ -67,6 +67,18 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     profile: "https://www.ashoka.edu.in/profile/saptarishi-dhanuka/",
     email: "saptarishi.dhanuka@ashoka.edu.in",
   },
+  {
+    name: "Bharat",
+    role: "Summer Intern · AI Weather Research",
+    affiliation: "IISER Pune",
+    scdldsRole: "Summer Intern",
+    expertise: "MS thesis in AI subseasonal-to-seasonal weather prediction.",
+    image:
+      "https://scdlds.ashoka.edu.in/wp-content/uploads/2026/06/1000088900.png",
+    imagePosition: "center 24%",
+    profile: "https://scdlds.ashoka.edu.in/members/bharat/",
+    email: "bharat.20221074@students.iiserpune.ac.in",
+  },
 ];
 
 function renderMember(member: TeamMember, index: number): string {
@@ -131,8 +143,8 @@ export function renderTeamPage(container: HTMLElement): void {
             experimental service.
           </p>
           <dl class="team-hero__stats" aria-label="Team overview">
-            <div><dt>06</dt><dd>Team members</dd></div>
-            <div><dt>05</dt><dd>SCDLDS affiliated</dd></div>
+            <div><dt>07</dt><dd>Team members</dd></div>
+            <div><dt>06</dt><dd>SCDLDS affiliated</dd></div>
             <div><dt>01</dt><dd>Shared forecast mission</dd></div>
           </dl>
         </div>
@@ -154,25 +166,25 @@ export function renderTeamPage(container: HTMLElement): void {
       <article class="team-lead team-manager" aria-labelledby="team-manager-name">
         <div class="team-lead__portrait team-lead__portrait--photo">
           <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="eager" decoding="async" />
-          <small>Project manager · Main lead</small>
+          <small>Researcher · MS thesis</small>
         </div>
         <div class="team-lead__content">
-          <span class="team-card-label">Project management &amp; research engineering</span>
+          <span class="team-card-label">Research · AI &amp; website maintenance</span>
           <a
             class="team-centre-affiliation team-centre-affiliation--lead"
             href="https://scdlds.ashoka.edu.in/"
             target="_blank"
             rel="noreferrer"
-            aria-label="Project manager, Safexpress Centre for Data, Learning and Decision Sciences"
-          ><span aria-hidden="true"></span>SCDLDS · Project manager</a>
+            aria-label="Researcher, Safexpress Centre for Data, Learning and Decision Sciences"
+          ><span aria-hidden="true"></span>SCDLDS · Researcher</a>
           <h2 id="team-manager-name">Ayush Raj</h2>
           <p class="team-lead__affiliation">
             IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
           </p>
           <p>
-            Ayush is the project manager and main lead for S2S Research, coordinating
-            forecast pipelines, scientific validation, operational automation, and
-            the public-facing products that make subseasonal guidance easier to use.
+            Ayush is a researcher completing an MS thesis in AI subseasonal-to-seasonal
+            weather prediction. His work spans AI research, forecast evaluation, and
+            maintaining the S2S website and its public-facing forecast products.
           </p>
           <div class="team-lead__links">
             <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
