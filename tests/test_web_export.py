@@ -10,6 +10,8 @@ from pathlib import Path
 import jsonschema
 import numpy as np
 
+from scripts.build_prototype_data import public_input_source
+
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DATA = ROOT / "public/data"
 
@@ -21,6 +23,13 @@ def load(path: Path):
             ValueError(f"non-finite JSON: {value}")
         ),
     )
+
+
+def test_public_input_source_removes_model_branding() -> None:
+    assert public_input_source(
+        "Experimental IFS-initialized FuXi-S2S forecast"
+    ) == "Experimental IFS-initialized subseasonal model forecast"
+    assert "NeuralGCM" not in public_input_source("NeuralGCM research input")
 
 
 def test_forecast_export_has_six_weeks_and_four_products() -> None:
@@ -104,8 +113,9 @@ def test_initial_condition_sources_are_never_conflated() -> None:
     assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
     ifs = sources[-1]
     assert ifs["category"] == "operational_initialization"
-    assert ifs["default_issue"] == "20260815"
+    assert ifs["default_issue"] == "20260819"
     assert [(issue["id"], issue["members"]) for issue in ifs["issues"]] == [
+        ("20260819", 100),
         ("20260815", 100),
     ]
     assert "SST proxy" in ifs["description"]

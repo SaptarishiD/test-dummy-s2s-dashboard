@@ -73,7 +73,7 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() ->
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
     assert rebuilt["current"]["source_id"] == "gfs"
-    assert rebuilt["current"]["issue_id"] == "20260815"
+    assert rebuilt["current"]["issue_id"] == "20260819"
     newer_limited = next(
         item
         for item in rebuilt["initial_condition_sources"][0]["issues"]

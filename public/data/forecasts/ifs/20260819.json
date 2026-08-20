@@ -9,7 +9,7 @@
       "2026-08-17",
       "2026-08-18"
     ],
-    "input_source": "ECMWF operational IFS Open Data 0.25-degree step-0 and 0-6 hour fields for 2026-08-17 and 2026-08-18; experimental IFS-initialized FuXi-S2S",
+    "input_source": "ECMWF operational IFS Open Data 0.25-degree step-0 and 0-6 hour fields for 2026-08-17 and 2026-08-18; experimental IFS-initialized subseasonal model",
     "members": 100,
     "lead_days": 42,
     "status": "warning",
@@ -25,7 +25,7 @@
     "downloads": {
       "compact_json": "data/forecasts/ifs/20260819.json",
       "india_pdf": "downloads/ifs/20260819/S2S_Research_India_Weeks1-4_IFS_20260819.pdf",
-      "india_pdf_sha256": "e8a341a1d2a297c1c00fc976259f589ba171527d240f4cbc411d017258fbcf05"
+      "india_pdf_sha256": "e07f2bca9c4b42c6161e0656db543696dda1a6a2b48af4e6bb7842cd28b42922"
     },
     "available_products": [
       "rainfall_total",

@@ -107,7 +107,7 @@
     "initialization": "2026-08-19T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/gfs/20260819.json",
-    "forecast_sha256": "118bd2b23040bd4d26b05282829cbe573c77d435d94ebdf6f858a2d135118dd3",
+    "forecast_sha256": "0ef032bb50995f5b929611db6c027c0aca442f16bdf9c55c22c535bb89bd54c7",
     "valid_through": "2026-09-29",
     "published_at": "2026-08-20T00:38:31.918832+00:00",
     "available_products": [
@@ -129,7 +129,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-20T00:41:08Z",
+  "generated_at": "2026-08-20T00:57:42Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -183,9 +183,9 @@
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "118bd2b23040bd4d26b05282829cbe573c77d435d94ebdf6f858a2d135118dd3",
+            "forecast_sha256": "0ef032bb50995f5b929611db6c027c0aca442f16bdf9c55c22c535bb89bd54c7",
             "regional_sha256": "4b7fd5ec3bb97967ea2a71ffab4d297c715a768243aa92af82b784d7477d7ec9",
-            "pdf_sha256": "8de931a863b50b8a8cee330300c4d9d609787fad93a052a853e1b2665337928b"
+            "pdf_sha256": "5086890a94d8980f5717ef8deca809c29ed42b244ea660f91889f01672fc01d9"
           },
           "forecast": "forecasts/gfs/20260819.json",
           "id": "20260819",
@@ -1372,9 +1372,9 @@
             "member_class": "production"
           },
           "checksums": {
-            "forecast_sha256": "398d964034caa48c04509fd87361d1f4308ded9ef77460bfe2f9b0d09323e7a9",
+            "forecast_sha256": "cd6e90e02f11a6ff16b775146e55242fd7a0a3fc77228a8903693df6cbd5a755",
             "regional_sha256": "2d3104cfa0f3e74c6270ed9007db0d63c2400e2b6541af33b71ecdd588717605",
-            "pdf_sha256": "e8a341a1d2a297c1c00fc976259f589ba171527d240f4cbc411d017258fbcf05"
+            "pdf_sha256": "e07f2bca9c4b42c6161e0656db543696dda1a6a2b48af4e6bb7842cd28b42922"
           },
           "valid_through": "2026-09-29",
           "published_at": "2026-08-20T00:39:51.825223+00:00",

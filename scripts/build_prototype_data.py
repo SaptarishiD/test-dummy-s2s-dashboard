@@ -251,6 +251,14 @@ def source_id_for(input_source: str, requested: str | None) -> str:
     return requested or inferred
 
 
+def public_input_source(input_source: str) -> str:
+    """Remove private model branding from release-facing source metadata."""
+
+    return input_source.replace("FuXi-S2S", "subseasonal model").replace(
+        "NeuralGCM", "subseasonal model"
+    )
+
+
 def validate_run_manifest(path: Path | None, forecast: Path, members: int, leads: int) -> None:
     """Verify a forecast against its private validated run manifest."""
 
@@ -548,8 +556,11 @@ def main() -> int:
         ]
         members = int(source.sizes["member"])
         lead_days = int(source.sizes["lead_day"])
-        input_source = str(source.attrs.get("input_source", "Experimental operational proxy inputs"))
-    source_id = source_id_for(input_source, args.source_id)
+        private_input_source = str(
+            source.attrs.get("input_source", "Experimental operational proxy inputs")
+        )
+    source_id = source_id_for(private_input_source, args.source_id)
+    input_source = public_input_source(private_input_source)
     source_definition = INITIAL_CONDITION_SOURCES[source_id]
     validate_run_manifest(args.run_manifest, args.forecast, members, lead_days)
     relative_forecast_path = Path("data/forecasts") / source_id / f"{issue_id}.json"

@@ -9,7 +9,7 @@
       "2026-08-17",
       "2026-08-18"
     ],
-    "input_source": "NCEP operational GFS 1.0-degree analyses and 0-6 hour forecasts for 2026-08-17 and 2026-08-18; experimental proxy for ERA5-initialized FuXi-S2S",
+    "input_source": "NCEP operational GFS 1.0-degree analyses and 0-6 hour forecasts for 2026-08-17 and 2026-08-18; experimental proxy for an ERA5-initialized subseasonal model",
     "members": 100,
     "lead_days": 42,
     "status": "warning",
@@ -25,7 +25,7 @@
     "downloads": {
       "compact_json": "data/forecasts/gfs/20260819.json",
       "india_pdf": "downloads/gfs/20260819/S2S_Research_India_Weeks1-4_GFS_20260819.pdf",
-      "india_pdf_sha256": "8de931a863b50b8a8cee330300c4d9d609787fad93a052a853e1b2665337928b"
+      "india_pdf_sha256": "5086890a94d8980f5717ef8deca809c29ed42b244ea660f91889f01672fc01d9"
     },
     "available_products": [
       "rainfall_total",
