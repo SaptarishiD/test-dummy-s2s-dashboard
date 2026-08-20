@@ -172,17 +172,23 @@ def test_publisher_requires_explicit_institutional_git_identity() -> None:
 def build_smoke_site(root: Path) -> None:
     (root / "data/forecasts/gfs").mkdir(parents=True)
     (root / "data/forecasts/era5").mkdir(parents=True)
+    (root / "data/forecasts/ifs").mkdir(parents=True)
     (root / "index.html").write_text('<main id="app"></main>\n', encoding="utf-8")
     index = {
         "current": {"source_id": "gfs", "issue_id": "20260805"},
         "latest_reference": {"source_id": "era5", "issue_id": "20260722"},
         "initial_condition_sources": [],
     }
-    for source, issue in (("gfs", "20260805"), ("era5", "20260722")):
+    for source, issue in (
+        ("gfs", "20260805"),
+        ("era5", "20260722"),
+        ("ifs", "20260815"),
+    ):
         forecast_path = f"forecasts/{source}/{issue}.json"
         index["initial_condition_sources"].append(
             {
                 "id": source,
+                "default_issue": issue,
                 "issues": [
                     {
                         "id": issue,
@@ -246,6 +252,30 @@ def test_postdeploy_smoke_verifies_commit_pointers_and_forecasts(
     assert receipt["current_gfs_issue"] == "20260805"
     assert receipt["latest_era5_issue"] == "20260722"
     assert len(receipt["verified_assets"]) == 2
+
+
+def test_postdeploy_smoke_verifies_selected_ifs_pilot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_smoke_site(tmp_path)
+    monkeypatch.setattr(
+        postdeploy,
+        "fetch",
+        lambda _base, relative, _attempts, _timeout: (tmp_path / relative).read_bytes(),
+    )
+    args = SimpleNamespace(
+        base_url="https://example.invalid/s2s/",
+        expected_commit="abc123",
+        expected_index=tmp_path / "data/index.json",
+        expected_gfs_issue=None,
+        expected_era5_issue=None,
+        expected_source="ifs",
+        expected_issue="20260815",
+        attempts=1,
+        timeout=2.0,
+    )
+    receipt = postdeploy.smoke(args)
+    assert "data/forecasts/ifs/20260815.json" in receipt["verified_assets"]
 
 
 def test_postdeploy_fetch_rejects_non_http_origin() -> None:

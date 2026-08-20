@@ -33,10 +33,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(90deg, rgb(16 45 60 / 2%) 1px, transparent 1px) 0 0 / 80px
-      80px,
-    #f1f3ee;
+  background: #f1f3ee;
 }
 
 button,
@@ -98,7 +95,7 @@ a {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  min-height: 74px;
+  min-height: 68px;
   padding: 0 4.5vw;
   color: var(--white);
   background: rgb(16 45 60 / 97%);
@@ -144,7 +141,7 @@ a {
 .site-nav {
   display: flex;
   align-self: stretch;
-  gap: 34px;
+  gap: 28px;
 }
 
 .site-nav a {
@@ -205,8 +202,8 @@ a {
   display: flex;
   gap: 9px;
   align-items: center;
-  height: 50px;
-  padding: 7px 10px;
+  height: 46px;
+  padding: 6px 9px;
   background: #fff;
   border: 1px solid rgb(255 255 255 / 28%);
   border-radius: 4px;
@@ -257,7 +254,7 @@ a {
   align-items: end;
   max-width: 1360px;
   margin: 0 auto;
-  padding: 88px 5vw 64px;
+  padding: 68px 5vw 50px;
 }
 
 .eyebrow {
@@ -275,7 +272,7 @@ a {
   margin: 0;
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(52px, 6.2vw, 92px);
+  font-size: clamp(48px, 5.6vw, 78px);
   font-weight: 400;
   letter-spacing: -0.055em;
   line-height: 0.93;
@@ -1845,7 +1842,6 @@ a {
   color: #172d39;
   background:
     radial-gradient(circle at 88% 10%, rgb(23 127 130 / 12%), transparent 28rem),
-    linear-gradient(90deg, rgb(16 45 60 / 2%) 1px, transparent 1px) 0 0 / 80px 80px,
     #f2f3ee;
 }
 
@@ -1857,7 +1853,7 @@ a {
 .team-page {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 82px 5vw 110px;
+  padding: 64px 5vw 84px;
 }
 
 .team-hero {
@@ -1865,7 +1861,7 @@ a {
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
   gap: 8vw;
   align-items: end;
-  padding-bottom: 52px;
+  padding-bottom: 42px;
   border-bottom: 1px solid #cbd4d0;
 }
 
@@ -1884,7 +1880,7 @@ a {
   margin: 17px 0 0;
   color: #102d3c;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(52px, 6.8vw, 90px);
+  font-size: clamp(50px, 5.8vw, 76px);
   font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 0.94;
@@ -1934,8 +1930,8 @@ a {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  min-height: 500px;
-  margin: 36px 0 88px;
+  min-height: 440px;
+  margin: 32px 0 64px;
   background: #fffef9;
   border: 1px solid #ced7d3;
   box-shadow: 0 18px 42px rgb(16 45 60 / 7%);
@@ -2059,7 +2055,7 @@ a {
 }
 
 .team-roster {
-  margin: 72px 0;
+  margin: 58px 0;
 }
 
 .team-section-heading {
@@ -2115,7 +2111,7 @@ a {
 .team-person-card__portrait {
   position: relative;
   display: block;
-  aspect-ratio: 4 / 4.35;
+  aspect-ratio: 4 / 3.65;
   color: #fff;
   background: #dce6e2;
   overflow: hidden;
@@ -2160,7 +2156,7 @@ a {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 26px 24px 28px;
+  padding: 23px 22px 25px;
 }
 
 .team-person-card__meta {
@@ -2214,14 +2210,14 @@ a {
   grid-template-columns: auto minmax(260px, 1fr) auto;
   gap: clamp(24px, 4vw, 54px);
   align-items: center;
-  margin-bottom: 82px;
+  margin-bottom: 64px;
   padding: 25px 30px;
   color: #dce8e7;
   background: #102d3c;
 }
 
 .team-manager {
-  margin: 0 0 82px;
+  margin: 0 0 64px;
 }
 
 .team-institution-band__logos {
@@ -2284,8 +2280,8 @@ a {
 }
 
 .team-principles__grid article {
-  min-height: 240px;
-  padding: 30px;
+  min-height: 205px;
+  padding: 26px;
   background: rgb(255 254 249 / 76%);
 }
 
@@ -2317,7 +2313,7 @@ a {
   gap: 24px;
   align-items: center;
   justify-content: space-between;
-  margin-top: 74px;
+  margin-top: 58px;
   padding: 34px 38px;
   background: #e4ece8;
   border-left: 4px solid #177f82;
@@ -3445,8 +3441,8 @@ a {
 
 .india-sheet {
   max-width: 1460px;
-  margin: 34px auto 64px;
-  padding: 52px 58px 34px;
+  margin: 24px auto 48px;
+  padding: 42px 48px 32px;
   background: #fff;
   border: 1px solid #d6dce5;
   box-shadow: 0 20px 60px rgb(20 37 65 / 10%);
@@ -5141,8 +5137,8 @@ a {
 
 .outlook-page {
   max-width: 1460px;
-  margin: 34px auto 64px;
-  padding: 52px 58px 38px;
+  margin: 24px auto 48px;
+  padding: 42px 48px 34px;
   background: #fff;
   border: 1px solid #d6dce5;
   box-shadow: 0 20px 60px rgb(20 37 65 / 10%);
@@ -5850,12 +5846,12 @@ a {
 
 .site-footer {
   display: grid;
-  grid-template-columns: minmax(230px, 1.15fr) repeat(3, minmax(170px, 1fr));
-  gap: 34px;
+  grid-template-columns: minmax(300px, 1.35fr) repeat(2, minmax(220px, 1fr));
+  gap: 42px;
   align-items: start;
   min-height: 0;
-  padding-top: 38px;
-  padding-bottom: 40px;
+  padding-top: 30px;
+  padding-bottom: 32px;
 }
 
 .site-footer > div {
@@ -6279,7 +6275,7 @@ a {
   }
 
   .site-footer__section:last-child {
-    grid-column: 2 / -1;
+    grid-column: auto;
   }
 
   .outlook-runbar {
@@ -6321,7 +6317,7 @@ a {
   }
 
   .site-footer__section:last-child {
-    grid-column: auto;
+    grid-column: 1 / -1;
   }
 
   .archive-hero {

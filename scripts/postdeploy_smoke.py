@@ -50,11 +50,10 @@ def decode_json(payload: bytes, label: str) -> Any:
 
 
 def pointer_id(index: dict[str, Any], source_id: str) -> str:
-    pointer_keys = (
-        ("current", "current_gfs", "current_issue")
-        if source_id == "gfs"
-        else ("latest_reference", "latest_era5", "reference_issue")
-    )
+    pointer_keys = {
+        "gfs": ("current", "current_gfs", "current_issue"),
+        "era5": ("latest_reference", "latest_era5", "reference_issue"),
+    }.get(source_id, ())
     for key in pointer_keys:
         pointer = index.get(key)
         if isinstance(pointer, str):
@@ -160,8 +159,11 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
     sources = {
         source["id"]: source for source in index.get("initial_condition_sources", [])
     }
+    selected_assets = [("gfs", actual_gfs), ("era5", actual_era5)]
+    if expected_source and (expected_source, expected_issue) not in selected_assets:
+        selected_assets.append((expected_source, expected_issue))
     verified_assets: list[str] = []
-    for source_id, issue_id in (("gfs", actual_gfs), ("era5", actual_era5)):
+    for source_id, issue_id in selected_assets:
         source = sources.get(source_id, {})
         record = next(
             (item for item in source.get("issues", []) if item.get("id") == issue_id),

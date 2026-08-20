@@ -292,7 +292,7 @@ function shell(): string {
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">Forecast</a>
         <a href="./#outlook" data-route="outlook">Regional</a>
-        <a href="./?view=global#forecast" data-route="forecast">Global Demo</a>
+        <a href="./?view=global#forecast" data-route="forecast">Global</a>
         <a href="./#archive" data-route="archive">Archive</a>
         <a href="./#team" data-route="team">Team</a>
       </nav>
@@ -327,19 +327,15 @@ function shell(): string {
       <div class="site-footer__brand">
         <strong>S2S Research</strong>
         <span>Safexpress Centre for Data, Learning and Decision Sciences · Ashoka University</span>
-        <p>Experimental research guidance · Not an operational forecast, warning, or decision trigger.</p>
-      </div>
-      <div class="site-footer__section" id="about">
-        <strong>About & methods</strong>
-        <p>AI subseasonal ensemble output is summarized as weekly India fields. Anomalies and raw tercile probabilities appear only when a seasonally matched model climatology is available.</p>
+        <p>Weekly ensemble guidance with source, timing, validation, and limitations kept visible.</p>
       </div>
       <div class="site-footer__section" id="schedule">
         <strong>Update schedule</strong>
-        <p>GFS-proxy runs are targeted every Wednesday and Saturday after source-data checks. ERA5 is a delayed reference, normally 5–7 days behind.</p>
+        <p>Validated GFS runs target Wednesday and Saturday. ERA5 follows when complete; IFS remains a reviewed experimental pilot.</p>
       </div>
       <div class="site-footer__section" id="limitations">
         <strong>Limitations & contact</strong>
-        <p>Long leads describe broad ensemble tendencies, not local weather. Public contact: <a href="mailto:raj.ayush@students.iiserpune.ac.in">raj.ayush@students.iiserpune.ac.in</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
+        <p>Research guidance—not a warning or decision trigger. <a href="mailto:raj.ayush@students.iiserpune.ac.in">Email the team</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
       </div>
     </footer>
   `;
