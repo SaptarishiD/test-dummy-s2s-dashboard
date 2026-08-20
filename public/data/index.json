@@ -129,7 +129,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-20T00:40:06Z",
+  "generated_at": "2026-08-20T00:41:08Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -847,19 +847,20 @@
             "rainfall_total",
             "temperature_mean",
             "rainfall_anomaly",
-            "temperature_anomaly"
+            "temperature_anomaly",
+            "wind850_anomaly"
           ],
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
-            "wind850_anomaly": false,
+            "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
           },
           "checksums": {
-            "forecast_sha256": "8233f4da5385a61ba7513db4e68eae633c82046eb7c78b18e8fde786b97f2ca2",
+            "forecast_sha256": "6859810e98cc264477f131dbef7c4f9db39919d525de3b1499f08c1f19df23a5",
             "regional_sha256": "368c362ad2df9eb95b4ad41b8bf3aebf161fa4db842cfd5def8bbac2b383944a",
-            "pdf_sha256": "851f296e22cf26b0bfe7325ad3284c12f62a25210e46d58c693c2cd35f81f04b"
+            "pdf_sha256": "c6c221a32c5136d0d354618f6ca12335231233b5696319be648e8e0568dc353d"
           },
           "forecast": "forecasts/era5/20260812.json",
           "id": "20260812",
@@ -871,7 +872,7 @@
             "label": "Delayed ERA5 reference",
             "member_class": "production"
           },
-          "published_at": "2026-08-18T14:12:32.225825+00:00",
+          "published_at": "2026-08-20T00:40:55.900437+00:00",
           "regional_outlook": "regional/era5/20260812.json",
           "role": "reference",
           "status": "warning",
@@ -1441,19 +1442,20 @@
     "initialization": "2026-08-12T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/era5/20260812.json",
-    "forecast_sha256": "8233f4da5385a61ba7513db4e68eae633c82046eb7c78b18e8fde786b97f2ca2",
+    "forecast_sha256": "6859810e98cc264477f131dbef7c4f9db39919d525de3b1499f08c1f19df23a5",
     "valid_through": "2026-09-22",
-    "published_at": "2026-08-18T14:12:32.225825+00:00",
+    "published_at": "2026-08-20T00:40:55.900437+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
       "rainfall_anomaly",
-      "temperature_anomaly"
+      "temperature_anomaly",
+      "wind850_anomaly"
     ],
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
-      "wind850_anomaly": false,
+      "wind850_anomaly": true,
       "regional_probabilities": true,
       "pdf": true
     },
