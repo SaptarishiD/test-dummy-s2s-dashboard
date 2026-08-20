@@ -3012,11 +3012,11 @@ a {
 @media (max-width: 600px) {
   .global-route .site-header {
     position: fixed;
-    display: flex;
-    min-height: 62px;
-    gap: 14px;
-    justify-content: space-between;
-    padding: 10px 15px 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 94px;
+    gap: 0;
+    padding: 9px 14px 0;
   }
 
   .global-route .header-partner {
@@ -3039,14 +3039,14 @@ a {
   }
 
   .global-route .site-nav {
-    min-height: 42px;
-    gap: 12px;
-    overflow-x: auto;
-    justify-content: flex-start;
+    width: 100%;
+    min-height: 38px;
+    gap: 10px;
+    justify-content: space-between;
+    overflow: visible;
   }
 
   .global-route .site-nav a {
-    flex: 0 0 auto;
     font-size: 8px;
   }
 
@@ -3055,7 +3055,7 @@ a {
   }
 
   .global-title {
-    top: 92px;
+    top: 112px;
     left: 18px;
     width: 75vw;
   }
@@ -6151,6 +6151,10 @@ a {
 
   .outlook-runbar .outlook-map-link {
     grid-column: 1;
+  }
+
+  .outlook-runbar {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

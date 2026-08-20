@@ -620,6 +620,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
         : sourceId === "gfs"
         ? "Experimental initialization from operational analysis and short-range forecast proxy inputs."
+        : sourceId === "ifs"
+        ? "Experimental IFS initialization from operational analysis fields; not calibrated operational guidance."
         : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 

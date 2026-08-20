@@ -261,7 +261,7 @@ export function renderGlobalPage(
 
       <div class="global-title">
         <span class="global-eyebrow"><b>Dated demo</b> · Pinned dataset · not the current forecast</span>
-        <h1>Global forecast <small>Demo</small></h1>
+        <h1>Global forecast <small>demo</small></h1>
         <p>Initialized 28 Jul 2026 · 42-day guidance · 100 members</p>
       </div>
 

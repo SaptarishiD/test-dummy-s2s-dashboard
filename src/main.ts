@@ -318,7 +318,7 @@ function shell(): string {
         </a>
         <div class="header-status">
           <span class="live-dot" aria-hidden="true"></span>
-          <span class="header-status__label">Research prototype</span>
+          <span class="header-status__label">Experimental research</span>
         </div>
       </div>
     </header>
@@ -335,7 +335,7 @@ function shell(): string {
       </div>
       <div class="site-footer__section" id="limitations">
         <strong>Limitations & contact</strong>
-        <p>Research guidance—not a warning or decision trigger. <a href="mailto:raj.ayush@students.iiserpune.ac.in">Email the team</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
+        <p>Experimental research guidance—not a warning or decision trigger. <a href="mailto:raj.ayush@students.iiserpune.ac.in">Email the team</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
       </div>
     </footer>
   `;
@@ -363,13 +363,18 @@ async function renderRoute(data: AppData): Promise<void> {
     ? data.global!.metadata.issue.initialization
     : data.forecast?.issue.initialization ??
       (data.index ? currentGfsIssue(data.index)?.initialization : undefined);
-  const statusLabel = route === "team"
-    ? "Research team"
-    : statusDate
+  const formattedStatusDate = statusDate
     ? new Intl.DateTimeFormat("en-IN", {
       day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
     }).format(new Date(statusDate))
-    : "Forecast archive";
+    : undefined;
+  const statusLabel = route === "team"
+    ? "Research team"
+    : route === "archive"
+    ? "Experimental archive"
+    : route === "forecast"
+    ? `Experimental demo · ${formattedStatusDate ?? "dated dataset"}`
+    : `Experimental · ${formattedStatusDate ?? "research guidance"}`;
   document.querySelector<HTMLElement>(".header-status__label")!.textContent = statusLabel;
   const regionalLink = document.querySelector<HTMLAnchorElement>(
     '.site-nav a[data-route="outlook"]',

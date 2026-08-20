@@ -207,7 +207,13 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
             if (!preferred) return "";
             return `
             <a href="${sourceLink(candidate.id, preferred.id)}" class="${candidate.id === sourceId ? "is-active" : ""}">
-              <strong>${candidate.short_label}</strong><span>${candidate.category === "operational_proxy" ? "Operational proxy" : "Reanalysis reference"}</span>
+              <strong>${candidate.short_label}</strong><span>${
+                candidate.category === "operational_proxy"
+                  ? "Operational proxy"
+                  : candidate.category === "operational_initialization"
+                  ? "Experimental initialization"
+                  : "Delayed reference"
+              }</span>
             </a>
           `;}).join("")}
         </div>
@@ -215,7 +221,7 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
           <div><dt>Initialized</dt><dd>${friendlyDate(forecast.issue.initialization, true)}</dd></div>
           <div><dt>Valid through</dt><dd>${friendlyDate(regionalOutlook.weeks.at(-1)!.valid_end, true)}</dd></div>
           <div><dt>Members</dt><dd>${forecast.issue.members}</dd></div>
-          <div><dt>Source</dt><dd>${sourceId === "gfs" ? "GFS proxy" : "ERA5 delayed"}</dd></div>
+          <div><dt>Source</dt><dd>${sourceId === "gfs" ? "GFS proxy" : sourceId === "ifs" ? "IFS experimental" : "ERA5 delayed"}</dd></div>
         </dl>
         <a class="outlook-map-link" href="./?source=${sourceId}&issue=${currentIssueId}#india">Open four-map India forecast →</a>
         <a class="outlook-map-link" href="./#archive">Browse archive →</a>

@@ -37,6 +37,24 @@ def test_shared_footer_has_mail_and_institutional_links() -> None:
     assert "https://scdlds.ashoka.edu.in/" in shell
     assert "Wednesday and Saturday" in shell
     assert "Limitations & contact" in shell
+    assert "Experimental research guidance—not a warning" in shell
+
+
+def test_experimental_status_and_source_labels_are_unambiguous() -> None:
+    shell = read("src/main.ts")
+    outlook = read("src/pages/outlook.ts")
+    forecast = read("src/pages/forecast.ts")
+    archive = read("src/pages/archive.ts")
+    global_page = read("src/pages/global.ts")
+    assert "Experimental research" in shell
+    assert "Experimental archive" in shell
+    assert "Experimental demo" in shell
+    assert 'candidate.category === "operational_initialization"' in outlook
+    assert 'sourceId === "ifs" ? "IFS experimental"' in outlook
+    assert "Experimental IFS initialization from operational analysis fields" in forecast
+    assert "Experimental operational initialization" in archive
+    assert "Experimental · Validated issue catalogue" in archive
+    assert "Global forecast <small>demo</small>" in global_page
 
 
 def test_dated_global_demo_copy_is_consistent() -> None:

@@ -66,9 +66,9 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
     <section class="archive-page">
       <header class="archive-hero">
         <div>
-          <span class="archive-eyebrow">Validated issue catalogue</span>
+          <span class="archive-eyebrow">Experimental · Validated issue catalogue</span>
           <h1>Forecast archive</h1>
-          <p>${activeDomain?.label ?? "India"} · Browse past forecast runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
+          <p>${activeDomain?.label ?? "India"} · Browse past experimental forecast runs without loading their map data. ERA5 runs are delayed reference experiments; smaller ensembles are kept visibly separate from the current forecast.</p>
         </div>
         ${current ? `
           <a class="archive-current-link" href="./${activeDomain?.id && activeDomain.id !== "india" ? `?domain=${activeDomain.id}` : ""}#india">
@@ -181,7 +181,13 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
           <div class="archive-card__date">
             <span>${source.short_label}</span>
             <time datetime="${issue.initialization}">${friendlyDate(issue.initialization)}</time>
-            <small>${source.id === "era5" ? "Reanalysis · normally 5–7 days delayed" : "Operational-input proxy"}</small>
+            <small>${
+              source.id === "era5"
+                ? "Reanalysis · normally 5–7 days delayed"
+                : source.id === "ifs"
+                ? "Experimental operational initialization"
+                : "Operational-input proxy"
+            }</small>
           </div>
           <div class="archive-card__summary">
             <span class="archive-card__role">${presentation}</span>
