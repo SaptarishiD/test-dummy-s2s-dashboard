@@ -395,7 +395,9 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       candidate.issues.some((issue) => issue.id === currentIssueId),
   );
   const sourceBadge = isCurrent
-    ? "Current · Experimental GFS proxy"
+    ? sourceId === "ifs"
+      ? "Default · Experimental IFS initialization"
+      : "Current · Experimental GFS proxy"
     : catalogIssue.members < 100
       ? "Archive · Limited experiment"
       : sourceId === "era5"
@@ -434,7 +436,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
             ? "ERA5 initialization is retained for controlled reference experiments and normally arrives 5–7 days after real time."
             : catalogIssue.members < 100
               ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
-              : "The current page always points to the newest validated 100-member GFS-proxy issue."}</p>
+              : "The landing page opens the configured default experimental ensemble; the GFS-proxy issue remains available from the source selector."}</p>
         </div>
         <a href="./#india">Return to current forecast →</a>
       </aside>

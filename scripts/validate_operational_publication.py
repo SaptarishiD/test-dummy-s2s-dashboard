@@ -651,8 +651,8 @@ def validate(args: argparse.Namespace) -> dict[str, Any]:
     public_root = args.public_root.resolve()
     index_path = public_root / "data/index.json"
     index = load_json(index_path)
-    if index.get("default_source") != "gfs":
-        raise ValueError("default source must remain GFS")
+    if index.get("default_source") != "ifs":
+        raise ValueError("default source must remain IFS")
     if not isinstance(index.get("schema_version"), int):
         raise ValueError("catalog has no integer schema_version")
     serialized_index = json.dumps(index).lower()

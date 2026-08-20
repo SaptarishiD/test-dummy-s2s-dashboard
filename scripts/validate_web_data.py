@@ -192,8 +192,17 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     source_ids = [source["id"] for source in sources]
     if source_ids not in (["gfs", "era5"], ["gfs", "era5", "ifs"]):
         raise ValueError("initial-condition sources must be GFS, ERA5, then optional IFS")
-    if index["default_source"] != "gfs" or index["default_view"] != "india":
-        raise ValueError("India/GFS defaults are not locked")
+    if index["default_source"] != "ifs" or index["default_view"] != "india":
+        raise ValueError("India/IFS defaults are not locked")
+    default_source = next(
+        (source for source in sources if source["id"] == index["default_source"]),
+        None,
+    )
+    if not default_source or not any(
+        issue["id"] == default_source["default_issue"]
+        for issue in default_source["issues"]
+    ):
+        raise ValueError("default source has no registered default issue")
     schema = load_json(ROOT / "science/web-data.schema.json")
     issue_count = 0
     regional_count = 0

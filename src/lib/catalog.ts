@@ -94,8 +94,8 @@ export function findIssue(
   const requestedSource = index.initial_condition_sources.find(
     (source) => source.id === sourceId,
   );
-  const source = requestedSource ?? sourceById(index, "gfs") ??
-    index.initial_condition_sources[0];
+  const source = requestedSource ?? sourceById(index, index.default_source) ??
+    sourceById(index, "gfs") ?? index.initial_condition_sources[0];
   if (!source) return undefined;
   const requestedIssue = issueId
     ? source.issues.find((issue) => issue.id === issueId)
@@ -212,7 +212,10 @@ export function issueIsCurrent(
   source: CatalogSource,
   issue: CatalogIssue,
 ): boolean {
-  return source.id === "gfs" && currentGfsIssue(index)?.id === issue.id;
+  return (
+    source.id === index.default_source &&
+    defaultIssueForSource(index, source)?.id === issue.id
+  ) || (source.id === "gfs" && currentGfsIssue(index)?.id === issue.id);
 }
 
 export function issueClass(issue: CatalogIssue): "complete" | "limited" {
