@@ -81,6 +81,8 @@ def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> N
     bedartha = team.split('name: "Bedartha Goswami"', 1)[1].split("  },", 1)[0]
     assert "scdldsRole" not in bedartha
     assert "SCDLDS · Researcher" in team
+    assert "with guidance from the faculty team" in team
+    assert "Maintains the S2S website." in team
     assert "Project manager" not in team
     assert 'class="team-researcher"' in team
     assert "Research group." in team

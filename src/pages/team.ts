@@ -160,9 +160,9 @@ export function renderTeamPage(container: HTMLElement): void {
         </a>
         <div class="team-researcher__content">
           <h2 id="team-researcher-name">Ayush Raj</h2>
-          <span class="team-card-label">Research · AI &amp; website maintenance</span>
+          <span class="team-card-label">MS thesis · AI weather research</span>
           <p class="team-researcher__affiliation">
-            IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
+            IISER Pune · SCDLDS, Ashoka University
           </p>
           <a
             class="team-centre-affiliation team-centre-affiliation--researcher"
@@ -172,9 +172,8 @@ export function renderTeamPage(container: HTMLElement): void {
             aria-label="Researcher, Safexpress Centre for Data, Learning and Decision Sciences"
           ><span aria-hidden="true"></span>SCDLDS · Researcher</a>
           <p>
-            Ayush is a researcher completing an MS thesis in AI subseasonal-to-seasonal
-            weather prediction. His work spans AI research, forecast evaluation, and
-            maintaining the S2S website and its public-facing forecast products.
+            MS thesis researcher working on AI subseasonal-to-seasonal weather prediction
+            with guidance from the faculty team. Maintains the S2S website.
           </p>
           <div class="team-researcher__links">
             <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
