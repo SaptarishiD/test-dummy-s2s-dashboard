@@ -23,13 +23,14 @@ import {
   issueHasRegionalOutlook,
 } from "./lib/catalog";
 
-type Route = "forecast" | "india" | "outlook" | "archive" | "team";
+type Route = "forecast" | "india" | "outlook" | "archive" | "briefing" | "team";
 
 const ROUTES = new Set<Route>([
   "forecast",
   "india",
   "outlook",
   "archive",
+  "briefing",
   "team",
 ]);
 let routeCleanup: (() => void) | undefined;
@@ -172,7 +173,7 @@ async function fetchGlobalData(
 
 async function loadData(): Promise<AppData> {
   const route = currentRoute();
-  if (route === "team") {
+  if (route === "briefing" || route === "team") {
     return {};
   }
   const domainCatalog = await fetchJson<ForecastDomainCatalog>(
@@ -291,6 +292,7 @@ function shell(): string {
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">Forecast</a>
+        <a href="./#briefing" data-route="briefing">Forecast Briefing</a>
         <a href="./#outlook" data-route="outlook">Regional</a>
         <a href="./?view=global#forecast" data-route="forecast">Global</a>
         <a href="./#archive" data-route="archive">Archive</a>
@@ -418,6 +420,18 @@ async function renderRoute(data: AppData): Promise<void> {
   if (route === "archive") {
     const { renderArchivePage } = await import("./pages/archive");
     renderArchivePage(content, data);
+  }
+  if (route === "briefing") {
+    content.innerHTML = `
+      <section class="briefing-page">
+        <span class="eyebrow">Latest forecast briefing</span>
+        <h1>India S2S forecast briefing</h1>
+        <p>Experimental Weeks 1–4 guidance covering rainfall, anomalies, temperature, and circulation over India.</p>
+        <div class="briefing-card">
+          <a href="./reports/s2s-summary-india-2026-08-19.pdf" target="_blank" rel="noreferrer"><img src="./reports/s2s-summary-india-2026-08-19-cover.png" alt="Forecast briefing cover" /></a>
+          <div><span class="eyebrow">19 August 2026</span><h2>Latest forecast briefing</h2><p>Read the full weekly outlook and scientific summary.</p><a class="button-primary" href="./reports/s2s-summary-india-2026-08-19.pdf" target="_blank" rel="noreferrer">Read briefing ↗</a><a class="briefing-team-cta" href="./#team">People behind the forecast →</a></div>
+        </div>
+      </section>`;
   }
   if (route === "team") {
     const { renderTeamPage } = await import("./pages/team");
