@@ -24,17 +24,6 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     email: "sandeep.juneja@ashoka.edu.in",
   },
   {
-    name: "Bedartha Goswami",
-    role: "Assistant Professor · Data Science",
-    affiliation: "IISER Pune",
-    expertise: "Machine learning for weather and climate, with a focus on complex systems.",
-    image: "./team/bedartha-goswami.jpg",
-    imagePosition: "center 34%",
-    profile:
-      "https://www.iiserpune.ac.in/research/department/data-science/people/faculty/regular-faculty/bedartha-goswami/542",
-    email: "bedartha.goswami@iiserpune.ac.in",
-  },
-  {
     name: "Parthasarathi Mukhopadhyay",
     role: "Visiting Faculty · Earth & Environmental Sciences",
     affiliation: "IISER Berhampur · FASc",
@@ -55,6 +44,17 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     imagePosition: "center 18%",
     profile: "https://www.wku.edu/eeas/staff/manmeet_singh",
     email: "manmeet.singh@wku.edu",
+  },
+  {
+    name: "Bedartha Goswami",
+    role: "Assistant Professor · Data Science",
+    affiliation: "IISER Pune",
+    expertise: "Machine learning for weather and climate, with a focus on complex systems.",
+    image: "./team/bedartha-goswami.jpg",
+    imagePosition: "center 34%",
+    profile:
+      "https://www.iiserpune.ac.in/research/department/data-science/people/faculty/regular-faculty/bedartha-goswami/542",
+    email: "bedartha.goswami@iiserpune.ac.in",
   },
   {
     name: "Saptarishi Dhanuka",
@@ -81,7 +81,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
   },
 ];
 
-function renderMember(member: TeamMember, index: number): string {
+function renderMember(member: TeamMember): string {
   const imageStyle = member.imagePosition
     ? ` style="object-position: ${member.imagePosition}"`
     : "";
@@ -96,28 +96,25 @@ function renderMember(member: TeamMember, index: number): string {
         aria-label="View ${member.name}'s official profile"
       >
         <img src="${member.image}" alt="${member.name}" loading="eager" decoding="async"${imageStyle} />
-        <span class="team-person-card__view" aria-hidden="true">View profile ↗</span>
+        <span class="team-person-card__view" aria-hidden="true">Profile ↗</span>
       </a>
       <div class="team-person-card__body">
-        <div class="team-person-card__meta">
-          <div class="team-person-card__affiliations">
-            <span class="team-card-label">${member.affiliation}</span>
-            ${
-              member.scdldsRole
-                ? `<a
-                    class="team-centre-affiliation"
-                    href="https://scdlds.ashoka.edu.in/"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="${member.scdldsRole}, Safexpress Centre for Data, Learning and Decision Sciences"
-                  ><span aria-hidden="true"></span>SCDLDS · ${member.scdldsRole}</a>`
-                : ""
-            }
-          </div>
-          <span class="team-person-card__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
-        </div>
         <h3>${member.name}</h3>
         <p class="team-person-card__role">${member.role}</p>
+        <div class="team-person-card__affiliations">
+          <span class="team-card-label">${member.affiliation}</span>
+          ${
+            member.scdldsRole
+              ? `<a
+                  class="team-centre-affiliation"
+                  href="https://scdlds.ashoka.edu.in/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="${member.scdldsRole}, Safexpress Centre for Data, Learning and Decision Sciences"
+                ><span aria-hidden="true"></span>SCDLDS · ${member.scdldsRole}</a>`
+              : ""
+          }
+        </div>
         <p>${member.expertise}</p>
         <div class="team-person-card__links">
           <a href="${member.profile}" target="_blank" rel="noreferrer">Official profile <span aria-hidden="true">↗</span></a>
@@ -163,22 +160,27 @@ export function renderTeamPage(container: HTMLElement): void {
         </div>
       </section>
 
-      <article class="team-lead team-manager" aria-labelledby="team-manager-name">
-        <div class="team-lead__portrait team-lead__portrait--photo">
+      <article class="team-researcher" aria-labelledby="team-researcher-name">
+        <a
+          class="team-researcher__portrait"
+          href="https://in.linkedin.com/in/ayush-raj-7608a424a"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="View Ayush Raj's LinkedIn profile"
+        >
           <img src="./team/ayush-raj.webp" alt="Ayush Raj" loading="eager" decoding="async" />
-          <small>Researcher · MS thesis</small>
-        </div>
-        <div class="team-lead__content">
+        </a>
+        <div class="team-researcher__content">
           <span class="team-card-label">Research · AI &amp; website maintenance</span>
           <a
-            class="team-centre-affiliation team-centre-affiliation--lead"
+            class="team-centre-affiliation team-centre-affiliation--researcher"
             href="https://scdlds.ashoka.edu.in/"
             target="_blank"
             rel="noreferrer"
             aria-label="Researcher, Safexpress Centre for Data, Learning and Decision Sciences"
           ><span aria-hidden="true"></span>SCDLDS · Researcher</a>
-          <h2 id="team-manager-name">Ayush Raj</h2>
-          <p class="team-lead__affiliation">
+          <h2 id="team-researcher-name">Ayush Raj</h2>
+          <p class="team-researcher__affiliation">
             IISER Pune · Safexpress Centre for Data, Learning and Decision Sciences
           </p>
           <p>
@@ -186,7 +188,7 @@ export function renderTeamPage(container: HTMLElement): void {
             weather prediction. His work spans AI research, forecast evaluation, and
             maintaining the S2S website and its public-facing forecast products.
           </p>
-          <div class="team-lead__links">
+          <div class="team-researcher__links">
             <a href="mailto:${CONTACT_EMAIL}">Email Ayush</a>
             <a href="https://in.linkedin.com/in/ayush-raj-7608a424a" target="_blank" rel="noreferrer">
               LinkedIn <span aria-hidden="true">↗</span>

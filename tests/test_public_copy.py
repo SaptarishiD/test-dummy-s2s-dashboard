@@ -62,6 +62,16 @@ def test_navigation_does_not_use_lab_branding() -> None:
 def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> None:
     team = read("src/pages/team.ts")
     shell = read("index.html")
+    expected_order = (
+        "Sandeep Juneja",
+        "Parthasarathi Mukhopadhyay",
+        "Dr. Manmeet Singh",
+        "Bedartha Goswami",
+        "Saptarishi Dhanuka",
+        "Bharat",
+    )
+    positions = [team.index(f'name: "{name}"') for name in expected_order]
+    assert positions == sorted(positions)
     assert team.count("scdldsRole:") == 5
     assert 'scdldsRole: "Centre Director"' in team
     assert 'scdldsRole: "Collaborator"' in team
@@ -72,6 +82,7 @@ def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> N
     assert "scdldsRole" not in bedartha
     assert "SCDLDS · Researcher" in team
     assert "Project manager" not in team
+    assert 'class="team-researcher"' in team
     assert "SCDLDS affiliated" in team
     assert "https://scdlds.ashoka.edu.in" in shell.split("img-src", 1)[1].split(";", 1)[0]
 
