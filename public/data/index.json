@@ -129,7 +129,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-20T00:38:46Z",
+  "generated_at": "2026-08-20T00:40:06Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -1355,12 +1355,13 @@
             "rainfall_total",
             "temperature_mean",
             "rainfall_anomaly",
-            "temperature_anomaly"
+            "temperature_anomaly",
+            "wind850_anomaly"
           ],
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
-            "wind850_anomaly": false,
+            "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
           },
@@ -1370,12 +1371,12 @@
             "member_class": "production"
           },
           "checksums": {
-            "forecast_sha256": "c7911f875a36fa18d6dcaf3e890a77d4d480531c24490083d47e0bd029ff0448",
+            "forecast_sha256": "398d964034caa48c04509fd87361d1f4308ded9ef77460bfe2f9b0d09323e7a9",
             "regional_sha256": "2d3104cfa0f3e74c6270ed9007db0d63c2400e2b6541af33b71ecdd588717605",
-            "pdf_sha256": "5314ab133f0947f6a63d8d7bd7cef0f070de20c6b138eb3d307faed4f17e4a8e"
+            "pdf_sha256": "e8a341a1d2a297c1c00fc976259f589ba171527d240f4cbc411d017258fbcf05"
           },
           "valid_through": "2026-09-29",
-          "published_at": "2026-08-19T22:51:47.293565+00:00",
+          "published_at": "2026-08-20T00:39:51.825223+00:00",
           "pdf": "downloads/ifs/20260819/S2S_Research_India_Weeks1-4_IFS_20260819.pdf",
           "archive": {
             "interactive_available": true,

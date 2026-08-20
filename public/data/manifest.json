@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-20T00:39:10.265147+00:00",
+  "generated_at": "2026-08-20T00:40:24.207604+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -221,8 +221,8 @@
     },
     {
       "path": "data/forecasts/ifs/20260819.json",
-      "size_bytes": 344576,
-      "sha256": "c7911f875a36fa18d6dcaf3e890a77d4d480531c24490083d47e0bd029ff0448"
+      "size_bytes": 606719,
+      "sha256": "398d964034caa48c04509fd87361d1f4308ded9ef77460bfe2f9b0d09323e7a9"
     },
     {
       "path": "data/formulas.json",
@@ -346,8 +346,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 54069,
-      "sha256": "4958d8f2480975dd470cafbf58b04010f8d7f2d75bac466b0b60c524f26eaea3"
+      "size_bytes": 54099,
+      "sha256": "462b680cc396120121f2a36b98b04f4b391319acd800b0705ecb3eb526db94c2"
     },
     {
       "path": "data/india-admin.json",
@@ -611,8 +611,8 @@
     },
     {
       "path": "downloads/ifs/20260819/S2S_Research_India_Weeks1-4_IFS_20260819.pdf",
-      "size_bytes": 2880154,
-      "sha256": "5314ab133f0947f6a63d8d7bd7cef0f070de20c6b138eb3d307faed4f17e4a8e"
+      "size_bytes": 3617746,
+      "sha256": "e8a341a1d2a297c1c00fc976259f589ba171527d240f4cbc411d017258fbcf05"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
