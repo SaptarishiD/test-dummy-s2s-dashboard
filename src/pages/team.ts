@@ -129,31 +129,19 @@ export function renderTeamPage(container: HTMLElement): void {
   container.innerHTML = `
     <section class="team-page" aria-labelledby="team-title">
       <header class="team-hero">
-        <div>
-          <span class="team-eyebrow">People behind the forecast</span>
-          <h1 id="team-title">The team behind the forecast.</h1>
-        </div>
-        <div class="team-hero__aside">
-          <p>
-            S2S Research brings atmospheric science, machine learning, forecast
-            verification, and careful public communication together in one
-            experimental service.
-          </p>
-          <dl class="team-hero__stats" aria-label="Team overview">
-            <div><dt>07</dt><dd>Team members</dd></div>
-            <div><dt>06</dt><dd>SCDLDS affiliated</dd></div>
-            <div><dt>01</dt><dd>Shared forecast mission</dd></div>
-          </dl>
-        </div>
+        <span class="team-eyebrow">S2S Research</span>
+        <h1 id="team-title">Research group.</h1>
+        <p class="team-hero__intro">
+          Atmospheric science, machine learning, and forecast verification for
+          experimental subseasonal guidance.
+        </p>
       </header>
 
       <section class="team-roster" aria-labelledby="team-roster-title">
         <header class="team-section-heading">
-          <div>
-            <span class="team-eyebrow">Scientific leadership &amp; collaborators</span>
-            <h2 id="team-roster-title">Expertise across weather, climate, data, and decisions.</h2>
-          </div>
-          <p>Centre-connected profiles carry an SCDLDS affiliation badge; institutional profiles and direct contact details remain one click away.</p>
+          <span class="team-eyebrow">People behind the forecast</span>
+          <h2 id="team-roster-title">Scientific team and collaborators</h2>
+          <p>Official profiles and direct contact details are available below.</p>
         </header>
         <div class="team-grid">
           ${SCIENTIFIC_TEAM.map(renderMember).join("")}
@@ -197,8 +185,8 @@ export function renderTeamPage(container: HTMLElement): void {
         </div>
       </article>
 
-      <aside class="team-institution-band" aria-label="Institutional collaboration">
-        <div class="team-institution-band__logos">
+      <footer class="team-page-footer" aria-label="Institutional collaboration and contact">
+        <div class="team-page-footer__logos">
           <img
             src="./brand/scdlds-centre.png"
             alt="Safexpress Centre for Data, Learning and Decision Sciences"
@@ -210,42 +198,13 @@ export function renderTeamPage(container: HTMLElement): void {
           Developed in association with the Safexpress Centre for Data, Learning
           and Decision Sciences at Ashoka University.
         </p>
-        <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">
-          Visit the Centre <span aria-hidden="true">↗</span>
-        </a>
-      </aside>
-
-      <section class="team-principles" aria-labelledby="team-principles-title">
-        <header>
-          <span class="team-eyebrow">How we work</span>
-          <h2 id="team-principles-title">From research run to public guidance</h2>
-        </header>
-        <div class="team-principles__grid">
-          <article>
-            <span>01</span>
-            <h3>Scientific provenance</h3>
-            <p>Every issue records its initialization source, ensemble size, and valid forecast periods.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Validation before release</h3>
-            <p>Forecast packages pass data, checksum, and presentation checks before they can be published.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Transparent limitations</h3>
-            <p>Research status, calibration gaps, and source delays stay visible alongside the guidance.</p>
-          </article>
+        <div class="team-page-footer__links">
+          <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">
+            Centre website <span aria-hidden="true">↗</span>
+          </a>
+          <a href="mailto:${CONTACT_EMAIL}">Contact the team</a>
         </div>
-      </section>
-
-      <section class="team-contact" aria-labelledby="team-contact-title">
-        <div>
-          <span class="team-card-label">Research enquiries</span>
-          <h2 id="team-contact-title">Questions, collaboration, or feedback?</h2>
-        </div>
-        <a href="mailto:${CONTACT_EMAIL}">Contact the team <span aria-hidden="true">→</span></a>
-      </section>
+      </footer>
     </section>
   `;
 }

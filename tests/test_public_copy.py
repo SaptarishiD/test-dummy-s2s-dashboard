@@ -83,7 +83,10 @@ def test_team_page_marks_centre_affiliations_without_mislabeling_bedartha() -> N
     assert "SCDLDS · Researcher" in team
     assert "Project manager" not in team
     assert 'class="team-researcher"' in team
-    assert "SCDLDS affiliated" in team
+    assert "Research group." in team
+    assert "team-hero__stats" not in team
+    assert "team-principles" not in team
+    assert 'class="team-page-footer"' in team
     assert "https://scdlds.ashoka.edu.in" in shell.split("img-src", 1)[1].split(";", 1)[0]
 
 
