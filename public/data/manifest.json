@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-20T00:57:43.425290+00:00",
+  "generated_at": "2026-08-22T01:12:45.327715+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -215,6 +215,11 @@
       "sha256": "0ef032bb50995f5b929611db6c027c0aca442f16bdf9c55c22c535bb89bd54c7"
     },
     {
+      "path": "data/forecasts/gfs/20260822.json",
+      "size_bytes": 346373,
+      "sha256": "654fc6d6c7e33a3a8cf42871787c0404712dd839b9cf955a5d47bfa478f66ec8"
+    },
+    {
       "path": "data/forecasts/ifs/20260815.json",
       "size_bytes": 606641,
       "sha256": "039b9222123c7dde9352c73d5e497799b9233ccc610003e759e23ab0614b6c6a"
@@ -346,8 +351,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 54153,
-      "sha256": "2104e397834e7fc0febf301bc4146fe2d6f906276c62b6995d5e57f0b95f6e88"
+      "size_bytes": 55925,
+      "sha256": "721d60bf364273dfd859944a307c1c8b383de791375ff38c4cf5884cc19ecf12"
     },
     {
       "path": "data/india-admin.json",
@@ -438,6 +443,11 @@
       "path": "data/regional/gfs/20260819.json",
       "size_bytes": 447416,
       "sha256": "4b7fd5ec3bb97967ea2a71ffab4d297c715a768243aa92af82b784d7477d7ec9"
+    },
+    {
+      "path": "data/regional/gfs/20260822.json",
+      "size_bytes": 447523,
+      "sha256": "40b04461185914a9a51a4816430681907806eb53b4c57e5537ee31141e393bc1"
     },
     {
       "path": "data/regional/ifs/20260815.json",
@@ -605,6 +615,11 @@
       "sha256": "5086890a94d8980f5717ef8deca809c29ed42b244ea660f91889f01672fc01d9"
     },
     {
+      "path": "downloads/gfs/20260822/S2S_Research_India_Weeks1-4_GFS_20260822.pdf",
+      "size_bytes": 2887205,
+      "sha256": "25725682e0d3223d31c9dcfca3f4fcd5118f46d7014c4351c2695603b2af022f"
+    },
+    {
       "path": "downloads/ifs/20260815/S2S_Research_India_Weeks1-4_IFS_20260815.pdf",
       "size_bytes": 3620782,
       "sha256": "1a14d7f0c0849339a9876c34dead503ede1fe6c13b64b46155abdd805fd9b981"
@@ -638,6 +653,16 @@
       "path": "meeting.html",
       "size_bytes": 2661,
       "sha256": "0d79c6dc429b109e5102a320252e48b50c8f45a8f116d54fe22563510e3e3ae7"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-08-19-cover.png",
+      "size_bytes": 286557,
+      "sha256": "43e72e44bf3b4739687abc9c7e413294142268b59cb7faff2c866268dad8367c"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-08-19.pdf",
+      "size_bytes": 2115128,
+      "sha256": "37f82e735bdebcfb7a9fdb917a7d69d10506c5b08e1f187ca13241aa7d084bc4"
     },
     {
       "path": "team/ayush-raj.webp",
