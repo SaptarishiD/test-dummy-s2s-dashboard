@@ -126,7 +126,10 @@ export interface ForecastData {
     };
     climatology_alignment?: {
       status?: "available" | "unavailable_outside_jjas";
-      target_model_state_calendar_day: string;
+      target_initialization_calendar_day?: string;
+      model_state_calendar_day?: string;
+      /** Legacy exports before initialization-slot alignment was corrected. */
+      target_model_state_calendar_day?: string;
       left_slot?: string;
       right_slot?: string;
       right_weight?: number;
@@ -187,10 +190,10 @@ export interface InitializationComparisonData {
     longitude: number[];
     value_order: string;
   };
-  sources: Record<
+  sources: Partial<Record<
     InitialConditionSourceId,
     { members: number; forecast_sha256: string; public_forecast: string }
-  >;
+  >>;
   pairs: Array<{
     id: string;
     left_source_id: InitialConditionSourceId;
