@@ -85,6 +85,7 @@ def test_forecast_explains_initial_condition_sources_accessibly() -> None:
     assert 'class="india-source-guide"' in forecast
     assert 'id="india-source-guide"' in forecast
     assert 'aria-describedby="india-source-guide"' in forecast
+    assert 'aria-label="Explain IFS, GFS, and ERA5 sources"' in forecast
     assert "Integrated Forecasting System" in forecast
     assert "Global Forecast System" in forecast
     assert "Delayed ECMWF reanalysis reference" in forecast

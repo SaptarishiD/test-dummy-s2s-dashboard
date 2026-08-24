@@ -89,7 +89,8 @@ select:focus-visible {
   min-height: 72px;
   padding: 0 max(24px, calc((100vw - 1440px) / 2));
   color: var(--ops-ink);
-  background: rgb(255 255 255 / 98%);
+  background: linear-gradient(105deg, #edf3f8 0%, #fff 47%, #edf7f4 100%);
+  border-top: 3px solid var(--ops-navy);
   border-bottom: 1px solid var(--ops-line);
   box-shadow: 0 5px 20px rgb(18 38 63 / 7%);
   backdrop-filter: none;
@@ -97,9 +98,26 @@ select:focus-visible {
 
 .institution-brand {
   display: inline-flex;
+  gap: 10px;
   width: max-content;
   align-items: center;
   text-decoration: none;
+}
+
+.institution-brand__badge {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 34px;
+  place-items: center;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, var(--ops-navy) 0%, var(--ops-teal) 100%);
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 8px;
+  box-shadow: 0 5px 14px rgb(11 33 56 / 15%);
 }
 
 .institution-brand img {
@@ -339,10 +357,11 @@ select:focus-visible {
 
 .india-source-guide summary {
   display: inline-flex;
-  gap: 7px;
-  min-height: 40px;
-  padding: 7px 10px;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
   align-items: center;
+  justify-content: center;
   color: #4d5f75;
   font-size: 10px;
   font-weight: 750;
@@ -350,7 +369,7 @@ select:focus-visible {
   list-style: none;
   background: var(--ops-surface-muted);
   border: 1px solid var(--ops-line);
-  border-radius: 9px;
+  border-radius: 999px;
 }
 
 .india-source-guide summary::-webkit-details-marker {
@@ -366,8 +385,8 @@ select:focus-visible {
 
 .india-run-console__heading .india-source-guide__icon {
   display: inline-grid;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   place-items: center;
   color: #fff;
   font: 800 12px/1 Georgia, serif;

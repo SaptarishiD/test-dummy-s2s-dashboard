@@ -138,6 +138,7 @@ function shell(): string {
         href="./#india"
         aria-label="Safexpress Centre for Data, Learning and Decision Sciences forecast home"
       >
+        <span class="institution-brand__badge" aria-hidden="true">SCDLDS</span>
         <img
           src="./brand/scdlds-centre.png"
           alt="Safexpress Centre for Data, Learning and Decision Sciences"

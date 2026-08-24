@@ -63,6 +63,7 @@ def test_navigation_does_not_use_lab_branding() -> None:
 def test_header_uses_only_the_centre_wordmark() -> None:
     shell = read("src/main.ts")
     assert 'class="institution-brand"' in shell
+    assert 'class="institution-brand__badge" aria-hidden="true">SCDLDS</span>' in shell
     assert shell.count('./brand/scdlds-centre.png') == 1
     assert './brand/s2s-research-mark.svg' not in shell
     assert './brand/ashoka-university.png' not in shell

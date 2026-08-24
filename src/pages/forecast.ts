@@ -478,9 +478,12 @@ export function renderForecastPage(
             <strong>${forecast.issue.initial_condition_source.label}</strong>
           </div>
           <details class="india-source-guide">
-            <summary>
+            <summary
+              aria-label="Explain IFS, GFS, and ERA5 sources"
+              title="Explain forecast sources"
+            >
               <span class="india-source-guide__icon" aria-hidden="true">i</span>
-              <span>Source guide</span>
+              <span class="ops-visually-hidden">Source guide</span>
             </summary>
             <div class="india-source-guide__panel" id="india-source-guide">
               <strong>One forecast system, three input sources</strong>
