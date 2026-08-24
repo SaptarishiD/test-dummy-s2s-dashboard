@@ -183,6 +183,15 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
   },
 };
 
+const AUTO_PRODUCT_ORDER: ProductKey[] = [
+  "rainfall_anomaly",
+  "rainfall_total",
+  "wind850_anomaly",
+  "temperature_anomaly",
+];
+const AUTO_PRODUCT_DELAY_MS = 12_000;
+const AUTO_PRODUCT_IDLE_DELAY_MS = 30_000;
+
 function friendlyDate(isoDate: string, includeYear = false): string {
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
@@ -310,7 +319,10 @@ function renderInitializationComparison(
   render();
 }
 
-export function renderForecastPage(container: HTMLElement, data: AppData): void {
+export function renderForecastPage(
+  container: HTMLElement,
+  data: AppData,
+): (() => void) | undefined {
   const {
     forecast,
     validation,
@@ -465,8 +477,23 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
             <span>${isCurrent ? "Current forecast" : "Selected archive issue"}</span>
             <strong>${forecast.issue.initial_condition_source.label}</strong>
           </div>
+          <details class="india-source-guide">
+            <summary>
+              <span class="india-source-guide__icon" aria-hidden="true">i</span>
+              <span>Source guide</span>
+            </summary>
+            <div class="india-source-guide__panel" id="india-source-guide">
+              <strong>One forecast system, three input sources</strong>
+              <p>These labels describe how the same experimental forecasting system is initialized.</p>
+              <dl>
+                <div><dt>IFS</dt><dd>ECMWF Integrated Forecasting System inputs; experimental initialization.</dd></div>
+                <div><dt>GFS</dt><dd>Global Forecast System inputs; near-real-time proxy for current guidance.</dd></div>
+                <div><dt>ERA5</dt><dd>Delayed ECMWF reanalysis reference for controlled comparisons, not current guidance.</dd></div>
+              </dl>
+            </div>
+          </details>
         </div>
-        <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source">
+        <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source" aria-describedby="india-source-guide">
           ${index.initial_condition_sources.map((candidate) => {
             const preferred = defaultIssueForSource(index, candidate);
             if (!preferred) return `<span class="is-pending" aria-disabled="true"><span>${candidate.short_label}</span><small>Pilot pending</small></span>`;
@@ -483,11 +510,20 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
           <div><dt>Source</dt><dd>${sourceId === "gfs" ? "GFS proxy" : sourceId === "ifs" ? "IFS experimental" : "ERA5 delayed"}</dd></div>
         </dl>
         <div class="india-run-actions" aria-label="Forecast downloads">
-          <span>Forecast briefing</span>
-          ${pdfReady
-            ? `<a class="india-pdf-download" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">View briefing ↗</a><a class="india-pdf-download-secondary" href="${pdfUrl}" download type="application/pdf">Download PDF ↓</a>`
-            : `<button class="india-pdf-download" type="button" disabled>PDF preparing · refresh shortly</button>`}
-          <a href="./#archive">Browse archive</a>
+          <a class="india-briefing-cta" href="./#briefing">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2.75h6.6L18.25 7.4V21.25H7z" />
+              <path d="M13.5 2.75V7.5h4.75M9.75 12h5.5M9.75 15.5h5.5" />
+            </svg>
+            <span><strong>Forecast briefing</strong><small>Summary and full report</small></span>
+            <i aria-hidden="true">→</i>
+          </a>
+          <div class="india-run-actions__secondary">
+            ${pdfReady
+              ? `<a class="india-pdf-download-secondary" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">Current issue PDF ↗</a><a class="india-pdf-download-tertiary" href="${pdfUrl}" download type="application/pdf">Download ↓</a>`
+              : `<button class="india-pdf-download-secondary" type="button" disabled>Current PDF preparing</button>`}
+            <a class="india-archive-action" href="./#archive">Archive →</a>
+          </div>
         </div>
         ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
       </section>
@@ -498,6 +534,10 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       <div class="india-toolbar">
         <div class="india-product-tabs" id="india-product-tabs" role="group" aria-label="India forecast field"></div>
         <div class="india-view-controls">
+          <button class="india-auto-cycle" id="india-auto-cycle" type="button" aria-pressed="true">
+            <span class="india-auto-cycle__indicator" aria-hidden="true"></span>
+            <span class="india-auto-cycle__label">Auto on</span>
+          </button>
           <div class="india-wind-mode" id="india-wind-mode" role="group" aria-label="Wind direction display" hidden>
             <span>Wind display</span>
             <button type="button" data-wind-mode="streamlines" class="is-active">Streamlines</button>
@@ -509,6 +549,8 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
           </div>
         </div>
       </div>
+
+      <p class="ops-visually-hidden" id="india-product-status" aria-live="polite" aria-atomic="true"></p>
 
       <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
       <div class="india-shared-legend" id="india-shared-legend"></div>
@@ -527,6 +569,126 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
   const productTabs = container.querySelector<HTMLDivElement>("#india-product-tabs")!;
   const panelGrid = container.querySelector<HTMLDivElement>("#india-panel-grid")!;
   const windModeControl = container.querySelector<HTMLDivElement>("#india-wind-mode")!;
+  const autoCycleButton = container.querySelector<HTMLButtonElement>("#india-auto-cycle")!;
+  const autoCycleLabel = autoCycleButton.querySelector<HTMLElement>(".india-auto-cycle__label")!;
+  const productStatus = container.querySelector<HTMLElement>("#india-product-status")!;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const automaticProducts = AUTO_PRODUCT_ORDER.filter((product) =>
+    availableProducts.includes(product)
+  );
+  let autoCycleEnabled = !reducedMotion.matches && automaticProducts.length > 1;
+  let autoCycleTimer: number | undefined;
+  let panelAnimationTimer: number | undefined;
+  let pointerPauseCount = 0;
+  let nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
+  let destroyed = false;
+
+  const pauseRegions = [
+    container.querySelector<HTMLElement>(".india-run-console")!,
+    container.querySelector<HTMLElement>(".india-toolbar")!,
+    panelGrid,
+  ];
+  const sourceGuide = container.querySelector<HTMLDetailsElement>(".india-source-guide")!;
+
+  function clearAutoCycleTimer(): void {
+    if (autoCycleTimer !== undefined) {
+      window.clearTimeout(autoCycleTimer);
+      autoCycleTimer = undefined;
+    }
+    autoCycleButton.classList.remove("is-counting");
+  }
+
+  function interactionHasFocus(): boolean {
+    return pauseRegions.some((region) => region.contains(document.activeElement));
+  }
+
+  function updateAutoCycleControl(): void {
+    const available = automaticProducts.length > 1;
+    autoCycleButton.disabled = !available;
+    autoCycleButton.setAttribute("aria-pressed", String(autoCycleEnabled));
+    autoCycleButton.dataset.state = autoCycleEnabled ? "on" : "off";
+    autoCycleLabel.textContent = available
+      ? `Auto ${autoCycleEnabled ? "on" : "off"}`
+      : "Auto unavailable";
+    autoCycleButton.setAttribute(
+      "aria-label",
+      autoCycleEnabled
+        ? "Pause automatic forecast field rotation"
+        : "Start automatic forecast field rotation",
+    );
+  }
+
+  function scheduleAutoCycle(delay = nextAutoDelay): void {
+    clearAutoCycleTimer();
+    updateAutoCycleControl();
+    if (
+      destroyed ||
+      !autoCycleEnabled ||
+      automaticProducts.length < 2 ||
+      document.hidden ||
+      pointerPauseCount > 0 ||
+      interactionHasFocus() ||
+      sourceGuide.open
+    ) return;
+
+    autoCycleButton.style.setProperty("--auto-cycle-duration", `${delay}ms`);
+    void autoCycleButton.offsetWidth;
+    autoCycleButton.classList.add("is-counting");
+    autoCycleTimer = window.setTimeout(() => {
+      autoCycleTimer = undefined;
+      if (destroyed || !panelGrid.isConnected) return;
+      const currentIndex = automaticProducts.indexOf(selectedProduct);
+      const nextProduct = automaticProducts[
+        (currentIndex + 1 + automaticProducts.length) % automaticProducts.length
+      ];
+      selectedProduct = nextProduct;
+      update();
+      productStatus.textContent = `Automatically showing ${PRESENTATION_PRODUCTS[nextProduct].label}.`;
+      nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
+      scheduleAutoCycle();
+    }, delay);
+  }
+
+  function holdForUser(): void {
+    productStatus.textContent = "";
+    nextAutoDelay = AUTO_PRODUCT_IDLE_DELAY_MS;
+    scheduleAutoCycle(AUTO_PRODUCT_IDLE_DELAY_MS);
+  }
+
+  function onPointerEnter(): void {
+    pointerPauseCount += 1;
+    clearAutoCycleTimer();
+  }
+
+  function onPointerLeave(): void {
+    pointerPauseCount = Math.max(0, pointerPauseCount - 1);
+    scheduleAutoCycle();
+  }
+
+  function onFocusIn(): void {
+    clearAutoCycleTimer();
+  }
+
+  function onFocusOut(): void {
+    window.setTimeout(() => scheduleAutoCycle(), 0);
+  }
+
+  function onVisibilityChange(): void {
+    if (document.hidden) clearAutoCycleTimer();
+    else scheduleAutoCycle();
+  }
+
+  function onMotionPreferenceChange(event: MediaQueryListEvent): void {
+    if (!event.matches) return;
+    autoCycleEnabled = false;
+    clearAutoCycleTimer();
+    updateAutoCycleControl();
+  }
+
+  function onSourceGuideToggle(): void {
+    if (sourceGuide.open) clearAutoCycleTimer();
+    else scheduleAutoCycle();
+  }
 
   container.querySelector<HTMLSelectElement>(".india-domain-select select")
     ?.addEventListener("change", (event) => {
@@ -548,6 +710,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     button.addEventListener("click", () => {
       selectedProduct = productKey;
       update();
+      holdForUser();
     });
     productTabs.append(button);
   });
@@ -558,6 +721,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       button.addEventListener("click", () => {
         rangeStart = Number(button.dataset.range);
         update();
+        holdForUser();
       });
     });
 
@@ -567,8 +731,31 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       button.addEventListener("click", () => {
         windRenderingMode = button.dataset.windMode as WindRenderingMode;
         update();
+        holdForUser();
       });
     });
+
+  autoCycleButton.addEventListener("click", () => {
+    autoCycleEnabled = !autoCycleEnabled;
+    if (autoCycleEnabled) {
+      nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
+      scheduleAutoCycle();
+    }
+    else {
+      clearAutoCycleTimer();
+      updateAutoCycleControl();
+    }
+  });
+
+  pauseRegions.forEach((region) => {
+    region.addEventListener("pointerenter", onPointerEnter);
+    region.addEventListener("pointerleave", onPointerLeave);
+    region.addEventListener("focusin", onFocusIn);
+    region.addEventListener("focusout", onFocusOut);
+  });
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  reducedMotion.addEventListener("change", onMotionPreferenceChange);
+  sourceGuide.addEventListener("toggle", onSourceGuideToggle);
 
   function update(): void {
     const product = PRESENTATION_PRODUCTS[selectedProduct];
@@ -614,6 +801,16 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       );
       map.render(selectedProduct, week, product, windRenderingMode);
     });
+    if (!reducedMotion.matches) {
+      if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
+      panelGrid.classList.remove("is-refreshing");
+      void panelGrid.offsetWidth;
+      panelGrid.classList.add("is-refreshing");
+      panelAnimationTimer = window.setTimeout(() => {
+        panelGrid.classList.remove("is-refreshing");
+        panelAnimationTimer = undefined;
+      }, 260);
+    }
 
     const legend = container.querySelector<HTMLDivElement>("#india-shared-legend")!;
     legend.style.setProperty("--legend-under", product.legend.under);
@@ -631,6 +828,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 
+  updateAutoCycleControl();
   update();
   if (initializationComparison && data.comparisonForecasts) {
     renderInitializationComparison(
@@ -640,4 +838,20 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       activeGeography,
     );
   }
+  scheduleAutoCycle();
+
+  return () => {
+    destroyed = true;
+    clearAutoCycleTimer();
+    if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
+    pauseRegions.forEach((region) => {
+      region.removeEventListener("pointerenter", onPointerEnter);
+      region.removeEventListener("pointerleave", onPointerLeave);
+      region.removeEventListener("focusin", onFocusIn);
+      region.removeEventListener("focusout", onFocusOut);
+    });
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    reducedMotion.removeEventListener("change", onMotionPreferenceChange);
+    sourceGuide.removeEventListener("toggle", onSourceGuideToggle);
+  };
 }

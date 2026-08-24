@@ -60,6 +60,15 @@ def test_navigation_does_not_use_lab_branding() -> None:
     assert 'data-route="models"' not in shell
 
 
+def test_header_uses_only_the_centre_wordmark() -> None:
+    shell = read("src/main.ts")
+    assert 'class="institution-brand"' in shell
+    assert shell.count('./brand/scdlds-centre.png') == 1
+    assert './brand/s2s-research-mark.svg' not in shell
+    assert './brand/ashoka-university.png' not in shell
+    assert "Loading latest issue" in shell
+
+
 def test_primary_navigation_is_india_focused() -> None:
     shell = read("src/main.ts")
     assert 'data-route="india"' in shell
@@ -119,31 +128,34 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
 
-def test_team_navigation_lists_scientific_contributors_by_surname() -> None:
+def test_team_navigation_lists_scientific_contributors_by_project_role() -> None:
     shell = read("src/main.ts")
     team = read("src/pages/team.ts")
     assert 'href="./#briefing" data-route="briefing"' in shell
     assert 'href="./#team" data-route="team"' in shell
-    names_by_surname = (
-        "Saptarishi Dhanuka",
+    names_by_project_role = (
+        "Manmeet Singh",
+        "Ayush Raj",
         "Sandeep Juneja",
         "Parthasarathi Mukhopadhyay",
-        "Ayush Raj",
-        "Manmeet Singh",
+        "Saptarishi Dhanuka",
     )
-    for name in names_by_surname:
+    for name in names_by_project_role:
         assert name in team
-    assert [team.index(name) for name in names_by_surname] == sorted(
-        team.index(name) for name in names_by_surname
+    assert [team.index(name) for name in names_by_project_role] == sorted(
+        team.index(name) for name in names_by_project_role
     )
-    for scientific_role in (
-        "Pre-doctoral Fellow · AI weather research",
-        "Professor of Computer Science · Centre Director",
-        "Visiting Faculty · Earth & Environmental Sciences",
-        "MS Thesis Researcher · AI weather research",
-        "Project Lead · Assistant Professor",
+    for project_role in (
+        "Lead Scientist",
+        "Main Researcher",
+        "Senior Scientist",
+        "Research Contributor",
     ):
-        assert scientific_role in team
+        assert project_role in team
+    assert team.count('projectRole: "Senior Scientist"') == 2
+    assert "People behind the forecast" not in team
+    assert "alphabetically by surname" not in team
+    assert 'id="team-title">Scientific contributors</h1>' in team
     assert "publication workflow" not in team.casefold()
     assert "website maintenance" not in team.casefold()
 

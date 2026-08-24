@@ -133,12 +133,15 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a class="brand" href="./#india" aria-label="S2S Research forecast home">
-        <img class="brand-logo" src="./brand/s2s-research-mark.svg" alt="" />
-        <span class="brand-copy">
-          <strong>S2S Research</strong>
-          <small>Experimental Subseasonal Forecasting</small>
-        </span>
+      <a
+        class="institution-brand"
+        href="./#india"
+        aria-label="Safexpress Centre for Data, Learning and Decision Sciences forecast home"
+      >
+        <img
+          src="./brand/scdlds-centre.png"
+          alt="Safexpress Centre for Data, Learning and Decision Sciences"
+        />
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="./#india" data-route="india">Forecast</a>
@@ -156,29 +159,10 @@ function shell(): string {
         </a>
         <a href="./#team" data-route="team">Team</a>
       </nav>
-      <div class="header-partner">
-        <a
-          class="institution-lockup"
-          href="https://scdlds.ashoka.edu.in/"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University"
-        >
-          <img
-            class="institution-lockup__centre"
-            src="./brand/scdlds-centre.png"
-            alt="Safexpress Centre for Data, Learning and Decision Sciences"
-          />
-          <span aria-hidden="true"></span>
-          <img
-            class="institution-lockup__ashoka"
-            src="./brand/ashoka-university.png"
-            alt="Ashoka University"
-          />
-        </a>
+      <div class="header-utility">
         <div class="header-status">
           <span class="live-dot" aria-hidden="true"></span>
-          <span class="header-status__label">Research prototype</span>
+          <span class="header-status__label">Loading latest issue</span>
         </div>
       </div>
     </header>
@@ -204,6 +188,8 @@ function shell(): string {
     </footer>
   `;
 }
+
+let routeCleanup: (() => void) | undefined;
 
 async function renderRoute(data: AppData): Promise<void> {
   const route = currentRoute();
@@ -236,10 +222,12 @@ async function renderRoute(data: AppData): Promise<void> {
       if (active) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     });
+  routeCleanup?.();
+  routeCleanup = undefined;
   content.replaceChildren();
   if (route === "india") {
     const { renderForecastPage } = await import("./pages/forecast");
-    renderForecastPage(content, data);
+    routeCleanup = renderForecastPage(content, data);
   }
   if (route === "archive") {
     const { renderArchivePage } = await import("./pages/archive");
@@ -253,7 +241,8 @@ async function renderRoute(data: AppData): Promise<void> {
     const { renderTeamPage } = await import("./pages/team");
     renderTeamPage(content);
   }
-  window.scrollTo({ top: 0, behavior: "instant" });
+  window.scrollTo(0, 0);
+  window.requestAnimationFrame(() => window.scrollTo(0, 0));
 }
 
 function renderLoadFailure(error: unknown): void {

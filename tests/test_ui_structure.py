@@ -76,4 +76,55 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     assert "renderTeamPage(content)" in main
     assert 'class="team-page"' in team
     assert 'class="team-grid"' in team
+    assert 'aria-label="Contributors ordered by project responsibility"' in team
     assert 'class="briefing-team"' not in briefing
+
+
+def test_forecast_explains_initial_condition_sources_accessibly() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert 'class="india-source-guide"' in forecast
+    assert 'id="india-source-guide"' in forecast
+    assert 'aria-describedby="india-source-guide"' in forecast
+    assert "Integrated Forecasting System" in forecast
+    assert "Global Forecast System" in forecast
+    assert "Delayed ECMWF reanalysis reference" in forecast
+    assert "same experimental forecasting system is initialized" in forecast
+
+
+def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
+    main = read("src/main.ts")
+    forecast = read("src/pages/forecast.ts")
+    expected_order = (
+        '"rainfall_anomaly"',
+        '"rainfall_total"',
+        '"wind850_anomaly"',
+        '"temperature_anomaly"',
+    )
+    order_start = forecast.index("const AUTO_PRODUCT_ORDER")
+    order_end = forecast.index("];", order_start)
+    order_block = forecast[order_start:order_end]
+    assert [order_block.index(product) for product in expected_order] == sorted(
+        order_block.index(product) for product in expected_order
+    )
+    assert "AUTO_PRODUCT_DELAY_MS = 12_000" in forecast
+    assert "AUTO_PRODUCT_IDLE_DELAY_MS = 30_000" in forecast
+    assert "AUTO_PRODUCT_ORDER.filter" in forecast
+    assert 'id="india-auto-cycle"' in forecast
+    assert 'aria-pressed="true"' in forecast
+    assert 'matchMedia("(prefers-reduced-motion: reduce)")' in forecast
+    assert 'document.addEventListener("visibilitychange"' in forecast
+    assert "return () => {" in forecast
+    assert "clearAutoCycleTimer();" in forecast
+    assert "routeCleanup?.();" in main
+    assert "routeCleanup = renderForecastPage(content, data);" in main
+
+
+def test_forecast_has_a_prominent_full_briefing_action() -> None:
+    forecast = read("src/pages/forecast.ts")
+    refresh = read("src/styles/operational.css")
+    assert 'class="india-briefing-cta" href="./#briefing"' in forecast
+    assert "Summary and full report" in forecast
+    assert 'class="india-pdf-download-secondary"' in forecast
+    assert 'class="india-pdf-download-tertiary"' in forecast
+    assert ".india-run-actions .india-briefing-cta" in refresh
+    assert ".site-nav .briefing-nav-link.is-active" in refresh
