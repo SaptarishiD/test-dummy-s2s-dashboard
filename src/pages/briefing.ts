@@ -1,43 +1,5 @@
 import { FEATURED_REPORT } from "../lib/reports";
 
-const TEAM_MEMBERS = [
-  {
-    name: "Saptarishi Dhanuka",
-    role: "Pre-doctoral Fellow · AI weather research",
-    affiliation: "Ashoka University · SCDLDS",
-    image: "./team/saptarishi-dhanuka.jpg",
-    profile: "https://www.ashoka.edu.in/profile/saptarishi-dhanuka/",
-  },
-  {
-    name: "Sandeep Juneja",
-    role: "Professor of Computer Science · Centre Director",
-    affiliation: "Ashoka University · SCDLDS",
-    image: "./team/sandeep-juneja.jpg",
-    profile: "https://www.ashoka.edu.in/profile/sandeep-juneja/",
-  },
-  {
-    name: "Parthasarathi Mukhopadhyay",
-    role: "Visiting Faculty · Earth & Environmental Sciences",
-    affiliation: "IISER Berhampur · FASc · SCDLDS",
-    image: "./team/parthasarathi-mukhopadhyay.jpg",
-    profile: "https://www.iiserbpr.ac.in/people/profile/parthasarathym",
-  },
-  {
-    name: "Ayush Raj",
-    role: "MS Thesis Researcher · AI weather research",
-    affiliation: "IISER Pune · SCDLDS",
-    image: "./team/ayush-raj.webp",
-    profile: "https://in.linkedin.com/in/ayush-raj-7608a424a",
-  },
-  {
-    name: "Manmeet Singh",
-    role: "Project Lead · Assistant Professor",
-    affiliation: "Western Kentucky University · SCDLDS",
-    image: "./team/manmeet-singh.jpg",
-    profile: "https://www.wku.edu/eeas/staff/manmeet_singh",
-  },
-] as const;
-
 export function renderBriefingPage(container: HTMLElement): void {
   container.innerHTML = `
     <section class="briefing-page">
@@ -45,8 +7,8 @@ export function renderBriefingPage(container: HTMLElement): void {
         <span class="briefing-eyebrow">S2S Research · Thursday briefing</span>
         <h1>Latest forecast briefing</h1>
         <p>
-          The complete India subseasonal outlook and the scientists responsible
-          for its weekly review and interpretation.
+          The complete India subseasonal outlook for weekly scientific review
+          and interpretation.
         </p>
       </header>
 
@@ -124,42 +86,6 @@ export function renderBriefingPage(container: HTMLElement): void {
           or
           <a href="${FEATURED_REPORT.href}" download type="application/pdf">download it</a>.
         </p>
-      </section>
-
-      <section class="briefing-team" aria-labelledby="briefing-team-title">
-        <header class="briefing-section-heading">
-          <div>
-            <span>Forecast team</span>
-            <h2 id="briefing-team-title">People behind the forecast</h2>
-          </div>
-          <p>Scientific contributors to forecast analysis, interpretation, and review.</p>
-        </header>
-
-        <div class="briefing-member-grid">
-          ${TEAM_MEMBERS.map((member) => `
-            <article class="briefing-member-card">
-              <div class="briefing-member-card__portrait">
-                <img
-                  src="${member.image}"
-                  alt="Portrait of ${member.name}"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div class="briefing-member-card__body">
-                <h3>${member.name}</h3>
-                <p class="briefing-member-card__role">${member.role}</p>
-                <p class="briefing-member-card__affiliation">${member.affiliation}</p>
-                <a
-                  href="${member.profile}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open ${member.name}'s public profile in a new tab"
-                >Public profile <span aria-hidden="true">↗</span></a>
-              </div>
-            </article>
-          `).join("")}
-        </div>
       </section>
 
       <aside class="briefing-context">

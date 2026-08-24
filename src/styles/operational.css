@@ -2,7 +2,7 @@
  * Operational interface refresh
  *
  * This layer intentionally sits after the historical stylesheet. It modernizes
- * the active Forecast, Archive, and Briefing routes without changing map
+ * the active Forecast, Archive, Briefing, and Team routes without changing map
  * geometry, scientific colour scales, or data-driven behavior.
  */
 
@@ -72,7 +72,8 @@ select:focus-visible {
 .site-header,
 .india-route .site-header,
 .archive-route .site-header,
-.briefing-route .site-header {
+.briefing-route .site-header,
+.team-route .site-header {
   grid-template-columns: minmax(250px, 1fr) auto minmax(250px, 1fr);
   min-height: 72px;
   padding: 0 max(24px, calc((100vw - 1440px) / 2));
@@ -209,7 +210,8 @@ select:focus-visible {
 .site-footer,
 .india-route .site-footer,
 .archive-route .site-footer,
-.briefing-route .site-footer {
+.briefing-route .site-footer,
+.team-route .site-footer {
   grid-template-columns: minmax(250px, 1.15fr) repeat(3, minmax(170px, 1fr));
   gap: 38px;
   padding: 44px max(24px, calc((100vw - 1320px) / 2));
@@ -647,16 +649,21 @@ select:focus-visible {
 }
 
 .archive-eyebrow,
-.briefing-eyebrow {
+.briefing-eyebrow,
+.team-eyebrow {
+  display: block;
   margin-bottom: 10px;
   color: var(--ops-teal);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .archive-hero h1,
-.briefing-hero h1 {
+.briefing-hero h1,
+.team-hero h1 {
+  margin: 0;
   color: var(--ops-ink);
   font-family: inherit;
   font-size: clamp(40px, 4.5vw, 58px);
@@ -666,7 +673,8 @@ select:focus-visible {
 }
 
 .archive-hero > div > p,
-.briefing-hero p {
+.briefing-hero p,
+.team-hero__intro {
   max-width: 720px;
   margin-top: 16px;
   color: var(--ops-ink-soft);
@@ -888,8 +896,7 @@ select:focus-visible {
 }
 
 .briefing-report-summary,
-.briefing-report,
-.briefing-team {
+.briefing-report {
   background: var(--ops-surface);
   border: 1px solid var(--ops-line);
   border-radius: var(--ops-radius-lg);
@@ -916,8 +923,7 @@ select:focus-visible {
 
 .briefing-details h2,
 .briefing-report-summary .briefing-details h2,
-.briefing-section-heading h2,
-.briefing-member-card h3 {
+.briefing-section-heading h2 {
   color: var(--ops-ink);
   font-family: inherit;
 }
@@ -1023,57 +1029,6 @@ select:focus-visible {
   border-radius: 10px;
 }
 
-.briefing-team {
-  margin-top: 20px;
-  padding: 24px;
-}
-
-.briefing-member-grid {
-  gap: 12px;
-  margin-top: 18px;
-  overflow: visible;
-  background: transparent;
-  border: 0;
-}
-
-.briefing-member-card {
-  min-height: 324px;
-  overflow: hidden;
-  background: var(--ops-surface);
-  border: 1px solid var(--ops-line);
-  border-radius: 12px;
-  box-shadow: 0 5px 14px rgb(18 38 63 / 5%);
-}
-
-.briefing-member-card__portrait {
-  background: #e9edf2;
-}
-
-.briefing-member-card__body {
-  padding: 15px;
-}
-
-.briefing-member-card h3 {
-  font-size: 14px;
-  font-weight: 750;
-}
-
-.briefing-member-card__role {
-  color: #42556c;
-  font-size: 11px;
-}
-
-.briefing-member-card__affiliation {
-  color: var(--ops-ink-faint);
-  font-size: 10px;
-}
-
-.briefing-member-card a {
-  color: var(--ops-blue);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-}
-
 .briefing-context {
   margin-top: 18px;
   background: #edf3f6;
@@ -1087,13 +1042,231 @@ select:focus-visible {
   font-size: 11px;
 }
 
+/* Team */
+
+.team-route {
+  color: var(--ops-ink);
+  background: var(--ops-canvas);
+}
+
+.team-page {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 62px 34px 96px;
+}
+
+.team-hero {
+  max-width: 980px;
+}
+
+.team-hero__intro {
+  max-width: 720px;
+}
+
+.team-roster {
+  margin-top: 30px;
+  padding: 24px;
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius-lg);
+  box-shadow: var(--ops-shadow-sm);
+}
+
+.team-section-heading {
+  display: flex;
+  gap: 28px;
+  align-items: end;
+  justify-content: space-between;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--ops-line);
+}
+
+.team-section-heading .team-eyebrow {
+  margin-bottom: 4px;
+}
+
+.team-section-heading h2 {
+  margin: 0;
+  color: var(--ops-ink);
+  font-size: 24px;
+  font-weight: 730;
+  letter-spacing: -0.02em;
+}
+
+.team-section-heading p {
+  max-width: 390px;
+  margin: 0;
+  color: var(--ops-ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.team-person-card {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  flex-direction: column;
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line);
+  border-radius: 12px;
+  box-shadow: 0 5px 14px rgb(18 38 63 / 5%);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.team-person-card:hover {
+  border-color: #c9d4e0;
+  box-shadow: 0 10px 24px rgb(18 38 63 / 9%);
+  transform: translateY(-2px);
+}
+
+.team-person-card__portrait {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #e9edf2;
+}
+
+.team-person-card__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.team-person-card:hover .team-person-card__portrait img {
+  transform: scale(1.025);
+}
+
+.team-person-card__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.team-person-card h3 {
+  margin: 0;
+  color: var(--ops-ink);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.team-person-card__role {
+  margin: 8px 0 0;
+  color: #42556c;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.team-person-card__affiliation {
+  margin: 6px 0 0;
+  color: var(--ops-ink-faint);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.team-person-card__expertise {
+  margin: 12px 0 0;
+  padding-top: 11px;
+  color: var(--ops-ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+  border-top: 1px solid var(--ops-line);
+}
+
+.team-person-card__profile {
+  width: max-content;
+  margin-top: auto;
+  padding-top: 14px;
+  color: var(--ops-blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.team-person-card__profile:hover {
+  color: #19477f;
+}
+
+.team-context {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: #edf3f6;
+  border: 1px solid #dce5ea;
+  border-radius: 11px;
+}
+
+.team-context > div:first-child {
+  max-width: 720px;
+}
+
+.team-context > div:first-child > span {
+  color: var(--ops-teal);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.team-context p {
+  margin: 4px 0 0;
+  color: var(--ops-ink-soft);
+  font-size: 11px;
+}
+
+.team-context__links {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.team-context__links a {
+  display: inline-flex;
+  min-height: 40px;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ops-blue);
+  font-size: 10px;
+  font-weight: 750;
+  text-decoration: none;
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 8px;
+}
+
+.team-context__links a:hover {
+  background: var(--ops-blue-soft);
+  border-color: #b9cdea;
+}
+
 /* Responsive behavior */
 
 @media (max-width: 1180px) {
   .site-header,
   .india-route .site-header,
   .archive-route .site-header,
-  .briefing-route .site-header {
+  .briefing-route .site-header,
+  .team-route .site-header {
     grid-template-columns: minmax(210px, 1fr) auto minmax(150px, 1fr);
     padding-inline: 22px;
   }
@@ -1135,9 +1308,14 @@ select:focus-visible {
   .site-footer,
   .india-route .site-footer,
   .archive-route .site-footer,
-  .briefing-route .site-footer {
+  .briefing-route .site-footer,
+  .team-route .site-footer {
     grid-template-columns: 1.15fr 1fr 1fr;
     padding-inline: 28px;
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1145,7 +1323,8 @@ select:focus-visible {
   .site-header,
   .india-route .site-header,
   .archive-route .site-header,
-  .briefing-route .site-header {
+  .briefing-route .site-header,
+  .team-route .site-header {
     grid-template-columns: auto 1fr auto;
   }
 
@@ -1173,7 +1352,8 @@ select:focus-visible {
   }
 
   .archive-page,
-  .briefing-page {
+  .briefing-page,
+  .team-page {
     padding-right: 24px;
     padding-left: 24px;
   }
@@ -1182,7 +1362,7 @@ select:focus-visible {
     grid-template-columns: 190px minmax(0, 1fr);
   }
 
-  .briefing-member-grid {
+  .team-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1191,7 +1371,8 @@ select:focus-visible {
   .site-header,
   .india-route .site-header,
   .archive-route .site-header,
-  .briefing-route .site-header {
+  .briefing-route .site-header,
+  .team-route .site-header {
     position: sticky;
     grid-template-columns: 1fr auto;
     gap: 10px;
@@ -1242,11 +1423,17 @@ select:focus-visible {
 
   .site-nav a,
   .site-nav .briefing-nav-link {
-    flex: 1 0 auto;
+    flex: 1 1 0;
     justify-content: center;
+    min-width: 0;
     min-height: 36px;
-    padding: 0 12px;
-    font-size: 11px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+
+  .briefing-nav-link__icon {
+    width: 12px;
+    height: 12px;
   }
 
   .india-sheet {
@@ -1392,7 +1579,8 @@ select:focus-visible {
   }
 
   .archive-page,
-  .briefing-page {
+  .briefing-page,
+  .team-page {
     padding: 42px 14px 68px;
   }
 
@@ -1402,7 +1590,8 @@ select:focus-visible {
   }
 
   .archive-hero h1,
-  .briefing-hero h1 {
+  .briefing-hero h1,
+  .team-hero h1 {
     font-size: 40px;
   }
 
@@ -1440,14 +1629,12 @@ select:focus-visible {
   }
 
   .briefing-report-summary .briefing-details,
-  .briefing-report,
-  .briefing-team {
+  .briefing-report {
     padding: 18px;
   }
 
   .briefing-report-summary .briefing-facts,
   .briefing-section-heading,
-  .briefing-member-grid,
   .briefing-context {
     grid-template-columns: 1fr;
   }
@@ -1456,14 +1643,49 @@ select:focus-visible {
     min-height: 520px;
   }
 
-  .briefing-member-grid {
+  .team-roster {
+    padding: 18px;
+  }
+
+  .team-section-heading,
+  .team-context {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .team-section-heading p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .team-person-card {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.34fr) minmax(0, 1fr);
+  }
+
+  .team-person-card__portrait {
+    min-height: 220px;
+    aspect-ratio: auto;
+  }
+
+  .team-context__links {
+    width: 100%;
+  }
+
+  .team-context__links a {
+    flex: 1;
   }
 
   .site-footer,
   .india-route .site-footer,
   .archive-route .site-footer,
-  .briefing-route .site-footer {
+  .briefing-route .site-footer,
+  .team-route .site-footer {
     grid-template-columns: 1fr;
     gap: 24px;
     padding: 36px 20px;
@@ -1473,6 +1695,18 @@ select:focus-visible {
 @media (max-width: 440px) {
   .brand-copy strong {
     font-size: 14px;
+  }
+
+  .team-page {
+    padding-top: 34px;
+  }
+
+  .team-hero h1 {
+    font-size: 34px;
+  }
+
+  .team-section-heading h2 {
+    font-size: 21px;
   }
 
   .india-source-tabs span {
@@ -1505,13 +1739,35 @@ select:focus-visible {
   .archive-card__actions {
     grid-template-columns: 1fr;
   }
+
+  .team-roster {
+    padding: 12px;
+  }
+
+  .team-person-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .team-person-card__portrait {
+    min-height: 240px;
+  }
+
+  .team-person-card__body {
+    padding: 13px;
+  }
+
+  .team-context__links {
+    flex-direction: column;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   a,
   button,
   select,
-  .archive-card {
+  .archive-card,
+  .team-person-card,
+  .team-person-card__portrait img {
     transition: none;
   }
 }

@@ -17,12 +17,13 @@ import {
   issueChecksum,
 } from "./lib/catalog";
 
-type Route = "india" | "archive" | "briefing";
+type Route = "india" | "archive" | "briefing" | "team";
 
 const ROUTES = new Set<Route>([
   "india",
   "archive",
   "briefing",
+  "team",
 ]);
 
 function currentRoute(): Route {
@@ -52,7 +53,7 @@ async function loadData(): Promise<AppData> {
   );
   if (!activeDomain) throw new Error("No forecast domain is configured");
 
-  if (route === "briefing") {
+  if (route === "briefing" || route === "team") {
     return { domainCatalog, activeDomain };
   }
 
@@ -153,6 +154,7 @@ function shell(): string {
           </svg>
           <span>Briefing</span>
         </a>
+        <a href="./#team" data-route="team">Team</a>
       </nav>
       <div class="header-partner">
         <a
@@ -213,15 +215,18 @@ async function renderRoute(data: AppData): Promise<void> {
   document.body.classList.toggle("india-route", route === "india");
   document.body.classList.toggle("archive-route", route === "archive");
   document.body.classList.toggle("briefing-route", route === "briefing");
+  document.body.classList.toggle("team-route", route === "team");
   const statusDate = data.forecast?.issue.initialization ??
     (data.index ? currentGfsIssue(data.index)?.initialization : undefined);
   const statusLabel = route === "briefing"
     ? "Latest Thursday briefing"
-    : statusDate
-    ? new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
-    }).format(new Date(statusDate))
-    : "Forecast archive";
+    : route === "team"
+      ? "Scientific team"
+      : statusDate
+        ? new Intl.DateTimeFormat("en-IN", {
+          day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
+        }).format(new Date(statusDate))
+        : "Forecast archive";
   document.querySelector<HTMLElement>(".header-status__label")!.textContent = statusLabel;
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
@@ -243,6 +248,10 @@ async function renderRoute(data: AppData): Promise<void> {
   if (route === "briefing") {
     const { renderBriefingPage } = await import("./pages/briefing");
     renderBriefingPage(content);
+  }
+  if (route === "team") {
+    const { renderTeamPage } = await import("./pages/team");
+    renderTeamPage(content);
   }
   window.scrollTo({ top: 0, behavior: "instant" });
 }

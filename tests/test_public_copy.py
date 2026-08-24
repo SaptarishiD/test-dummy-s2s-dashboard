@@ -25,6 +25,7 @@ def test_public_copy_contains_only_the_approved_contact_email() -> None:
             "src/pages/forecast.ts",
             "src/pages/global.ts",
             "src/pages/outlook.ts",
+            "src/pages/team.ts",
             "public/meeting.html",
         )
     )
@@ -64,6 +65,7 @@ def test_primary_navigation_is_india_focused() -> None:
     assert 'data-route="india"' in shell
     assert 'data-route="archive"' in shell
     assert 'data-route="briefing"' in shell
+    assert 'data-route="team"' in shell
     assert 'data-route="forecast"' not in shell
     assert 'data-route="outlook"' not in shell
     assert "?view=global" not in shell
@@ -117,10 +119,11 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
 
-def test_briefing_navigation_lists_the_scientific_team_by_surname() -> None:
+def test_team_navigation_lists_scientific_contributors_by_surname() -> None:
     shell = read("src/main.ts")
-    briefing = read("src/pages/briefing.ts")
+    team = read("src/pages/team.ts")
     assert 'href="./#briefing" data-route="briefing"' in shell
+    assert 'href="./#team" data-route="team"' in shell
     names_by_surname = (
         "Saptarishi Dhanuka",
         "Sandeep Juneja",
@@ -129,9 +132,9 @@ def test_briefing_navigation_lists_the_scientific_team_by_surname() -> None:
         "Manmeet Singh",
     )
     for name in names_by_surname:
-        assert name in briefing
-    assert [briefing.index(name) for name in names_by_surname] == sorted(
-        briefing.index(name) for name in names_by_surname
+        assert name in team
+    assert [team.index(name) for name in names_by_surname] == sorted(
+        team.index(name) for name in names_by_surname
     )
     for scientific_role in (
         "Pre-doctoral Fellow · AI weather research",
@@ -140,24 +143,26 @@ def test_briefing_navigation_lists_the_scientific_team_by_surname() -> None:
         "MS Thesis Researcher · AI weather research",
         "Project Lead · Assistant Professor",
     ):
-        assert scientific_role in briefing
-    assert "publication workflow" not in briefing.casefold()
-    assert "website maintenance" not in briefing.casefold()
+        assert scientific_role in team
+    assert "publication workflow" not in team.casefold()
+    assert "website maintenance" not in team.casefold()
 
 
-def test_briefing_places_the_complete_report_before_the_team() -> None:
+def test_briefing_is_report_only_and_keeps_the_complete_pdf() -> None:
     briefing = read("src/pages/briefing.ts")
     summary_at = briefing.index('class="briefing-feature briefing-report-summary"')
     report_at = briefing.index('class="briefing-report"')
-    team_at = briefing.index('class="briefing-team"')
-    assert summary_at < report_at < team_at
+    assert summary_at < report_at
+    assert 'class="briefing-team"' not in briefing
+    assert "TEAM_MEMBERS" not in briefing
+    assert "People behind the forecast" not in briefing
     assert 'class="briefing-report__viewer"' in briefing
     assert 'title="Full ${FEATURED_REPORT.title} for ${FEATURED_REPORT.date}"' in briefing
     assert "Your browser cannot display embedded PDFs." in briefing
     assert "If the embedded report is unavailable," in briefing
 
 
-def test_briefing_team_portraits_are_local_assets() -> None:
+def test_team_portraits_are_local_assets() -> None:
     portraits = {
         "ayush-raj.webp": b"RIFF",
         "sandeep-juneja.jpg": b"\xff\xd8\xff",
@@ -165,9 +170,9 @@ def test_briefing_team_portraits_are_local_assets() -> None:
         "manmeet-singh.jpg": b"\xff\xd8\xff",
         "saptarishi-dhanuka.jpg": b"\xff\xd8\xff",
     }
-    briefing = read("src/pages/briefing.ts")
+    team = read("src/pages/team.ts")
     for filename, signature in portraits.items():
-        assert f'./team/{filename}' in briefing
+        assert f'./team/{filename}' in team
         assert (ROOT / "public" / "team" / filename).read_bytes().startswith(signature)
 
 

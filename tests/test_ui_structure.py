@@ -61,3 +61,19 @@ def test_operational_refresh_is_imported_after_the_legacy_styles() -> None:
     assert ".india-run-console" in refresh
     assert ".archive-controls" in refresh
     assert ".briefing-report-summary" in refresh
+    assert ".team-roster" in refresh
+    assert ".team-grid" in refresh
+
+
+def test_scientific_team_has_a_dedicated_route() -> None:
+    main = read("src/main.ts")
+    briefing = read("src/pages/briefing.ts")
+    team = read("src/pages/team.ts")
+    assert 'type Route = "india" | "archive" | "briefing" | "team"' in main
+    assert 'href="./#team" data-route="team"' in main
+    assert 'document.body.classList.toggle("team-route", route === "team")' in main
+    assert 'await import("./pages/team")' in main
+    assert "renderTeamPage(content)" in main
+    assert 'class="team-page"' in team
+    assert 'class="team-grid"' in team
+    assert 'class="briefing-team"' not in briefing
