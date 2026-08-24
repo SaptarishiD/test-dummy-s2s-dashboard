@@ -49,3 +49,15 @@ def test_archive_distinguishes_ifs_from_the_gfs_proxy() -> None:
     assert 'source.id === "ifs"' in archive
     assert 'Experimental operational initialization' in archive
     assert 'Operational-input proxy' in archive
+
+
+def test_operational_refresh_is_imported_after_the_legacy_styles() -> None:
+    main = read("src/main.ts")
+    refresh = read("src/styles/operational.css")
+    assert main.index('import "./styles/main.css"') < main.index(
+        'import "./styles/operational.css"'
+    )
+    assert "--ops-canvas" in refresh
+    assert ".india-run-console" in refresh
+    assert ".archive-controls" in refresh
+    assert ".briefing-report-summary" in refresh

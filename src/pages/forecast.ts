@@ -4,6 +4,7 @@ import {
 } from "../components/ForecastMap";
 import { createLegend } from "../components/Legend";
 import {
+  currentGfsIssue,
   defaultIssueForSource,
   issueIsCurrent,
   productKeysForForecast,
@@ -380,6 +381,10 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
     : availableProducts[0];
   const sourceLink = (id: InitialConditionSourceId, issue: string): string =>
     `./?source=${id}&issue=${issue}${activeDomain && activeDomain.id !== "india" ? `&domain=${activeDomain.id}` : ""}#india`;
+  const currentGfs = currentGfsIssue(index);
+  const currentGfsLink = currentGfs
+    ? sourceLink("gfs", currentGfs.id)
+    : "./#india";
   const matchedSource = index.initial_condition_sources.find(
     (candidate) =>
       candidate.id !== sourceId &&
@@ -418,7 +423,7 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
             ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
               : "The current page always points to the newest validated GFS-proxy issue."}</p>
         </div>
-        <a href="./#india">Return to current forecast →</a>
+        <a href="${currentGfsLink}">Return to current forecast →</a>
       </aside>
     `
     : "";
@@ -475,7 +480,6 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
         <dl class="india-status-grid" aria-label="Issue status">
           <div><dt>Initialized</dt><dd>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} · 00 UTC</dd></div>
           <div><dt>Valid through</dt><dd>${friendlyDate(validThrough, true)}</dd></div>
-          <div><dt>Ensemble</dt><dd>${forecast.issue.members} members</dd></div>
           <div><dt>Source</dt><dd>${sourceId === "gfs" ? "GFS proxy" : sourceId === "ifs" ? "IFS experimental" : "ERA5 delayed"}</dd></div>
         </dl>
         <div class="india-run-actions" aria-label="Forecast downloads">
@@ -492,14 +496,14 @@ export function renderForecastPage(container: HTMLElement, data: AppData): void 
       ${comparisonCard}
 
       <div class="india-toolbar">
-        <div class="india-product-tabs" id="india-product-tabs" aria-label="India forecast field"></div>
+        <div class="india-product-tabs" id="india-product-tabs" role="group" aria-label="India forecast field"></div>
         <div class="india-view-controls">
           <div class="india-wind-mode" id="india-wind-mode" role="group" aria-label="Wind direction display" hidden>
             <span>Wind display</span>
             <button type="button" data-wind-mode="streamlines" class="is-active">Streamlines</button>
             <button type="button" data-wind-mode="arrows">Arrows</button>
           </div>
-          <div class="india-range-tabs" aria-label="Displayed forecast weeks">
+          <div class="india-range-tabs" role="group" aria-label="Displayed forecast weeks">
             <button type="button" data-range="0" class="is-active">Weeks 1–4</button>
             <button type="button" data-range="2">Weeks 3–6</button>
           </div>

@@ -1,4 +1,5 @@
 import "./styles/main.css";
+import "./styles/operational.css";
 import type {
   AppData,
   ForecastData,

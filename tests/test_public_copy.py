@@ -77,15 +77,24 @@ def test_archive_exposes_an_exact_initialization_date_filter() -> None:
     assert "refreshDateOptions();" in archive
 
 
-def test_member_count_is_kept_to_the_forecast_status_detail() -> None:
+def test_member_count_is_not_promoted_in_the_public_interface() -> None:
     forecast = read("src/pages/forecast.ts")
     archive = read("src/pages/archive.ts")
     briefing = read("src/pages/briefing.ts")
-    assert forecast.count("${forecast.issue.members} members") == 1
+    assert "${forecast.issue.members} members" not in forecast
     assert "member ensemble mean" not in forecast
     assert "Current 100-member proxy" not in forecast
     assert "${issue.members} members" not in archive
     assert "FEATURED_REPORT.ensemble" not in briefing
+
+
+def test_current_forecast_links_target_the_current_gfs_issue() -> None:
+    forecast = read("src/pages/forecast.ts")
+    archive = read("src/pages/archive.ts")
+    assert 'currentGfsIssue(index)' in forecast
+    assert 'href="${currentGfsLink}"' in forecast
+    assert 'issueUrl(currentSource, current, activeDomain?.id)' in archive
+    assert 'href="${currentHref}"' in archive
 
 
 def test_featured_report_link_targets_a_valid_public_pdf() -> None:

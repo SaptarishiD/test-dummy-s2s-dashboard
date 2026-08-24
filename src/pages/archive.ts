@@ -64,6 +64,12 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
     issue.initialization,
   ))].sort((left, right) => right.localeCompare(left));
   const current = currentGfsIssue(activeIndex);
+  const currentSource = activeIndex.initial_condition_sources.find(
+    (source) => source.id === "gfs",
+  );
+  const currentHref = current && currentSource
+    ? issueUrl(currentSource, current, activeDomain?.id)
+    : "./#india";
 
   container.innerHTML = `
     <section class="archive-page">
@@ -74,7 +80,7 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
           <p>${activeDomain?.label ?? "India"} · Browse past forecast issues without loading their map data. ERA5 runs are retained as delayed reference experiments.</p>
         </div>
         ${current ? `
-          <a class="archive-current-link" href="./${activeDomain?.id && activeDomain.id !== "india" ? `?domain=${activeDomain.id}` : ""}#india">
+          <a class="archive-current-link" href="${currentHref}">
             <span>Current forecast</span>
             <strong>${friendlyDate(current.initialization)}</strong>
             <small>Open the latest validated issue →</small>
