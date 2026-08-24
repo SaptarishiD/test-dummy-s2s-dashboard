@@ -136,14 +136,13 @@ function shell(): string {
       <a
         class="institution-brand"
         href="./#india"
-        aria-label="SCDLDS at Ashoka University forecast home"
+        aria-label="Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University forecast home"
       >
         <img
           class="institution-brand__ashoka"
           src="./brand/ashoka-university.png"
           alt=""
         />
-        <span class="institution-brand__divider" aria-hidden="true"></span>
         <img
           class="institution-brand__centre"
           src="./brand/scdlds-centre.png"

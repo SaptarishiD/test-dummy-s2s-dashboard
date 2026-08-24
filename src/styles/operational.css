@@ -111,12 +111,6 @@ select:focus-visible {
   object-fit: contain;
 }
 
-.institution-brand__divider {
-  width: 1px;
-  height: 34px;
-  background: #cad5df;
-}
-
 .institution-brand__centre {
   flex: 0 0 auto;
   width: 132px;
@@ -1618,8 +1612,8 @@ select:focus-visible {
   }
 
   .institution-brand__ashoka {
-    width: 39px;
-    height: 39px;
+    width: 44px;
+    height: 44px;
   }
 
   .institution-brand__centre {
@@ -1923,17 +1917,13 @@ select:focus-visible {
   }
 
   .institution-brand__ashoka {
-    width: 36px;
-    height: 36px;
-  }
-
-  .institution-brand__divider {
-    height: 30px;
+    width: 44px;
+    height: 44px;
   }
 
   .institution-brand__centre {
-    width: 112px;
-    height: 40px;
+    width: 116px;
+    height: 42px;
   }
 
   .team-page {

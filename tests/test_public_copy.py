@@ -65,10 +65,11 @@ def test_header_uses_the_official_scdlds_lockup() -> None:
     assert 'class="institution-brand"' in shell
     assert 'class="institution-brand__ashoka"' in shell
     assert 'class="institution-brand__centre"' in shell
-    assert 'class="institution-brand__divider"' in shell
     assert shell.count('./brand/scdlds-centre.png') == 1
     assert shell.count('./brand/ashoka-university.png') == 1
     assert "institution-brand__badge" not in shell
+    assert "institution-brand__divider" not in shell
+    assert "Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University forecast home" in shell
     assert './brand/s2s-research-mark.svg' not in shell
     assert "Loading latest issue" in shell
 
