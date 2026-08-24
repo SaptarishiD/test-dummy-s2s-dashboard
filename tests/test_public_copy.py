@@ -60,13 +60,16 @@ def test_navigation_does_not_use_lab_branding() -> None:
     assert 'data-route="models"' not in shell
 
 
-def test_header_uses_only_the_centre_wordmark() -> None:
+def test_header_uses_the_official_scdlds_lockup() -> None:
     shell = read("src/main.ts")
     assert 'class="institution-brand"' in shell
-    assert 'class="institution-brand__badge" aria-hidden="true">SCDLDS</span>' in shell
+    assert 'class="institution-brand__ashoka"' in shell
+    assert 'class="institution-brand__centre"' in shell
+    assert 'class="institution-brand__divider"' in shell
     assert shell.count('./brand/scdlds-centre.png') == 1
+    assert shell.count('./brand/ashoka-university.png') == 1
+    assert "institution-brand__badge" not in shell
     assert './brand/s2s-research-mark.svg' not in shell
-    assert './brand/ashoka-university.png' not in shell
     assert "Loading latest issue" in shell
 
 
