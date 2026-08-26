@@ -111,6 +111,14 @@ def test_forecast_warns_that_source_latest_dates_can_differ() -> None:
     assert ".india-source-date-notice" in refresh
 
 
+def test_forecast_date_formatter_accepts_full_iso_initializations() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert "const calendarDate = isoDate.slice(0, 10);" in forecast
+    assert "new Date(`${calendarDate}T12:00:00Z`)" in forecast
+    assert "friendlyDate(preferred.initialization, true)" in forecast
+    assert "new Date(`${isoDate}T12:00:00Z`)" not in forecast
+
+
 def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     main = read("src/main.ts")
     forecast = read("src/pages/forecast.ts")

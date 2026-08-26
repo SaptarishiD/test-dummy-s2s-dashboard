@@ -219,12 +219,17 @@ function isWindProduct(product: ProductKey): boolean {
 }
 
 function friendlyDate(isoDate: string, includeYear = false): string {
+  const calendarDate = isoDate.slice(0, 10);
+  const date = new Date(`${calendarDate}T12:00:00Z`);
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error(`Invalid forecast date: ${isoDate}`);
+  }
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "short",
     ...(includeYear ? { year: "numeric" } : {}),
     timeZone: "UTC",
-  }).format(new Date(`${isoDate}T12:00:00Z`));
+  }).format(date);
 }
 
 function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
