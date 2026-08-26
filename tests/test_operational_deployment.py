@@ -157,6 +157,57 @@ def test_current_pointer_cannot_select_limited_ensemble() -> None:
         choose_scope(args, index, sources, records)
 
 
+def test_latest_era5_pointer_accepts_manual_off_cadence_reference() -> None:
+    index = {
+        "current": {"source_id": "gfs", "issue_id": "20260826"},
+        "latest_reference": {"source_id": "era5", "issue_id": "20260820"},
+        "initial_condition_sources": [
+            {
+                "id": "gfs",
+                "default_issue": "20260826",
+                "issues": [
+                    {
+                        "id": "20260826",
+                        "initialization": "2026-08-26T00:00:00Z",
+                        "members": 100,
+                        "forecast": "forecasts/gfs/20260826.json",
+                    }
+                ],
+            },
+            {
+                "id": "era5",
+                "default_issue": "20260820",
+                "issues": [
+                    {
+                        "id": "20260820",
+                        "initialization": "2026-08-20T00:00:00Z",
+                        "members": 100,
+                        "forecast": "forecasts/era5/20260820.json",
+                    }
+                ],
+            },
+        ],
+    }
+    sources = source_map(index)
+    records = issue_records(sources)
+    args = SimpleNamespace(
+        scope="current",
+        source=None,
+        issue=None,
+        expected_gfs_issue=None,
+        expected_era5_issue=None,
+    )
+
+    selected, gfs_id, era5_id = choose_scope(args, index, sources, records)
+
+    assert {(ref.source_id, ref.issue_id) for ref in selected} == {
+        ("gfs", "20260826"),
+        ("era5", "20260820"),
+    }
+    assert gfs_id == "20260826"
+    assert era5_id == "20260820"
+
+
 def test_public_path_rejects_parent_traversal(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="unsafe public path"):
         public_path(tmp_path, "../private/config.json")
