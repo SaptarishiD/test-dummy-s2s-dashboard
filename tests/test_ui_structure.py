@@ -25,6 +25,7 @@ def test_forecast_map_places_coordinate_labels_outside_the_plot() -> None:
 def test_india_forecast_paint_and_wind_are_clipped_to_the_abdb_outline() -> None:
     forecast_map = read("src/components/ForecastMap.ts")
     forecast_page = read("src/pages/forecast.ts")
+    outlook_map = read("src/components/TercileProbabilityMap.ts")
 
     assert (
         'indiaDataClipPath.setAttribute("d", this.geography.india_outline_path)'
@@ -37,9 +38,25 @@ def test_india_forecast_paint_and_wind_are_clipped_to_the_abdb_outline() -> None
     assert forecast_map.count(
         'group.setAttribute("clip-path", `url(#${indiaDataClipPathId})`)'
     ) == 2
+    world_before_field = forecast_map.index(
+        "if (hasIndiaBoundary) {\n      this.addWorldBoundaries(plot);"
+    )
+    field = forecast_map.index("this.addInterpolatedField(", world_before_field)
+    configured_domain_world = forecast_map.index(
+        "if (!hasIndiaBoundary) {\n      this.addWorldBoundaries(plot);",
+        field,
+    )
+    assert world_before_field < field < configured_domain_world
+    outlook_world = outlook_map.index("this.addWorldBoundaries(svg);")
+    outlook_field = outlook_map.index(
+        "this.addProbabilityField(svg, variable, week);"
+    )
+    outlook_outline = outlook_map.index("this.addOutline(svg);")
+    assert outlook_world < outlook_field < outlook_outline
     assert "Survey of India ABDB display derivative" in forecast_page
     assert "Source: Survey of India, Government of India." in forecast_page
-    assert "Non-India political boundaries are intentionally omitted" in forecast_page
+    assert "Neighboring-country context: Natural Earth" in forecast_page
+    assert "its India feature is excluded" in forecast_page
 
 
 def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:

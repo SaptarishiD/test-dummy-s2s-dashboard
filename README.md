@@ -110,8 +110,9 @@ lazily when selected. The complete optional global payload is about 51 MB
 before HTTP compression.
 
 Global and configured non-India maps use Natural Earth. India forecast and
-outlook maps intentionally render no Natural Earth linework. Their India
-outline and state/UT lines use display derivatives of the
+outlook maps use Natural Earth only for neighboring-country context, with its
+India feature excluded. Their India outline and state/UT lines use display
+derivatives of the
 [Survey of India Administrative Boundary Database](https://surveyofindia.gov.in/pages/administrative-boundary-data-base-abdb-)
 state/UT layer; forecast shading and wind vectors are clipped to that outline.
 `india-admin.json` contains no raw shapefile. Source: Survey of India,

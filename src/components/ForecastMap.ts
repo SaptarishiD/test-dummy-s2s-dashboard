@@ -384,6 +384,10 @@ export class ForecastMap {
     ocean.setAttribute("height", String(this.mapHeight));
     ocean.setAttribute("class", "map-ocean");
     plot.append(ocean);
+    const hasIndiaBoundary = Boolean(this.geography.india_outline_path);
+    if (hasIndiaBoundary) {
+      this.addWorldBoundaries(plot);
+    }
     this.addInterpolatedField(
       plot,
       productKey,
@@ -391,7 +395,9 @@ export class ForecastMap {
       product,
       indiaDataClipPathId,
     );
-    this.addWorldBoundaries(plot);
+    if (!hasIndiaBoundary) {
+      this.addWorldBoundaries(plot);
+    }
     this.addGraticules(plot, svg);
     if (isWindProduct(productKey)) {
       if (windRenderingMode === "arrows") {

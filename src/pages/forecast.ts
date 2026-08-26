@@ -640,7 +640,7 @@ export function renderForecastPage(
       <p class="india-visual-note" id="india-visual-note"></p>
       ${activeDomain?.id === "india" ? `
         <p class="india-visual-note india-boundary-source">
-          India outline and state/UT boundaries: <a href="https://surveyofindia.gov.in/pages/administrative-boundary-data-base-abdb-" target="_blank" rel="noopener noreferrer">Survey of India ABDB display derivative</a>. Source: Survey of India, Government of India. Non-India political boundaries are intentionally omitted from these panels.
+          India outline and state/UT boundaries: <a href="https://surveyofindia.gov.in/pages/administrative-boundary-data-base-abdb-" target="_blank" rel="noopener noreferrer">Survey of India ABDB display derivative</a>. Source: Survey of India, Government of India. Neighboring-country context: Natural Earth; its India feature is excluded.
         </p>
       ` : ""}
 

@@ -97,37 +97,70 @@ def feature_collection_path(payload: dict[str, Any], regional_only: bool) -> str
     )
 
 
+def is_natural_earth_india(feature: dict[str, Any]) -> bool:
+    """Identify Natural Earth's India feature without matching its neighbors."""
+
+    properties = feature.get("properties") or {}
+    return (
+        properties.get("ADM0_A3") == "IND"
+        or properties.get("ISO_A3") == "IND"
+    )
+
+
 def main() -> int:
+    world_path = DATA / "world-countries.geojson"
     outline_path = DATA / "india-outline.json"
     admin_path = DATA / "india-admin.json"
+    world = json.loads(world_path.read_text(encoding="utf-8"))
     outline = json.loads(outline_path.read_text(encoding="utf-8"))
     admin = json.loads(admin_path.read_text(encoding="utf-8"))
+    neighboring_countries = {
+        **world,
+        "features": [
+            feature
+            for feature in world["features"]
+            if not is_natural_earth_india(feature)
+        ],
+    }
+    excluded_count = len(world["features"]) - len(neighboring_countries["features"])
+    if excluded_count != 1:
+        raise ValueError(
+            f"expected exactly one Natural Earth India feature; found {excluded_count}"
+        )
 
     payload = {
         "schema_version": 1,
         "description": (
-            "Pre-projected Survey of India ABDB-derived display paths for the "
-            "India forecast panels; Natural Earth linework is intentionally "
-            "omitted and scientific field values remain on the native forecast grid."
+            "Pre-projected display paths for the India forecast panels: Survey of "
+            "India ABDB-derived India boundaries over Natural Earth neighboring-"
+            "country context with its India feature excluded. Scientific field "
+            "values remain on the native forecast grid."
         ),
         "view_box": [0, 0, int(MAP_SIZE), int(MAP_SIZE)],
-        "world_path": "",
+        "world_path": feature_collection_path(
+            neighboring_countries,
+            regional_only=True,
+        ),
         "india_outline_path": geometry_path(outline["geometry"]),
         "india_admin_path": feature_collection_path(admin, regional_only=False),
         "boundary_sources": {
             "india": outline["source"],
             "natural_earth_context": {
                 "name": "Natural Earth 1:110m administrative boundaries",
-                "rendered_on_india_maps": False,
+                "rendered_on_india_maps": True,
+                "india_feature_excluded": True,
             },
         },
         "sources": {
-            "world_countries_sha256": "not_rendered",
+            "world_countries_sha256": sha256(world_path),
             "india_outline_sha256": sha256(outline_path),
             "india_admin_sha256": sha256(admin_path),
         },
     }
-    if not all(payload[key] for key in ("india_outline_path", "india_admin_path")):
+    if not all(
+        payload[key]
+        for key in ("world_path", "india_outline_path", "india_admin_path")
+    ):
         raise ValueError("one or more India map paths are empty")
     OUTPUT.write_text(
         json.dumps(payload, separators=(",", ":"), allow_nan=False) + "\n",

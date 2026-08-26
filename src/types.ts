@@ -541,7 +541,8 @@ export interface IndiaMapGeographyData {
     };
     natural_earth_context: {
       name: string;
-      rendered_on_india_maps: false;
+      rendered_on_india_maps: boolean;
+      india_feature_excluded: boolean;
     };
   };
   sources: {

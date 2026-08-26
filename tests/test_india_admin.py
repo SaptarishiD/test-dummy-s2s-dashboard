@@ -43,7 +43,7 @@ def test_india_admin_is_compact_and_contains_no_source_path() -> None:
         assert 0 <= latitude <= 40
 
 
-def test_india_outline_declares_official_source_and_never_uses_natural_earth() -> None:
+def test_india_outline_declares_official_source_over_neighbor_context() -> None:
     admin = json.loads(INDIA_ADMIN.read_text(encoding="utf-8"))
     outline = json.loads(INDIA_OUTLINE.read_text(encoding="utf-8"))
     geography = json.loads(INDIA_GEOGRAPHY.read_text(encoding="utf-8"))
@@ -55,9 +55,8 @@ def test_india_outline_declares_official_source_and_never_uses_natural_earth() -
         "Source: Survey of India, Government of India."
     )
     assert geography["boundary_sources"]["india"] == outline["source"]
-    assert geography["world_path"] == ""
-    assert geography["sources"]["world_countries_sha256"] == "not_rendered"
     assert geography["boundary_sources"]["natural_earth_context"] == {
         "name": "Natural Earth 1:110m administrative boundaries",
-        "rendered_on_india_maps": False,
+        "rendered_on_india_maps": True,
+        "india_feature_excluded": True,
     }
