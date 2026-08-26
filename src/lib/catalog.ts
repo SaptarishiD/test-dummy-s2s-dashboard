@@ -14,7 +14,15 @@ const PRODUCT_KEYS: ProductKey[] = [
   "rainfall_anomaly",
   "temperature_mean",
   "temperature_anomaly",
+  "wind850_mean",
   "wind850_anomaly",
+];
+
+const LEGACY_PRODUCT_KEYS: ProductKey[] = [
+  "rainfall_total",
+  "rainfall_anomaly",
+  "temperature_mean",
+  "temperature_anomaly",
 ];
 
 function newest(issues: CatalogIssue[]): CatalogIssue | undefined {
@@ -142,7 +150,7 @@ export function productsForIssue(
   // exports always contain the four India fields, so this is a legacy-only
   // compatibility path. Newer catalogues must declare their products.
   if (index.schema_version <= 2) {
-    const products = new Set<AvailableProductKey>(PRODUCT_KEYS);
+    const products = new Set<AvailableProductKey>(LEGACY_PRODUCT_KEYS);
     if (issue.regional_outlook) products.add("regional_probabilities");
     if (issue.pdf) products.add("india_pdf");
     return products;

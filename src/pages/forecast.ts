@@ -158,6 +158,27 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
       over: "#730000",
     },
   },
+  wind850_mean: {
+    label: "Weekly mean 850 hPa wind",
+    short_label: "850 hPa wind",
+    description: "Shading is the speed of the weekly ensemble-mean wind vector; arrows are the weekly ensemble-mean U/V components",
+    units: "m s⁻¹",
+    baseline: null,
+    legend: {
+      boundaries: [0, 3, 6, 9, 12, 18, 25, 35],
+      colors: [
+        "#10212b",
+        "#194554",
+        "#1d7180",
+        "#36a09b",
+        "#8ac483",
+        "#e1c969",
+        "#e8804c",
+      ],
+      under: "#09171e",
+      over: "#d84e43",
+    },
+  },
   wind850_anomaly: {
     label: "850 hPa wind anomaly",
     short_label: "850 hPa wind anomaly",
@@ -186,11 +207,16 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
 const AUTO_PRODUCT_ORDER: ProductKey[] = [
   "rainfall_anomaly",
   "rainfall_total",
+  "wind850_mean",
   "wind850_anomaly",
   "temperature_anomaly",
 ];
 const AUTO_PRODUCT_DELAY_MS = 12_000;
 const AUTO_PRODUCT_IDLE_DELAY_MS = 30_000;
+
+function isWindProduct(product: ProductKey): boolean {
+  return product === "wind850_mean" || product === "wind850_anomaly";
+}
 
 function friendlyDate(isoDate: string, includeYear = false): string {
   return new Intl.DateTimeFormat("en-IN", {
@@ -452,6 +478,21 @@ export function renderForecastPage(
         <div id="india-comparison-explorer"></div>
       </section>`
     : "";
+  const preferredIssues = new Map(
+    index.initial_condition_sources.map((candidate) => [
+      candidate.id,
+      defaultIssueForSource(index, candidate),
+    ] as const),
+  );
+  const latestSourceDates = index.initial_condition_sources
+    .map((candidate) => {
+      const preferred = preferredIssues.get(candidate.id);
+      return preferred
+        ? `<strong>${candidate.short_label} ${friendlyDate(preferred.initialization, true)}</strong>`
+        : "";
+    })
+    .filter(Boolean)
+    .join(" · ");
 
   container.innerHTML = `
     <section class="india-sheet">
@@ -496,16 +537,22 @@ export function renderForecastPage(
             </div>
           </details>
         </div>
-        <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source" aria-describedby="india-source-guide">
-          ${index.initial_condition_sources.map((candidate) => {
-            const preferred = defaultIssueForSource(index, candidate);
-            if (!preferred) return `<span class="is-pending" aria-disabled="true"><span>${candidate.short_label}</span><small>Pilot pending</small></span>`;
-            return `
-            <a href="${sourceLink(candidate.id, preferred.id)}" class="${candidate.id === sourceId ? "is-active" : ""}" ${candidate.id === sourceId ? "aria-current=\"page\"" : ""}>
-              <span>${candidate.short_label}</span>
-              <small>${candidate.category === "operational_proxy" ? "Current proxy" : candidate.category === "operational_initialization" ? "Experimental initialization" : "Delayed reference"}</small>
-            </a>
-          `;}).join("")}
+        <div class="india-source-selection">
+          <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source" aria-describedby="india-source-guide india-source-date-notice">
+            ${index.initial_condition_sources.map((candidate) => {
+              const preferred = preferredIssues.get(candidate.id);
+              if (!preferred) return `<span class="is-pending" aria-disabled="true"><span>${candidate.short_label}</span><small>Pilot pending</small></span>`;
+              return `
+              <a href="${sourceLink(candidate.id, preferred.id)}" class="${candidate.id === sourceId ? "is-active" : ""}" ${candidate.id === sourceId ? "aria-current=\"page\"" : ""}>
+                <span>${candidate.short_label}</span>
+                <small>${candidate.category === "operational_proxy" ? "Current proxy" : candidate.category === "operational_initialization" ? "Experimental initialization" : "Delayed reference"}</small>
+              </a>
+            `;}).join("")}
+          </div>
+          <p class="india-source-date-notice" id="india-source-date-notice" role="note">
+            <span>Latest validated: ${latestSourceDates}</span>
+            Dates can differ between sources. Selecting a source opens its latest validated initialization.
+          </p>
         </div>
         <dl class="india-status-grid" aria-label="Issue status">
           <div><dt>Initialized</dt><dd>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} · 00 UTC</dd></div>
@@ -776,7 +823,7 @@ export function renderForecastPage(
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-pressed", String(active));
       });
-    windModeControl.hidden = selectedProduct !== "wind850_anomaly";
+    windModeControl.hidden = !isWindProduct(selectedProduct);
     windModeControl
       .querySelectorAll<HTMLButtonElement>("button[data-wind-mode]")
       .forEach((button) => {
@@ -819,8 +866,8 @@ export function renderForecastPage(
     legend.style.setProperty("--legend-under", product.legend.under);
     legend.style.setProperty("--legend-over", product.legend.over);
     legend.replaceChildren(createLegend(product));
-    container.querySelector("#india-visual-note")!.textContent = selectedProduct === "wind850_anomaly"
-      ? `${product.description}. ${windRenderingMode === "streamlines" ? "Streamlines trace the interpolated anomaly flow and include direction markers." : "Arrows sample every third native grid point and use one scale across all weeks."} Shading is visually interpolated 1.5°→0.25°; hover values remain native-grid values.`
+    container.querySelector("#india-visual-note")!.textContent = isWindProduct(selectedProduct)
+      ? `${product.description}. ${windRenderingMode === "streamlines" ? `Streamlines trace the interpolated ${selectedProduct === "wind850_anomaly" ? "anomaly " : ""}flow and include direction markers.` : "Arrows sample every third native grid point and use one product-specific scale across all weeks."} Shading is visually interpolated 1.5°→0.25°; hover values remain native-grid values.`
       : `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation from the ${activeForecast.grid.spacing_degrees}° native grid; hover values remain native-grid values.`;
     container.querySelector("#india-baseline-note")!.textContent = product.baseline
       ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."

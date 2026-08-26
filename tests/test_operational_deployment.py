@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import subprocess
@@ -18,11 +19,14 @@ from scripts.publish_operational_site import (
     remove_disposable_worktree,
 )
 from scripts.validate_operational_publication import (
+    IssueRef,
     choose_scope,
     issue_records,
+    live_inventory,
     public_path,
     source_map,
     validate,
+    validate_forecast,
 )
 
 
@@ -34,20 +38,79 @@ def digest(payload: bytes) -> str:
 
 
 def test_checked_in_catalog_passes_issue_scoped_live_inventory() -> None:
+    index = json.loads((ROOT / "public/data/index.json").read_text(encoding="utf-8"))
+    gfs_issue = index["current"]["issue_id"]
+    era5_issue = index["latest_reference"]["issue_id"]
     args = SimpleNamespace(
         public_root=ROOT / "public",
         scope="issue",
         source="gfs",
-        issue="20260819",
-        expected_gfs_issue="20260819",
-        expected_era5_issue="20260812",
+        issue=gfs_issue,
+        expected_gfs_issue=gfs_issue,
+        expected_era5_issue=era5_issue,
         expected_forecast_sha256=None,
         live_inventory=True,
     )
     receipt = validate(args)
     assert receipt["status"] == "validated"
-    assert receipt["issues_validated"] == ["gfs/20260819"]
+    assert receipt["issues_validated"] == [f"gfs/{gfs_issue}"]
     assert receipt["catalog_schema"] >= 3
+
+
+def test_operational_validator_accepts_both_wind_products(tmp_path: Path) -> None:
+    source = ROOT / "public/data/forecasts/ifs/20260819.json"
+    forecast = json.loads(source.read_text(encoding="utf-8"))
+    forecast = copy.deepcopy(forecast)
+    forecast["products"]["wind850_mean"] = {
+        "label": "Weekly mean 850 hPa wind"
+    }
+    forecast["issue"]["available_products"] = list(forecast["products"])
+    forecast["issue"].setdefault("capabilities", {})["wind850_mean"] = True
+    forecast["issue"].pop("initialization_comparison", None)
+    forecast["issue"]["downloads"] = {
+        "compact_json": "data/forecasts/ifs/20260819.json"
+    }
+    for week in forecast["weeks"]:
+        anomaly = week["vectors"]["wind850_anomaly"]
+        u = [value + 6.0 for value in anomaly["u"]]
+        v = [value + 3.0 for value in anomaly["v"]]
+        week["fields"]["wind850_mean"] = [
+            (u_value**2 + v_value**2) ** 0.5
+            for u_value, v_value in zip(u, v)
+        ]
+        week["summary"]["wind850_mean"] = copy.deepcopy(
+            week["summary"]["wind850_anomaly"]
+        )
+        week["vectors"]["wind850_mean"] = {"u": u, "v": v}
+
+    public_root = tmp_path / "public"
+    forecast_path = public_root / "data/forecasts/ifs/20260819.json"
+    forecast_path.parent.mkdir(parents=True)
+    forecast_path.write_text(json.dumps(forecast), encoding="utf-8")
+    record = {
+        "id": "20260819",
+        "initialization": "2026-08-19T00:00:00Z",
+        "members": 100,
+        "forecast": "forecasts/ifs/20260819.json",
+        "available_products": list(forecast["products"]),
+        "capabilities": {
+            "raw_fields": True,
+            "anomalies": True,
+            "wind850_mean": True,
+            "wind850_anomaly": True,
+        },
+        "archive": {"pdf_available": False},
+    }
+    result = validate_forecast(
+        public_root,
+        live_inventory(public_root),
+        {},
+        IssueRef("ifs", record),
+    )
+    assert set(result["weeks"][0]["vectors"]) == {
+        "wind850_mean",
+        "wind850_anomaly",
+    }
 
 
 def test_current_pointer_cannot_select_limited_ensemble() -> None:

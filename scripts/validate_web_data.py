@@ -52,6 +52,7 @@ FORBIDDEN_PUBLIC_PATTERNS = (
     re.compile(r"-----BEGIN [A-Z ]+PRIVATE KEY-----"),
     re.compile(r"\b(password|secret|access[_-]?token)\b\s*[:=]", re.IGNORECASE),
 )
+WIND_PRODUCTS = {"wind850_mean", "wind850_anomaly"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -157,6 +158,47 @@ def load_json(path: Path) -> Any:
     return payload
 
 
+def validate_wind_contract(
+    forecast: dict[str, Any],
+    catalog_capabilities: dict[str, Any],
+    label: str,
+) -> None:
+    """Require a scalar field and matching U/V arrays for every wind product."""
+
+    products = set(forecast.get("products", {}))
+    forecast_capabilities = forecast.get("issue", {}).get("capabilities", {})
+    for product in WIND_PRODUCTS:
+        available = product in products
+        if bool(catalog_capabilities.get(product, available)) != available:
+            raise ValueError(f"catalog wind capability/product mismatch: {label}/{product}")
+        if bool(forecast_capabilities.get(product, available)) != available:
+            raise ValueError(f"forecast wind capability/product mismatch: {label}/{product}")
+
+    latitude = forecast.get("grid", {}).get("latitude", [])
+    longitude = forecast.get("grid", {}).get("longitude", [])
+    expected_values = len(latitude) * len(longitude)
+    expected_vectors = WIND_PRODUCTS & products
+    for week in forecast.get("weeks", []):
+        vectors = week.get("vectors", {})
+        if not isinstance(vectors, dict) or set(vectors) != expected_vectors:
+            raise ValueError(f"wind vectors differ from products: {label}/Week {week.get('week')}")
+        for product in expected_vectors:
+            scalar = np.asarray(week.get("fields", {}).get(product, []), dtype=np.float64)
+            if scalar.shape != (expected_values,) or not np.isfinite(scalar).all():
+                raise ValueError(f"invalid wind scalar field: {label}/{product}")
+            if product == "wind850_mean" and np.any(scalar < 0):
+                raise ValueError(f"raw wind speed is negative: {label}")
+            vector = vectors.get(product, {})
+            if not isinstance(vector, dict) or set(vector) != {"u", "v"}:
+                raise ValueError(f"wind U/V components are missing: {label}/{product}")
+            for component in ("u", "v"):
+                values = np.asarray(vector[component], dtype=np.float64)
+                if values.shape != (expected_values,) or not np.isfinite(values).all():
+                    raise ValueError(
+                        f"invalid wind vector field: {label}/{product}/{component}"
+                    )
+
+
 def schema_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     """Validate the forecast schema and exact six-by-four field topology."""
 
@@ -223,6 +265,11 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                 raise ValueError(f"member mismatch in {forecast_path}")
             regional_path_text = issue.get("regional_outlook")
             capabilities = issue.get("capabilities", {})
+            validate_wind_contract(
+                forecast,
+                capabilities,
+                f"{source_id}/{issue['id']}",
+            )
             anomalies_available = capabilities.get(
                 "anomalies",
                 {

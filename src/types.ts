@@ -5,12 +5,14 @@ export type InitialConditionCategory =
   | "operational_initialization"
   | "reanalysis_reference";
 
+export type WindProductKey = "wind850_mean" | "wind850_anomaly";
+
 export type ProductKey =
   | "rainfall_total"
   | "rainfall_anomaly"
   | "temperature_mean"
   | "temperature_anomaly"
-  | "wind850_anomaly";
+  | WindProductKey;
 
 export type AvailableProductKey =
   | ProductKey
@@ -20,6 +22,7 @@ export type AvailableProductKey =
 export interface IssueCapabilities {
   raw_fields?: boolean;
   anomalies?: boolean;
+  wind850_mean?: boolean;
   wind850_anomaly?: boolean;
   regional_probabilities?: boolean;
   regional_probabilities_eligible?: boolean;
@@ -84,7 +87,7 @@ export interface ForecastWeek {
   fields: Partial<Record<ProductKey, number[]>>;
   summary: Partial<Record<ProductKey, FieldSummary>>;
   vectors?: Partial<
-    Record<"wind850_anomaly", { u: number[]; v: number[] }>
+    Record<WindProductKey, { u: number[]; v: number[] }>
   >;
 }
 

@@ -85,6 +85,25 @@ PRODUCTS = {
         "operation": "identity",
         "note": "Difference from the model's typical temperature for the same season and forecast lead (2002–2021).",
     },
+    "wind850_mean": {
+        "title": "Weekly mean 850 hPa wind",
+        "units": "m s⁻¹",
+        "boundaries": [0, 3, 6, 9, 12, 18, 25, 35],
+        "colors": [
+            "#10212b", "#194554", "#1d7180", "#36a09b", "#8ac483",
+            "#e1c969", "#e8804c",
+        ],
+        "under": "#09171e",
+        "over": "#d84e43",
+        "operation": "identity",
+        "vector_reference": 10.0,
+        "vector_scale": 4.8,
+        "vector_label": "10 m s⁻¹",
+        "note": (
+            "Shading: speed of the weekly ensemble-mean wind vector; arrows: "
+            "weekly ensemble-mean U/V components."
+        ),
+    },
     "wind850_anomaly": {
         "title": "850 hPa wind anomaly",
         "units": "m s⁻¹",
@@ -96,6 +115,9 @@ PRODUCTS = {
         "under": "#421c12",
         "over": "#083653",
         "operation": "identity",
+        "vector_reference": 5.0,
+        "vector_scale": 2.4,
+        "vector_label": "5 m s⁻¹ anomaly",
         "note": (
             "Shading: weekly wind-speed anomaly; arrows: weekly U/V "
             "vector-component anomaly relative to 2002–2021."
@@ -348,7 +370,7 @@ def build_pdf(
                     zorder=1,
                 )
                 draw_geometry(axes, world_segments, "#777777", 0.38)
-                if product_key == "wind850_anomaly":
+                if "vector_reference" in definition:
                     vectors = week.get("vectors", {}).get(product_key)
                     if not isinstance(vectors, dict) or set(vectors) != {"u", "v"}:
                         raise ValueError(
@@ -366,7 +388,7 @@ def build_pdf(
                         v[stride, stride],
                         angles="xy",
                         scale_units="xy",
-                        scale=2.4,
+                        scale=definition["vector_scale"],
                         pivot="middle",
                         width=0.0042,
                         headwidth=4.0,
@@ -378,8 +400,8 @@ def build_pdf(
                         quiver,
                         0.79,
                         0.95,
-                        5.0,
-                        "5 m s⁻¹ anomaly",
+                        definition["vector_reference"],
+                        definition["vector_label"],
                         coordinates="axes",
                         labelpos="E",
                         fontproperties={"size": 6.5, "weight": "bold"},

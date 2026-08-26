@@ -5,6 +5,7 @@ import type {
   IndiaMapGeographyData,
   ProductDefinition,
   ProductKey,
+  WindProductKey,
 } from "../types";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -12,7 +13,10 @@ const MAP_WIDTH = 620;
 const AXIS_LEFT = 42;
 const AXIS_BOTTOM = 30;
 const WIND_VECTOR_STRIDE = 3;
-const WIND_REFERENCE_SPEED = 5;
+const WIND_REFERENCE_SPEED: Record<WindProductKey, number> = {
+  wind850_mean: 10,
+  wind850_anomaly: 5,
+};
 const WIND_REFERENCE_LENGTH = 32;
 const WIND_MINIMUM_SPEED = 0.2;
 const STREAMLINE_SEED_SPACING = 52;
@@ -39,6 +43,10 @@ interface WindVectorGrid {
   longitude: number[];
   u: number[];
   v: number[];
+}
+
+function isWindProduct(productKey: ProductKey): productKey is WindProductKey {
+  return productKey === "wind850_mean" || productKey === "wind850_anomaly";
 }
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
@@ -366,11 +374,11 @@ export class ForecastMap {
     this.addInterpolatedField(plot, productKey, week, product);
     this.addWorldBoundaries(plot);
     this.addGraticules(plot, svg);
-    if (productKey === "wind850_anomaly") {
+    if (isWindProduct(productKey)) {
       if (windRenderingMode === "arrows") {
-        this.addWindVectors(svg, plot, week);
+        this.addWindVectors(svg, plot, productKey, week);
       } else {
-        this.addWindStreamlines(svg, plot, week);
+        this.addWindStreamlines(svg, plot, productKey, week);
       }
     }
     this.addOutline(plot);
@@ -397,8 +405,11 @@ export class ForecastMap {
     definitions.append(marker);
   }
 
-  private validWindVectors(week: ForecastWeek): WindVectorGrid | undefined {
-    const vectors = week.vectors?.wind850_anomaly;
+  private validWindVectors(
+    productKey: WindProductKey,
+    week: ForecastWeek,
+  ): WindVectorGrid | undefined {
+    const vectors = week.vectors?.[productKey];
     if (!vectors) return undefined;
     const { latitude, longitude } = this.forecast.grid;
     const expected = latitude.length * longitude.length;
@@ -411,11 +422,13 @@ export class ForecastMap {
   private addWindVectors(
     svg: SVGSVGElement,
     plot: SVGGElement,
+    productKey: WindProductKey,
     week: ForecastWeek,
   ): void {
-    const vectors = this.validWindVectors(week);
+    const vectors = this.validWindVectors(productKey, week);
     if (!vectors) return;
     const { latitude, longitude } = vectors;
+    const referenceSpeed = WIND_REFERENCE_SPEED[productKey];
     const markerId = `forecast-map-wind-arrow-${this.instanceId}`;
     this.addWindMarker(svg, markerId);
 
@@ -428,7 +441,7 @@ export class ForecastMap {
         const v = vectors.v[index];
         const magnitude = Math.hypot(u, v);
         if (!Number.isFinite(magnitude) || magnitude < WIND_MINIMUM_SPEED) continue;
-        const scale = Math.min(magnitude / WIND_REFERENCE_SPEED, 1.5);
+        const scale = Math.min(magnitude / referenceSpeed, 1.5);
         const length = WIND_REFERENCE_LENGTH * scale;
         const dx = (u / magnitude) * length;
         const dy = (-v / magnitude) * length;
@@ -463,7 +476,7 @@ export class ForecastMap {
     const keyLabel = svgElement("text");
     keyLabel.setAttribute("x", "494");
     keyLabel.setAttribute("y", "43");
-    keyLabel.textContent = `${WIND_REFERENCE_SPEED} m s⁻¹ anomaly`;
+    keyLabel.textContent = `${referenceSpeed} m s⁻¹${productKey === "wind850_anomaly" ? " anomaly" : ""}`;
     key.append(background, keyLine, keyLabel);
     plot.append(key);
   }
@@ -471,9 +484,10 @@ export class ForecastMap {
   private addWindStreamlines(
     svg: SVGSVGElement,
     plot: SVGGElement,
+    productKey: WindProductKey,
     week: ForecastWeek,
   ): void {
-    const vectors = this.validWindVectors(week);
+    const vectors = this.validWindVectors(productKey, week);
     if (!vectors) return;
     const markerId = `forecast-map-wind-streamline-${this.instanceId}`;
     this.addWindMarker(svg, markerId);
@@ -528,7 +542,9 @@ export class ForecastMap {
     const keyLabel = svgElement("text");
     keyLabel.setAttribute("x", "474");
     keyLabel.setAttribute("y", "43");
-    keyLabel.textContent = "Anomaly flow direction";
+    keyLabel.textContent = productKey === "wind850_anomaly"
+      ? "Anomaly flow direction"
+      : "Mean wind flow direction";
     key.append(background, keyLine, keyLabel);
     plot.append(key);
   }
@@ -688,8 +704,8 @@ export class ForecastMap {
       const lat = latitude[latIndex];
       const lon = longitude[lonIndex];
       const value = values[latIndex * longitude.length + lonIndex];
-      const vector = productKey === "wind850_anomaly"
-        ? week.vectors?.wind850_anomaly
+      const vector = isWindProduct(productKey)
+        ? week.vectors?.[productKey]
         : undefined;
       const vectorIndex = latIndex * longitude.length + lonIndex;
       const vectorU = vector?.u[vectorIndex];

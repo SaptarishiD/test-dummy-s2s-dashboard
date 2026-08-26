@@ -10,7 +10,7 @@ from pathlib import Path
 
 import jsonschema
 
-from science.catalog import build_catalog, next_expected_update
+from science.catalog import build_catalog, enrich_issue, next_expected_update
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
@@ -67,13 +67,18 @@ def test_catalog_assets_are_checksum_versioned_and_capability_scoped() -> None:
 
 def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() -> None:
     index = load(DATA / "index.json")
+    expected_issue = max(
+        item["id"]
+        for item in index["initial_condition_sources"][0]["issues"]
+        if item["members"] == 100
+    )
     rebuilt = build_catalog(
         index,
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
     assert rebuilt["current"]["source_id"] == "gfs"
-    assert rebuilt["current"]["issue_id"] == "20260819"
+    assert rebuilt["current"]["issue_id"] == expected_issue
     newer_limited = next(
         item
         for item in rebuilt["initial_condition_sources"][0]["issues"]
@@ -114,3 +119,31 @@ def test_forecast_schema_accepts_raw_only_year_round_payload() -> None:
         }
     schema = load(ROOT / "science/web-data.schema.json")
     jsonschema.Draft202012Validator(schema).validate(forecast)
+
+
+def test_catalog_advertises_raw_and_anomalous_wind_independently(
+    tmp_path: Path,
+) -> None:
+    forecast = copy.deepcopy(load(DATA / "forecasts/ifs/20260819.json"))
+    forecast["products"]["wind850_mean"] = {
+        "label": "Weekly mean 850 hPa wind"
+    }
+    forecast["issue"]["downloads"] = {
+        "compact_json": "data/forecasts/ifs/20260819.json"
+    }
+    forecast_path = tmp_path / "data/forecasts/ifs/20260819.json"
+    forecast_path.parent.mkdir(parents=True)
+    forecast_path.write_text(json.dumps(forecast), encoding="utf-8")
+    enriched, _ = enrich_issue(
+        {
+            "id": "20260819",
+            "initialization": "2026-08-19T00:00:00Z",
+            "members": 100,
+            "forecast": "forecasts/ifs/20260819.json",
+        },
+        "ifs",
+        tmp_path,
+        datetime(2026, 8, 20, 0, tzinfo=timezone.utc),
+    )
+    assert enriched["capabilities"]["wind850_mean"] is True
+    assert enriched["capabilities"]["wind850_anomaly"] is True

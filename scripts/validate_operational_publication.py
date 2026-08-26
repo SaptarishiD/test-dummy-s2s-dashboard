@@ -25,7 +25,7 @@ ISSUE_ID = re.compile(r"^\d{8}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
-WIND_PRODUCT = "wind850_anomaly"
+WIND_PRODUCTS = {"wind850_mean", "wind850_anomaly"}
 PRIVATE_TOKENS = ("/home/", "/storage/", "private key", "password", "secret")
 
 
@@ -397,11 +397,15 @@ def validate_forecast(
     )
     if anomaly_available != ANOMALY_PRODUCTS.issubset(products):
         raise ValueError(f"anomaly capability/product mismatch: {ref.source_id}/{ref.issue_id}")
-    wind_available = capability(
-        ref.record, WIND_PRODUCT, WIND_PRODUCT in products
-    )
-    if wind_available != (WIND_PRODUCT in products):
-        raise ValueError(f"wind capability/product mismatch: {ref.source_id}/{ref.issue_id}")
+    for wind_product in WIND_PRODUCTS:
+        wind_available = capability(
+            ref.record, wind_product, wind_product in products
+        )
+        if wind_available != (wind_product in products):
+            raise ValueError(
+                f"wind capability/product mismatch: "
+                f"{ref.source_id}/{ref.issue_id}/{wind_product}"
+            )
 
     expected_values = grid_size(forecast, "forecast")
     mask = forecast["grid"].get("india_mask")
@@ -431,29 +435,44 @@ def validate_forecast(
                     f"forecast field is not numeric: "
                     f"{ref.source_id}/{ref.issue_id}/{expected_week}/{product}"
                 )
+            if product == "wind850_mean" and any(value < 0 for value in values):
+                raise ValueError(
+                    f"raw wind speed is negative: "
+                    f"{ref.source_id}/{ref.issue_id}/{expected_week}"
+                )
         vectors = week.get("vectors", {})
-        if WIND_PRODUCT in products:
-            wind = vectors.get(WIND_PRODUCT) if isinstance(vectors, dict) else None
+        expected_wind_vectors = WIND_PRODUCTS & set(products)
+        if not isinstance(vectors, dict):
+            raise ValueError(
+                f"forecast vectors are invalid: "
+                f"{ref.source_id}/{ref.issue_id}/{expected_week}"
+            )
+        if set(vectors) != expected_wind_vectors:
+            raise ValueError(
+                f"forecast vectors differ from wind products: "
+                f"{ref.source_id}/{ref.issue_id}/{expected_week}"
+            )
+        for wind_product in expected_wind_vectors:
+            wind = vectors.get(wind_product)
             if not isinstance(wind, dict) or set(wind) != {"u", "v"}:
                 raise ValueError(
-                    f"wind vectors are missing: {ref.source_id}/{ref.issue_id}/{expected_week}"
+                    f"wind vectors are missing: "
+                    f"{ref.source_id}/{ref.issue_id}/{expected_week}/{wind_product}"
                 )
             for component in ("u", "v"):
                 values = wind[component]
                 if not isinstance(values, list) or len(values) != expected_values:
                     raise ValueError(
                         f"wind vector has wrong size: "
-                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/{component}"
+                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/"
+                        f"{wind_product}/{component}"
                     )
                 if any(not isinstance(value, (int, float)) for value in values):
                     raise ValueError(
                         f"wind vector is not numeric: "
-                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/{component}"
+                        f"{ref.source_id}/{ref.issue_id}/{expected_week}/"
+                        f"{wind_product}/{component}"
                     )
-        elif vectors:
-            raise ValueError(
-                f"orphan forecast vectors: {ref.source_id}/{ref.issue_id}/{expected_week}"
-            )
 
     regional = ref.record.get("regional_outlook")
     regional_capability = capability(ref.record, "regional_probabilities", bool(regional))

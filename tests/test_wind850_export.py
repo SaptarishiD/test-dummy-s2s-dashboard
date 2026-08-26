@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import copy
 import json
+import re
 from pathlib import Path
 
 import jsonschema
@@ -18,8 +20,56 @@ from scripts.add_wind850_anomaly import (
     augment_wind_products,
 )
 
+from scripts import build_forecast_pdfs as pdf_builder
+from scripts.validate_web_data import validate_wind_contract
+
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def with_raw_wind(forecast: dict) -> dict:
+    """Return a representative six-product payload without changing fixtures."""
+
+    payload = copy.deepcopy(forecast)
+    payload["products"]["wind850_mean"] = {
+        "label": "Weekly mean 850 hPa wind",
+        "short_label": "850 hPa wind",
+        "description": (
+            "Shading is the speed of the weekly ensemble-mean wind vector; "
+            "arrows are the weekly ensemble-mean U/V components"
+        ),
+        "units": "m/s",
+        "baseline": None,
+        "legend": {
+            "boundaries": [0, 3, 6, 9, 12, 18, 25, 35],
+            "colors": [
+                "#10212b",
+                "#194554",
+                "#1d7180",
+                "#36a09b",
+                "#8ac483",
+                "#e1c969",
+                "#e8804c",
+            ],
+            "under": "#09171e",
+            "over": "#d84e43",
+        },
+    }
+    payload["issue"]["available_products"] = list(payload["products"])
+    payload["issue"].setdefault("capabilities", {})["wind850_mean"] = True
+    for week in payload["weeks"]:
+        anomaly = week["vectors"]["wind850_anomaly"]
+        u = np.asarray(anomaly["u"], dtype=np.float64) + 6.0
+        v = np.asarray(anomaly["v"], dtype=np.float64) + 3.0
+        speed = np.hypot(u, v)
+        week["fields"]["wind850_mean"] = speed.tolist()
+        week["summary"]["wind850_mean"] = {
+            "india_weighted_mean": float(speed.mean()),
+            "india_minimum": float(speed.min()),
+            "india_maximum": float(speed.max()),
+        }
+        week["vectors"]["wind850_mean"] = {"u": u.tolist(), "v": v.tolist()}
+    return payload
 
 
 @pytest.mark.parametrize(
@@ -44,6 +94,11 @@ def test_published_wind_anomaly_archive_remains_schema_compatible(
         (ROOT / "science/web-data.schema.json").read_text(encoding="utf-8")
     )
     jsonschema.Draft202012Validator(schema).validate(forecast)
+    validate_wind_contract(
+        forecast,
+        {"wind850_anomaly": True},
+        relative_path.removesuffix(".json"),
+    )
     assert "wind850_anomaly" in forecast["products"]
     assert forecast["issue"]["capabilities"]["wind850_anomaly"] is True
     assert forecast["issue"]["members"] == members
@@ -234,3 +289,55 @@ def test_exporter_rejects_multi_member_forecast_with_zero_spread(
 
     with pytest.raises(ValueError, match="zero member spread"):
         augment_wind_products(payload, forecast_path, climatology_path)
+
+
+def test_schema_and_web_validator_accept_raw_and_anomalous_wind() -> None:
+    legacy = json.loads(
+        (ROOT / "public/data/forecasts/ifs/20260819.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    forecast = with_raw_wind(legacy)
+    schema = json.loads(
+        (ROOT / "science/web-data.schema.json").read_text(encoding="utf-8")
+    )
+    jsonschema.Draft202012Validator(schema).validate(forecast)
+    validate_wind_contract(
+        forecast,
+        {"wind850_mean": True, "wind850_anomaly": True},
+        "ifs/20260819",
+    )
+    assert len(forecast["products"]) == 6
+    for week in forecast["weeks"]:
+        assert set(week["vectors"]) == {"wind850_mean", "wind850_anomaly"}
+        assert min(week["fields"]["wind850_mean"]) >= 0
+
+
+def test_pdf_builder_creates_one_page_for_each_of_six_products(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    forecast = with_raw_wind(
+        json.loads(
+            (ROOT / "public/data/forecasts/ifs/20260819.json").read_text(
+                encoding="utf-8"
+            )
+        )
+    )
+    temporary_public = tmp_path / "public"
+    forecast_path = temporary_public / "data/forecasts/ifs/20260819.json"
+    forecast_path.parent.mkdir(parents=True)
+    forecast_path.write_text(json.dumps(forecast), encoding="utf-8")
+    monkeypatch.setattr(pdf_builder, "PUBLIC", temporary_public)
+    data = ROOT / "public/data"
+    output = pdf_builder.build_pdf(
+        forecast_path,
+        {"id": "ifs"},
+        {"id": "20260819"},
+        json.loads((data / "world-countries.geojson").read_text(encoding="utf-8")),
+        json.loads((data / "india-outline.json").read_text(encoding="utf-8")),
+        json.loads((data / "india-admin.json").read_text(encoding="utf-8")),
+    )
+    pdf_bytes = output.read_bytes()
+    assert pdf_bytes.startswith(b"%PDF-")
+    assert len(re.findall(rb"/Type /Page\b", pdf_bytes)) == 6

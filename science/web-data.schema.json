@@ -120,7 +120,7 @@
         "temperature_mean"
       ],
       "minProperties": 2,
-      "maxProperties": 5
+      "maxProperties": 6
     },
     "weeks": {
       "type": "array",
@@ -160,6 +160,30 @@
           "vectors": {
             "type": "object",
             "properties": {
+              "wind850_mean": {
+                "type": "object",
+                "required": [
+                  "u",
+                  "v"
+                ],
+                "properties": {
+                  "u": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "v": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
               "wind850_anomaly": {
                 "type": "object",
                 "required": [

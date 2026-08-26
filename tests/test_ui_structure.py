@@ -30,9 +30,13 @@ def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:
     assert "traceStreamlineDirection(" in forecast_map
     assert "sampleWindVector(" in forecast_map
     assert 'class", "map-wind-streamline map-wind-vector"' in forecast_map
+    assert 'wind850_mean: 10' in forecast_map
+    assert 'wind850_anomaly: 5' in forecast_map
+    assert "const vectors = week.vectors?.[productKey]" in forecast_map
     assert 'data-wind-mode="streamlines" class="is-active"' in forecast_page
     assert 'data-wind-mode="arrows"' in forecast_page
-    assert 'windModeControl.hidden = selectedProduct !== "wind850_anomaly"' in forecast_page
+    assert 'windModeControl.hidden = !isWindProduct(selectedProduct)' in forecast_page
+    assert 'product === "wind850_mean" || product === "wind850_anomaly"' in forecast_page
     assert "map.render(selectedProduct, week, product, windRenderingMode)" in forecast_page
 
 
@@ -84,12 +88,24 @@ def test_forecast_explains_initial_condition_sources_accessibly() -> None:
     forecast = read("src/pages/forecast.ts")
     assert 'class="india-source-guide"' in forecast
     assert 'id="india-source-guide"' in forecast
-    assert 'aria-describedby="india-source-guide"' in forecast
+    assert 'aria-describedby="india-source-guide india-source-date-notice"' in forecast
     assert 'aria-label="Explain IFS, GFS, and ERA5 sources"' in forecast
     assert "Integrated Forecasting System" in forecast
     assert "Global Forecast System" in forecast
     assert "Delayed ECMWF reanalysis reference" in forecast
     assert "same experimental forecasting system is initialized" in forecast
+
+
+def test_forecast_warns_that_source_latest_dates_can_differ() -> None:
+    forecast = read("src/pages/forecast.ts")
+    refresh = read("src/styles/operational.css")
+    assert "const preferredIssues = new Map(" in forecast
+    assert "defaultIssueForSource(index, candidate)" in forecast
+    assert 'id="india-source-date-notice"' in forecast
+    assert "Latest validated:" in forecast
+    assert "Dates can differ between sources" in forecast
+    assert "opens its latest validated initialization" in forecast
+    assert ".india-source-date-notice" in refresh
 
 
 def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
@@ -98,6 +114,7 @@ def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     expected_order = (
         '"rainfall_anomaly"',
         '"rainfall_total"',
+        '"wind850_mean"',
         '"wind850_anomaly"',
         '"temperature_anomaly"',
     )

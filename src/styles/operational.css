@@ -450,6 +450,33 @@ select:focus-visible {
   gap: 7px;
 }
 
+.india-source-selection {
+  display: grid;
+  gap: 8px;
+  align-self: stretch;
+}
+
+.india-source-date-notice {
+  margin: 0;
+  padding: 8px 10px;
+  color: #6d5527;
+  font-size: 9px;
+  line-height: 1.45;
+  background: var(--ops-amber-soft);
+  border: 1px solid #ecd9ba;
+  border-radius: 8px;
+}
+
+.india-source-date-notice > span {
+  display: block;
+  margin-bottom: 2px;
+  color: #57441f;
+}
+
+.india-source-date-notice strong {
+  font-weight: 800;
+}
+
 .india-source-tabs a,
 .india-source-tabs > .is-pending {
   gap: 3px;
@@ -1572,6 +1599,7 @@ select:focus-visible {
   }
 
   .india-source-tabs,
+  .india-source-selection,
   .india-status-grid,
   .india-run-actions,
   .india-matched-run {

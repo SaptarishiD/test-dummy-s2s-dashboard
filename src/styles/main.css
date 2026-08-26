@@ -550,6 +550,10 @@ a {
   background: linear-gradient(90deg, #4965ae, #edf0ec, #c84331);
 }
 
+.product-swatch--wind850_mean {
+  background: linear-gradient(90deg, #10212b, #1d7180, #8ac483, #e8804c);
+}
+
 .product-swatch--wind850_anomaly {
   background: linear-gradient(90deg, #6f321e, #f7f5ef, #3988b2);
 }
@@ -3347,6 +3351,10 @@ a {
 
 .india-product-tabs .product-swatch--temperature_anomaly {
   background: linear-gradient(90deg, #383880, #dcdcf7, #fffacd, #ff7605, #c30400);
+}
+
+.india-product-tabs .product-swatch--wind850_mean {
+  background: linear-gradient(90deg, #10212b, #1d7180, #36a09b, #8ac483, #e8804c);
 }
 
 .india-product-tabs .product-swatch--wind850_anomaly {
