@@ -70,6 +70,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-base-sha")
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=3600)
+    parser.add_argument(
+        "--wind-forecast",
+        type=Path,
+        help="Validated U850/V850 forecast NetCDF; requires --wind-climatology.",
+    )
+    parser.add_argument(
+        "--wind-climatology",
+        type=Path,
+        help="Matched 2002-2021 wind climatology; requires --wind-forecast.",
+    )
     parser.add_argument("--skip-install", action="store_true")
     parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--no-push", action="store_true")
@@ -131,9 +141,86 @@ def publisher_command(
     return command
 
 
+def validate_wind_inputs(args: argparse.Namespace) -> tuple[Path, Path] | None:
+    """Resolve an optional, required-together wind forecast/climatology pair."""
+
+    forecast_value = getattr(args, "wind_forecast", None)
+    climatology_value = getattr(args, "wind_climatology", None)
+    if (forecast_value is None) != (climatology_value is None):
+        raise ValueError(
+            "--wind-forecast and --wind-climatology must be supplied together"
+        )
+    if forecast_value is None:
+        return None
+
+    resolved: list[Path] = []
+    for label, value in (
+        ("wind forecast", forecast_value),
+        ("wind climatology", climatology_value),
+    ):
+        path = Path(value).resolve()
+        if not path.is_file():
+            raise ValueError(f"{label} is not a file: {path}")
+        resolved.append(path)
+    return resolved[0], resolved[1]
+
+
+def wind_postprocess_commands(
+    args: argparse.Namespace,
+    export_dashboard: Path,
+    wind_inputs: tuple[Path, Path],
+) -> list[list[str]]:
+    """Build ordered wind augmentation and issue-specific PDF commands."""
+
+    wind_forecast, wind_climatology = wind_inputs
+    forecast_json = (
+        export_dashboard
+        / "public"
+        / "data"
+        / "forecasts"
+        / args.source
+        / f"{args.issue}.json"
+    )
+    index = export_dashboard / "public" / "data" / "index.json"
+    add_wind_script = ROOT / "scripts" / "add_wind850_anomaly.py"
+    pdf_script = export_dashboard / "scripts" / "build_forecast_pdfs.py"
+    for label, path in (
+        ("published forecast JSON", forecast_json),
+        ("published issue catalog", index),
+        ("wind augmentation script", add_wind_script),
+        ("PDF builder", pdf_script),
+    ):
+        if not path.is_file():
+            raise ValueError(f"{label} is not a file: {path}")
+
+    return [
+        [
+            args.operational_python,
+            str(add_wind_script),
+            "--forecast-json",
+            str(forecast_json),
+            "--wind-forecast",
+            str(wind_forecast),
+            "--wind-climatology",
+            str(wind_climatology),
+        ],
+        [
+            args.operational_python,
+            str(pdf_script),
+            "--index",
+            str(index),
+            "--source",
+            args.source,
+            "--issue",
+            args.issue,
+        ],
+    ]
+
+
 def main() -> int:
     args = parse_args()
     load_config(args.config, args.source, args.issue)
+    wind_inputs = validate_wind_inputs(args)
     if args.timeout < 1:
         raise ValueError("timeout must be positive")
     if args.publish_clone is None:
@@ -172,6 +259,17 @@ def main() -> int:
             check=True,
             timeout=args.timeout,
         )
+        if wind_inputs is not None:
+            for command in wind_postprocess_commands(
+                args, export_dashboard, wind_inputs
+            ):
+                subprocess.run(
+                    command,
+                    cwd=export_dashboard,
+                    env=environment,
+                    check=True,
+                    timeout=args.timeout,
+                )
         subprocess.run(
             publisher_command(args, export_dashboard),
             cwd=ROOT,
