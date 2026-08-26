@@ -13,6 +13,7 @@ from scripts.export_and_publish_operational_issue import (
     load_config,
     publisher_command,
     validate_wind_inputs,
+    wind_augmentation_available,
     wind_postprocess_commands,
 )
 
@@ -28,6 +29,47 @@ def write_config(path: Path, *, source: str = "gfs", members: int = 100) -> None
         ),
         encoding="utf-8",
     )
+
+
+def forecast_payload(
+    *,
+    status: str,
+    model_state_time: str,
+) -> dict[str, object]:
+    raw_products = ["rainfall_total", "temperature_mean"]
+    target = model_state_time[5:10].replace("-", "")
+    alignment = {
+        "status": status,
+        "target_model_state_calendar_day": target,
+    }
+    if status == "unavailable_outside_jjas":
+        alignment.update(
+            {
+                "available_slot_start": "0602",
+                "available_slot_end": "0929",
+            }
+        )
+    return {
+        "issue": {
+            "model_state_time": model_state_time,
+            "available_products": raw_products,
+            "capabilities": {
+                "raw_fields": True,
+                "anomalies": False,
+                "regional_probabilities_eligible": False,
+            },
+            "climatology_alignment": alignment,
+        },
+        "products": {product: {} for product in raw_products},
+        "weeks": [
+            {
+                "week": week,
+                "fields": {product: [] for product in raw_products},
+                "summary": {product: {} for product in raw_products},
+            }
+            for week in range(1, 7)
+        ],
+    }
 
 
 def test_private_config_identity_is_bound_before_export(tmp_path: Path) -> None:
@@ -123,11 +165,100 @@ def test_wind_postprocessing_requires_the_generated_issue_json(
 
 
 @pytest.mark.parametrize(
-    ("with_wind", "expected_scripts"),
+    ("model_state_time", "status", "expected"),
     [
-        (False, ["operational.py", "publish.py"]),
+        ("2026-09-29T00:00:00Z", "available", True),
+        ("2026-10-02T00:00:00Z", "unavailable_outside_jjas", False),
+    ],
+)
+def test_wind_augmentation_follows_base_climatology_alignment(
+    tmp_path: Path,
+    model_state_time: str,
+    status: str,
+    expected: bool,
+) -> None:
+    forecast_json = tmp_path / "forecast.json"
+    forecast_json.write_text(
+        json.dumps(forecast_payload(status=status, model_state_time=model_state_time)),
+        encoding="utf-8",
+    )
+
+    assert wind_augmentation_available(forecast_json) is expected
+
+
+def test_wind_augmentation_rejects_unknown_alignment_status(tmp_path: Path) -> None:
+    forecast_json = tmp_path / "forecast.json"
+    forecast_json.write_text(
+        json.dumps(
+            forecast_payload(
+                status="not_validated",
+                model_state_time="2026-08-25T00:00:00Z",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unsupported climatology alignment"):
+        wind_augmentation_available(forecast_json)
+
+
+def test_outside_jjas_status_cannot_bypass_in_window_wind_gate(
+    tmp_path: Path,
+) -> None:
+    forecast_json = tmp_path / "forecast.json"
+    forecast_json.write_text(
+        json.dumps(
+            forecast_payload(
+                status="unavailable_outside_jjas",
+                model_state_time="2026-08-25T00:00:00Z",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="inside the available slot bounds"):
+        wind_augmentation_available(forecast_json)
+
+
+def test_outside_jjas_fallback_rejects_declared_anomaly_products(
+    tmp_path: Path,
+) -> None:
+    payload = forecast_payload(
+        status="unavailable_outside_jjas",
+        model_state_time="2026-10-02T00:00:00Z",
+    )
+    payload["products"]["wind850_anomaly"] = {}
+    forecast_json = tmp_path / "forecast.json"
+    forecast_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not a raw-only product package"):
+        wind_augmentation_available(forecast_json)
+
+
+@pytest.mark.parametrize("value", [True, 1, "yes"])
+def test_outside_jjas_fallback_rejects_wind_capability_values(
+    tmp_path: Path,
+    value: object,
+) -> None:
+    payload = forecast_payload(
+        status="unavailable_outside_jjas",
+        model_state_time="2026-10-02T00:00:00Z",
+    )
+    payload["issue"]["capabilities"]["wind850_mean"] = value
+    forecast_json = tmp_path / "forecast.json"
+    forecast_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="capabilities are not raw-only"):
+        wind_augmentation_available(forecast_json)
+
+
+@pytest.mark.parametrize(
+    ("with_wind", "alignment_status", "expected_scripts"),
+    [
+        (False, "available", ["operational.py", "publish.py"]),
         (
             True,
+            "available",
             [
                 "operational.py",
                 "add_wind850_anomaly.py",
@@ -135,12 +266,18 @@ def test_wind_postprocessing_requires_the_generated_issue_json(
                 "publish.py",
             ],
         ),
+        (
+            True,
+            "unavailable_outside_jjas",
+            ["operational.py", "publish.py"],
+        ),
     ],
 )
 def test_wind_augmentation_and_pdf_rebuild_precede_publication(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     with_wind: bool,
+    alignment_status: str,
     expected_scripts: list[str],
 ) -> None:
     config = tmp_path / "case.json"
@@ -155,7 +292,20 @@ def test_wind_augmentation_and_pdf_rebuild_precede_publication(
         export_dashboard / "public/data/forecasts/gfs/20260808.json"
     )
     forecast_json.parent.mkdir(parents=True)
-    forecast_json.write_text("{}", encoding="utf-8")
+    model_state_time = (
+        "2026-10-02T00:00:00Z"
+        if alignment_status == "unavailable_outside_jjas"
+        else "2026-08-07T00:00:00Z"
+    )
+    forecast_json.write_text(
+        json.dumps(
+            forecast_payload(
+                status=alignment_status,
+                model_state_time=model_state_time,
+            )
+        ),
+        encoding="utf-8",
+    )
     index = export_dashboard / "public/data/index.json"
     index.parent.mkdir(parents=True, exist_ok=True)
     index.write_text("{}", encoding="utf-8")
@@ -220,7 +370,7 @@ def test_wind_augmentation_and_pdf_rebuild_precede_publication(
 
     assert [Path(command[1]).name for command in calls] == expected_scripts
     assert removed == [(publish_clone, export_dashboard)]
-    if with_wind:
+    if with_wind and alignment_status == "available":
         augmentation = calls[1]
         assert augmentation[0] == args.operational_python
         assert augmentation[augmentation.index("--forecast-json") + 1] == str(

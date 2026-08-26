@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -27,6 +28,9 @@ from scripts.publish_operational_site import (  # noqa: E402
     prepare_clone,
     remove_disposable_worktree,
 )
+
+VALIDATED_JJAS_SLOT_START = "0602"
+VALIDATED_JJAS_SLOT_END = "0929"
 
 
 def parse_args() -> argparse.Namespace:
@@ -217,6 +221,117 @@ def wind_postprocess_commands(
     ]
 
 
+def wind_augmentation_available(forecast_json: Path) -> bool:
+    """Return whether the base export has a supported anomaly climatology.
+
+    The native rainfall/temperature exporter is the authority for the
+    model-state calendar alignment. Outside its validated JJAS window it
+    deliberately emits a raw-only package; the optional wind bridge must
+    preserve that fallback instead of interpolating beyond the same boundary.
+    """
+
+    try:
+        payload = json.loads(
+            forecast_json.read_text(encoding="utf-8"),
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                ValueError(f"non-finite JSON constant {value!r}")
+            ),
+        )
+        issue = payload["issue"]
+        alignment = issue["climatology_alignment"]
+        status = alignment["status"]
+    except (KeyError, TypeError) as error:
+        raise ValueError(
+            "published forecast lacks climatology alignment status"
+        ) from error
+
+    model_state_time = issue.get("model_state_time")
+    if not isinstance(model_state_time, str):
+        raise ValueError("published forecast lacks a valid model-state time")
+    try:
+        model_state_day = datetime.strptime(model_state_time[:10], "%Y-%m-%d")
+    except ValueError as error:
+        raise ValueError("published forecast has an invalid model-state time") from error
+    target = alignment.get("target_model_state_calendar_day")
+    if target != model_state_day.strftime("%m%d"):
+        raise ValueError("climatology alignment target differs from model-state time")
+
+    if status == "available":
+        return True
+    if status == "unavailable_outside_jjas":
+        def calendar_day(value: object, label: str) -> datetime:
+            if not isinstance(value, str) or len(value) != 4 or not value.isdigit():
+                raise ValueError(f"climatology alignment has an invalid {label}")
+            try:
+                return datetime.strptime(f"2000{value}", "%Y%m%d")
+            except ValueError as error:
+                raise ValueError(
+                    f"climatology alignment has an invalid {label}"
+                ) from error
+
+        target_day = calendar_day(target, "target calendar day")
+        available_start = calendar_day(
+            alignment.get("available_slot_start"), "available-slot start"
+        )
+        available_end = calendar_day(
+            alignment.get("available_slot_end"), "available-slot end"
+        )
+        if (
+            alignment.get("available_slot_start") != VALIDATED_JJAS_SLOT_START
+            or alignment.get("available_slot_end") != VALIDATED_JJAS_SLOT_END
+        ):
+            raise ValueError(
+                "climatology alignment bounds differ from the validated JJAS slots"
+            )
+        if available_start > available_end:
+            raise ValueError("climatology alignment slot bounds are reversed")
+        if available_start <= target_day <= available_end:
+            raise ValueError(
+                "outside-JJAS alignment target is inside the available slot bounds"
+            )
+
+        raw_products = {"rainfall_total", "temperature_mean"}
+        products = payload.get("products")
+        available_products = issue.get("available_products")
+        capabilities = issue.get("capabilities")
+        weeks = payload.get("weeks")
+        if not isinstance(products, dict) or set(products) != raw_products:
+            raise ValueError("outside-JJAS forecast is not a raw-only product package")
+        if (
+            not isinstance(available_products, list)
+            or len(available_products) != len(raw_products)
+            or set(available_products) != raw_products
+        ):
+            raise ValueError("outside-JJAS available products are not raw-only")
+        if (
+            not isinstance(capabilities, dict)
+            or capabilities.get("raw_fields") is not True
+            or capabilities.get("anomalies") is not False
+            or capabilities.get("regional_probabilities_eligible") is not False
+            or capabilities.get("wind850_mean", False) is not False
+            or capabilities.get("wind850_anomaly", False) is not False
+        ):
+            raise ValueError("outside-JJAS forecast capabilities are not raw-only")
+        if not isinstance(weeks, list) or len(weeks) != 6:
+            raise ValueError("outside-JJAS forecast must contain exactly six weeks")
+        for expected_week, week in enumerate(weeks, start=1):
+            if not isinstance(week, dict) or week.get("week") != expected_week:
+                raise ValueError("outside-JJAS forecast weeks are not ordered")
+            fields = week.get("fields")
+            summaries = week.get("summary")
+            if (
+                not isinstance(fields, dict)
+                or not isinstance(summaries, dict)
+                or set(fields) != raw_products
+                or set(summaries) != raw_products
+            ):
+                raise ValueError("outside-JJAS forecast week is not raw-only")
+            if week.get("vectors"):
+                raise ValueError("outside-JJAS forecast unexpectedly contains vectors")
+        return False
+    raise ValueError(f"unsupported climatology alignment status: {status!r}")
+
+
 def main() -> int:
     args = parse_args()
     load_config(args.config, args.source, args.issue)
@@ -260,15 +375,30 @@ def main() -> int:
             timeout=args.timeout,
         )
         if wind_inputs is not None:
-            for command in wind_postprocess_commands(
-                args, export_dashboard, wind_inputs
-            ):
-                subprocess.run(
-                    command,
-                    cwd=export_dashboard,
-                    env=environment,
-                    check=True,
-                    timeout=args.timeout,
+            forecast_json = (
+                export_dashboard
+                / "public"
+                / "data"
+                / "forecasts"
+                / args.source
+                / f"{args.issue}.json"
+            )
+            if wind_augmentation_available(forecast_json):
+                for command in wind_postprocess_commands(
+                    args, export_dashboard, wind_inputs
+                ):
+                    subprocess.run(
+                        command,
+                        cwd=export_dashboard,
+                        env=environment,
+                        check=True,
+                        timeout=args.timeout,
+                    )
+            else:
+                print(
+                    "wind augmentation withheld outside the validated JJAS "
+                    "climatology; publishing the base raw-only package",
+                    flush=True,
                 )
         subprocess.run(
             publisher_command(args, export_dashboard),
