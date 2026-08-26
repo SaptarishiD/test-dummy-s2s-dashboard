@@ -88,7 +88,10 @@ async function loadData(): Promise<AppData> {
       issue.validation ? `./data/${issue.validation}` : "./data/validation.json",
       issueChecksum(issue, "validation"),
     ), issue.validation ? undefined : "no-store"),
-    fetchJson<IndiaMapGeographyData>(`./data/${activeDomain.geography}`),
+    fetchJson<IndiaMapGeographyData>(
+      `./data/${activeDomain.geography}`,
+      "no-store",
+    ),
   ]);
   if (forecast.issue.initial_condition_source.id !== source.id) {
     throw new Error("Forecast source does not match the selected initialization source");

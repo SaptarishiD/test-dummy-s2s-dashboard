@@ -26,6 +26,7 @@ def test_india_forecast_paint_and_wind_are_clipped_to_the_abdb_outline() -> None
     forecast_map = read("src/components/ForecastMap.ts")
     forecast_page = read("src/pages/forecast.ts")
     outlook_map = read("src/components/TercileProbabilityMap.ts")
+    main = read("src/main.ts")
 
     assert (
         'indiaDataClipPath.setAttribute("d", this.geography.india_outline_path)'
@@ -57,6 +58,11 @@ def test_india_forecast_paint_and_wind_are_clipped_to_the_abdb_outline() -> None
     assert "Source: Survey of India, Government of India." in forecast_page
     assert "Neighboring-country context: Natural Earth" in forecast_page
     assert "its India feature is excluded" in forecast_page
+    assert (
+        'fetchJson<IndiaMapGeographyData>(\n'
+        '      `./data/${activeDomain.geography}`,\n'
+        '      "no-store",'
+    ) in main
 
 
 def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:
