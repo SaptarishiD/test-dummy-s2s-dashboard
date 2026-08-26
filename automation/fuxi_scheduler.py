@@ -1234,6 +1234,9 @@ class Controller:
             "issue": issue_id(date),
             "date": issue_id(date),
             "config": config,
+            "private_forecast": str(
+                record.get("artifacts", {}).get("private_forecast", "")
+            ),
             "receipt": str(receipt),
             "state_root": str(self.settings.state_root),
             "dashboard_root": str(self.settings.dashboard_root),

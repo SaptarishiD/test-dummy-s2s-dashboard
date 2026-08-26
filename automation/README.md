@@ -40,7 +40,11 @@ auditable hand-off:
 ```
 
 The example configuration consumes that action automatically during the next
-`reconcile`. `export_and_publish_operational_issue.py` creates a disposable
+`reconcile`. New compact operational forecasts retain U850/V850 alongside
+TP/T2M; the publication command binds the validated private forecast and the
+all-slot JJAS 2002–2021 wind climatology so raw and anomalous wind products are
+part of the same publication gate. Legacy two-field forecasts require an
+explicit validated wind sidecar instead. `export_and_publish_operational_issue.py` creates a disposable
 worktree from the dedicated publishing clone, points the existing exporter at
 that isolated dashboard, and then hands its public package to the allow-listed
 publisher. A second disposable worktree validates, builds, commits, and pushes

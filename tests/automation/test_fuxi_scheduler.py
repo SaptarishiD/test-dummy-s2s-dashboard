@@ -551,6 +551,8 @@ def test_reconcile_automatically_publishes_and_confirms_deployment(
             "{issue}",
             "--config",
             "{config}",
+            "--wind-forecast",
+            "{private_forecast}",
             "--receipt",
             "{receipt}",
         ),
@@ -591,6 +593,12 @@ def test_reconcile_automatically_publishes_and_confirms_deployment(
     assert state["deployment"]["pushed_commit"] == "a" * 40
     assert state["deployment"]["deployed_commit"] == "a" * 40
     assert "next_action" not in state
+    publisher = next(
+        command for command in runner.commands if command[0] == "/test/publisher"
+    )
+    assert publisher[publisher.index("--wind-forecast") + 1].endswith(
+        "/private/forecasts/annual2026/20260805.nc"
+    )
 
 
 def test_postdeploy_latency_keeps_pushed_state_for_retry(tmp_path: Path) -> None:

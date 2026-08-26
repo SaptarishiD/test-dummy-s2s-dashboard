@@ -45,6 +45,10 @@
       "{issue}",
       "--config",
       "{config}",
+      "--wind-forecast",
+      "{private_forecast}",
+      "--wind-climatology",
+      "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/native_reforecast_jjas_2002_2021/fuxi_s2s_wind850_climatology_jjas_allslots_2002_2021.nc",
       "--receipt",
       "{receipt}"
     ],
