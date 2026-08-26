@@ -26,6 +26,7 @@ def test_current_is_latest_complete_production_gfs_not_newer_limited_run() -> No
     gfs = index["initial_condition_sources"][0]
     production = [item for item in gfs["issues"] if item["members"] == 100]
     limited = [item for item in gfs["issues"] if item["members"] < 100]
+    assert index["default_source"] == "gfs"
     assert index["current"]["source_id"] == "gfs"
     assert index["current"]["members"] == 100
     assert index["current"]["issue_id"] == max(item["id"] for item in production)
@@ -77,8 +78,13 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() ->
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
+    assert rebuilt["default_source"] == "gfs"
     assert rebuilt["current"]["source_id"] == "gfs"
     assert rebuilt["current"]["issue_id"] == expected_issue
+    assert next(
+        source for source in rebuilt["initial_condition_sources"] if source["id"] == "ifs"
+    )["default_issue"] == "20260819"
+    assert rebuilt["latest_reference"]["source_id"] == "era5"
     newer_limited = next(
         item
         for item in rebuilt["initial_condition_sources"][0]["issues"]

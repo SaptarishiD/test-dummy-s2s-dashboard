@@ -121,6 +121,8 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("deployed index.html has no application root")
     index_bytes = fetch(args.base_url, "data/index.json", 1, args.timeout)
     index = decode_json(index_bytes, "deployed data/index.json")
+    if index.get("default_source") != "gfs":
+        raise ValueError("deployed default source is not GFS")
     manifest = decode_json(
         fetch(args.base_url, "data/manifest.json", 1, args.timeout),
         "deployed data/manifest.json",
@@ -192,6 +194,7 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "status": "healthy",
         "deployed_commit": manifest.get("deployed_commit"),
+        "default_source": index.get("default_source"),
         "current_gfs_issue": actual_gfs,
         "latest_era5_issue": actual_era5,
         "verified_assets": verified_assets,
@@ -228,6 +231,7 @@ def main() -> int:
     else:
         print(
             "post-deploy smoke: healthy; "
+            f"default {receipt['default_source'].upper()}, "
             f"GFS {receipt['current_gfs_issue']}, "
             f"ERA5 {receipt['latest_era5_issue']}, "
             f"commit {receipt['deployed_commit']}"

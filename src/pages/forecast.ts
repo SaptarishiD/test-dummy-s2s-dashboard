@@ -423,20 +423,34 @@ export function renderForecastPage(
   const currentGfsLink = currentGfs
     ? sourceLink("gfs", currentGfs.id)
     : "./#india";
+  const sourceLatestIssue = defaultIssueForSource(index, source);
+  const isSourceLatest = sourceLatestIssue?.id === catalogIssue.id;
   const matchedSource = index.initial_condition_sources.find(
     (candidate) =>
       candidate.id !== sourceId &&
       candidate.issues.some((issue) => issue.id === currentIssueId),
   );
   const sourceBadge = isCurrent
-    ? sourceId === "ifs"
-      ? "Default · Experimental IFS initialization"
-      : "Current · Experimental GFS proxy"
-    : catalogIssue.members < 100
-      ? "Archive · Limited experiment"
+    ? sourceId === "gfs"
+      ? "Current · Experimental GFS proxy"
+      : sourceId === "ifs"
+        ? "Default · Experimental IFS initialization"
+        : "Default · Delayed ERA5 reference"
+    : sourceId === "ifs"
+      ? isSourceLatest
+        ? "Latest source issue · Experimental IFS"
+        : catalogIssue.members < 100
+          ? "Archive · Limited IFS experiment"
+          : "Archive · Experimental IFS"
       : sourceId === "era5"
-        ? "Archive · Delayed ERA5 reference"
-        : "Archive · Complete ensemble";
+        ? isSourceLatest
+          ? "Latest · Delayed ERA5 reference"
+          : "Archive · Delayed ERA5 reference"
+        : isSourceLatest
+          ? "Latest source issue · Experimental GFS proxy"
+          : catalogIssue.members < 100
+            ? "Archive · Limited experiment"
+            : "Archive · Complete ensemble";
   const pdfPath = forecast.issue.downloads?.domain_pdf ??
     forecast.issue.downloads?.india_pdf;
   const pdfReady = typeof pdfPath === "string" && pdfPath.endsWith(".pdf");
@@ -450,16 +464,31 @@ export function renderForecastPage(
     : "";
   const initializationComparison = data.initializationComparison;
   const validThrough = forecast.weeks.at(-1)?.valid_end ?? "";
+  const issueSelectionLabel = isCurrent
+    ? "Current forecast"
+    : isSourceLatest
+      ? sourceId === "era5"
+        ? "Latest delayed reference"
+        : "Latest validated source issue"
+      : "Selected archive issue";
+  const archiveTitle = sourceId === "era5" && isSourceLatest
+    ? "Latest delayed reference—not the current forecast"
+    : sourceId === "ifs" && isSourceLatest
+      ? "Latest experimental IFS issue—not the current forecast"
+      : "You are viewing an archived issue";
+  const archiveMessage = sourceId === "era5" && isSourceLatest
+    ? "This is ERA5's latest validated delayed reference. Source initialization dates are independent, and ERA5 normally arrives 5–7 days after real time."
+    : sourceId === "ifs" && isSourceLatest
+      ? "This is IFS's latest validated issue. IFS remains experimental and is separate from the dashboard's current GFS guidance; source initialization dates can differ."
+      : catalogIssue.members < 100
+        ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
+        : "This older issue is retained in the archive. The current page points to the latest validated GFS-proxy issue.";
   const archiveBanner = !isCurrent
     ? `
-      <aside class="india-archive-banner" aria-label="Archived forecast notice">
+      <aside class="india-archive-banner" aria-label="Non-current forecast notice">
         <div>
-          <strong>${sourceId === "era5" ? "Delayed reference—not the current forecast" : "You are viewing an archived issue"}</strong>
-          <p>${sourceId === "era5"
-            ? "ERA5 initialization is retained for controlled reference experiments and normally arrives 5–7 days after real time."
-            : catalogIssue.members < 100
-            ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
-              : "The current page always points to the newest validated GFS-proxy issue."}</p>
+          <strong>${archiveTitle}</strong>
+          <p>${archiveMessage}</p>
         </div>
         <a href="${currentGfsLink}">Return to current forecast →</a>
       </aside>
@@ -515,7 +544,7 @@ export function renderForecastPage(
         ` : ""}
         <div class="india-run-console__heading">
           <div>
-            <span>${isCurrent ? "Current forecast" : "Selected archive issue"}</span>
+            <span>${issueSelectionLabel}</span>
             <strong>${forecast.issue.initial_condition_source.label}</strong>
           </div>
           <details class="india-source-guide">
@@ -570,8 +599,8 @@ export function renderForecastPage(
           </a>
           <div class="india-run-actions__secondary">
             ${pdfReady
-              ? `<a class="india-pdf-download-secondary" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">Current issue PDF ↗</a><a class="india-pdf-download-tertiary" href="${pdfUrl}" download type="application/pdf">Download ↓</a>`
-              : `<button class="india-pdf-download-secondary" type="button" disabled>Current PDF preparing</button>`}
+              ? `<a class="india-pdf-download-secondary" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">${isCurrent ? "Current" : "Selected"} issue PDF ↗</a><a class="india-pdf-download-tertiary" href="${pdfUrl}" download type="application/pdf">Download ↓</a>`
+              : `<button class="india-pdf-download-secondary" type="button" disabled>${isCurrent ? "Current" : "Selected"} PDF preparing</button>`}
             <a class="india-archive-action" href="./#archive">Archive →</a>
           </div>
         </div>

@@ -293,6 +293,7 @@ def build_catalog(
     payload.update(
         {
             "schema_version": 3,
+            "default_source": "gfs",
             "generated_at": iso_z(now),
             "latest_successful_issue": current_issue["id"],
             "current": current,

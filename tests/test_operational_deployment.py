@@ -238,6 +238,7 @@ def build_smoke_site(root: Path) -> None:
     (root / "data/forecasts/ifs").mkdir(parents=True)
     (root / "index.html").write_text('<main id="app"></main>\n', encoding="utf-8")
     index = {
+        "default_source": "gfs",
         "current": {"source_id": "gfs", "issue_id": "20260805"},
         "latest_reference": {"source_id": "era5", "issue_id": "20260722"},
         "initial_condition_sources": [],
@@ -312,9 +313,36 @@ def test_postdeploy_smoke_verifies_commit_pointers_and_forecasts(
     )
     receipt = postdeploy.smoke(args)
     assert receipt["status"] == "healthy"
+    assert receipt["default_source"] == "gfs"
     assert receipt["current_gfs_issue"] == "20260805"
     assert receipt["latest_era5_issue"] == "20260722"
     assert len(receipt["verified_assets"]) == 2
+
+
+def test_postdeploy_smoke_rejects_a_non_gfs_default(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_smoke_site(tmp_path)
+    index_path = tmp_path / "data/index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index["default_source"] = "ifs"
+    index_path.write_text(json.dumps(index), encoding="utf-8")
+    monkeypatch.setattr(
+        postdeploy,
+        "fetch",
+        lambda _base, relative, _attempts, _timeout: (tmp_path / relative).read_bytes(),
+    )
+    args = SimpleNamespace(
+        base_url="https://example.invalid/s2s/",
+        expected_commit=None,
+        expected_index=None,
+        expected_gfs_issue=None,
+        expected_era5_issue=None,
+        attempts=1,
+        timeout=2.0,
+    )
+    with pytest.raises(ValueError, match="deployed default source is not GFS"):
+        postdeploy.smoke(args)
 
 
 def test_postdeploy_smoke_verifies_selected_ifs_pilot(

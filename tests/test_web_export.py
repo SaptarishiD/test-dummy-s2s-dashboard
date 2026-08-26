@@ -108,7 +108,7 @@ def test_only_compact_json_is_present_in_public_data() -> None:
 def test_initial_condition_sources_are_never_conflated() -> None:
     index = load(PUBLIC_DATA / "index.json")
     assert index["default_view"] == "india"
-    assert index["default_source"] == "ifs"
+    assert index["default_source"] == "gfs"
     sources = index["initial_condition_sources"]
     assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
     ifs = sources[-1]

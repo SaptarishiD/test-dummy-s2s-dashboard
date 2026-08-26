@@ -40,12 +40,15 @@ def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:
     assert "map.render(selectedProduct, week, product, windRenderingMode)" in forecast_page
 
 
-def test_forecast_preserves_the_catalog_configured_default_source() -> None:
+def test_forecast_uses_gfs_current_without_conflating_source_latest_issues() -> None:
     catalog = read("src/lib/catalog.ts")
     forecast = read("src/pages/forecast.ts")
     assert 'sourceById(index, index.default_source)' in catalog
-    assert 'source.id === index.default_source' in catalog
-    assert 'Default · Experimental IFS initialization' in forecast
+    assert "if (index.current)" in catalog
+    assert "source.id === index.current.source_id" in catalog
+    assert 'Current · Experimental GFS proxy' in forecast
+    assert 'Latest source issue · Experimental IFS' in forecast
+    assert 'Latest experimental IFS issue—not the current forecast' in forecast
 
 
 def test_archive_distinguishes_ifs_from_the_gfs_proxy() -> None:

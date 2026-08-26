@@ -220,10 +220,16 @@ export function issueIsCurrent(
   source: CatalogSource,
   issue: CatalogIssue,
 ): boolean {
+  if (index.current) {
+    return (
+      source.id === index.current.source_id &&
+      issue.id === index.current.issue_id
+    );
+  }
   return (
     source.id === index.default_source &&
     defaultIssueForSource(index, source)?.id === issue.id
-  ) || (source.id === "gfs" && currentGfsIssue(index)?.id === issue.id);
+  );
 }
 
 export function issueClass(issue: CatalogIssue): "complete" | "limited" {

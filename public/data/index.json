@@ -138,7 +138,7 @@
     "regional_outlook": "regional/gfs/20260826.json",
     "pdf": "downloads/gfs/20260826/S2S_Research_India_Weeks1-4_GFS_20260826.pdf"
   },
-  "default_source": "ifs",
+  "default_source": "gfs",
   "default_view": "india",
   "generated_at": "2026-08-26T13:42:49Z",
   "global_viewer": {

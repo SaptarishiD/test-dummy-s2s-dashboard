@@ -5,6 +5,9 @@ separate dated Global Demo. India is the default page. It separates
 near-real-time GFS-proxy initializations, delayed ERA5 references, and a gated
 IFS-initialized pilot, exposes the available issue dates and ensemble sizes,
 and provides compact issue-level downloads.
+The landing forecast is the latest validated GFS-proxy issue. Selecting IFS or
+ERA5 opens that source's independently dated latest validated issue; IFS remains
+explicitly experimental.
 
 The dated Global Demo animates a pinned 28 July 2026 set of 42 daily
 ensemble-mean fields for
