@@ -110,6 +110,16 @@
       "forecast_sha256": "de04cc243f0730ca13017c111ddf879224882369982e89bd544d9f4bc4de4f21",
       "climatology_sha256": "c405872b84b0c34b96705833e3652caa11432e77a3970dd6fa33601192d37cf7",
       "definition": "shading: ensemble-mean vector speed minus the equally weighted mean of 20 yearly vector speeds; arrows: forecast U/V mean minus the 2002-2021 U/V model climatology"
+    },
+    "initialization_comparison": {
+      "status": "initialization_sensitivity_only",
+      "compared_source_ids": [
+        "gfs",
+        "era5",
+        "ifs"
+      ],
+      "comparison": "comparisons/20260819.json",
+      "message": "Pairwise differences measure sensitivity to the initial-condition source. They do not show which forecast is better; skill requires observations for each complete valid period."
     }
   },
   "grid": {

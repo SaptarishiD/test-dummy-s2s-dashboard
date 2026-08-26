@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-26T10:12:52.807914+00:00",
+  "generated_at": "2026-08-26T13:42:53.851609+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -53,6 +53,11 @@
       "path": "data/comparisons/20260805.json",
       "size_bytes": 4535,
       "sha256": "edbeda91bdd82e8c7c86cf45c78ba54641198ee9e71e55d38ef8baa1d7d2a7f8"
+    },
+    {
+      "path": "data/comparisons/20260819.json",
+      "size_bytes": 603530,
+      "sha256": "76fccfd588a9e8f48995c259716b6a13089f2dc8f424f7c12903b3e24a436449"
     },
     {
       "path": "data/domains.json",
@@ -135,6 +140,11 @@
       "sha256": "6859810e98cc264477f131dbef7c4f9db39919d525de3b1499f08c1f19df23a5"
     },
     {
+      "path": "data/forecasts/era5/20260819.json",
+      "size_bytes": 344418,
+      "sha256": "30b3e6fb83a3fb00b60b9204911f3018b718b31b19f7e0156ca412b0496fe601"
+    },
+    {
       "path": "data/forecasts/gfs/20260720.json",
       "size_bytes": 347672,
       "sha256": "e6f32219ae2fd54744d2eb7be688ae5ad9d897a8432f032f5a63f30fc56d179f"
@@ -211,8 +221,8 @@
     },
     {
       "path": "data/forecasts/gfs/20260819.json",
-      "size_bytes": 608981,
-      "sha256": "0ef032bb50995f5b929611db6c027c0aca442f16bdf9c55c22c535bb89bd54c7"
+      "size_bytes": 609404,
+      "sha256": "bbc4fabdff32e84453d01218382bc27d68a0eca48175e782e93b76a2002ae2b8"
     },
     {
       "path": "data/forecasts/gfs/20260822.json",
@@ -231,8 +241,8 @@
     },
     {
       "path": "data/forecasts/ifs/20260819.json",
-      "size_bytes": 606728,
-      "sha256": "cd6e90e02f11a6ff16b775146e55242fd7a0a3fc77228a8903693df6cbd5a755"
+      "size_bytes": 607151,
+      "sha256": "7249191b24b3cb91c8b425a1f8ffc4eaec0c383baee1a99e5b2170e4b655dbd2"
     },
     {
       "path": "data/formulas.json",
@@ -356,8 +366,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 57721,
-      "sha256": "b9d96f3ed9ccdd5677071f71f126eac650abfce833bbcfd21cf625f1d140bfe4"
+      "size_bytes": 59327,
+      "sha256": "c9b89287999c889cc1e252f09f5ccf39ac4006f3b6acc28f82ba715811670c2e"
     },
     {
       "path": "data/india-admin.json",
@@ -403,6 +413,11 @@
       "path": "data/regional/era5/20260812.json",
       "size_bytes": 448509,
       "sha256": "368c362ad2df9eb95b4ad41b8bf3aebf161fa4db842cfd5def8bbac2b383944a"
+    },
+    {
+      "path": "data/regional/era5/20260819.json",
+      "size_bytes": 448265,
+      "sha256": "cfb07edd7bbedcb4f27ef7d70bbe301084c0e8967e6ebc4e0391597831ccf6c6"
     },
     {
       "path": "data/regional/gfs/20260722.json",
@@ -543,6 +558,11 @@
       "path": "downloads/era5/20260812/S2S_Research_India_Weeks1-4_ERA5_20260812.pdf",
       "size_bytes": 3609169,
       "sha256": "c6c221a32c5136d0d354618f6ca12335231233b5696319be648e8e0568dc353d"
+    },
+    {
+      "path": "downloads/era5/20260819/S2S_Research_India_Weeks1-4_ERA5_20260819.pdf",
+      "size_bytes": 2871184,
+      "sha256": "c71930ebe106c530919be06d2a9dea41b2a061914fe8401342a7ad84efcb2ca3"
     },
     {
       "path": "downloads/gfs/20260720/S2S_Research_India_Weeks1-4_GFS_20260720.pdf",
