@@ -229,14 +229,15 @@ def test_india_map_geography_is_compact_and_source_locked() -> None:
     geography = load(geography_path)
     assert geography_path.stat().st_size < 200_000
     assert geography["view_box"] == [0, 0, 620, 620]
-    for key in ("world_path", "india_outline_path", "india_admin_path"):
+    assert geography["world_path"] == ""
+    for key in ("india_outline_path", "india_admin_path"):
         assert geography[key].startswith("M")
         assert len(geography[key]) > 1_000
     sources = {
-        "world_countries_sha256": PUBLIC_DATA / "world-countries.geojson",
         "india_outline_sha256": PUBLIC_DATA / "india-outline.json",
         "india_admin_sha256": PUBLIC_DATA / "india-admin.json",
     }
+    assert geography["sources"]["world_countries_sha256"] == "not_rendered"
     for key, source_path in sources.items():
         assert geography["sources"][key] == hashlib.sha256(
             source_path.read_bytes()

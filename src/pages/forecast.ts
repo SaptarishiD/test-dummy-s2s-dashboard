@@ -207,7 +207,6 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
 const AUTO_PRODUCT_ORDER: ProductKey[] = [
   "rainfall_anomaly",
   "rainfall_total",
-  "wind850_mean",
   "wind850_anomaly",
   "temperature_anomaly",
 ];
@@ -639,6 +638,11 @@ export function renderForecastPage(
       <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
       <div class="india-shared-legend" id="india-shared-legend"></div>
       <p class="india-visual-note" id="india-visual-note"></p>
+      ${activeDomain?.id === "india" ? `
+        <p class="india-visual-note india-boundary-source">
+          India outline and state/UT boundaries: <a href="https://surveyofindia.gov.in/pages/administrative-boundary-data-base-abdb-" target="_blank" rel="noopener noreferrer">Survey of India ABDB display derivative</a>. Source: Survey of India, Government of India. Non-India political boundaries are intentionally omitted from these panels.
+        </p>
+      ` : ""}
 
       <footer class="india-sheet__footer">
         <p id="india-baseline-note"></p>

@@ -6,18 +6,19 @@ import {
   issueInteractiveAvailable,
   issueIsCurrent,
   issuePdfAvailable,
+  productIsWebsiteVisible,
   productsForIssue,
   type CatalogIssue,
   type CatalogSource,
+  type WebsiteProductKey,
 } from "../lib/catalog";
 import type { AppData, AvailableProductKey } from "../types";
 
-const PRODUCT_LABELS: Record<AvailableProductKey, string> = {
+const PRODUCT_LABELS: Record<WebsiteProductKey, string> = {
   rainfall_total: "Rainfall",
   rainfall_anomaly: "Rainfall anomaly",
   temperature_mean: "Temperature",
   temperature_anomaly: "Temperature anomaly",
-  wind850_mean: "850 hPa wind",
   wind850_anomaly: "850 hPa wind anomaly",
   regional_probabilities: "Regional probabilities",
   india_pdf: "PDF briefing",
@@ -206,7 +207,9 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
       const pdfPath = issue.pdf;
       const badges = [...products]
         .filter((product) =>
-          product !== "india_pdf" && product !== "regional_probabilities"
+          productIsWebsiteVisible(product) &&
+          product !== "india_pdf" &&
+          product !== "regional_probabilities"
         )
         .map((product) => `<span>${PRODUCT_LABELS[product]}</span>`)
         .join("");

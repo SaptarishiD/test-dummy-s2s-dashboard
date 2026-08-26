@@ -358,6 +358,19 @@ export class ForecastMap {
     clipRectangle.setAttribute("height", String(this.mapHeight));
     clipPath.append(clipRectangle);
     definitions.append(clipPath);
+
+    let indiaDataClipPathId: string | undefined;
+    if (this.geography.india_outline_path) {
+      indiaDataClipPathId = `forecast-map-india-${this.instanceId}`;
+      const indiaDataClip = svgElement("clipPath");
+      indiaDataClip.setAttribute("id", indiaDataClipPathId);
+      indiaDataClip.setAttribute("clipPathUnits", "userSpaceOnUse");
+      const indiaDataClipPath = svgElement("path");
+      indiaDataClipPath.setAttribute("d", this.geography.india_outline_path);
+      indiaDataClipPath.setAttribute("fill-rule", "evenodd");
+      indiaDataClip.append(indiaDataClipPath);
+      definitions.append(indiaDataClip);
+    }
     svg.append(definitions);
 
     const plot = svgElement("g");
@@ -371,14 +384,26 @@ export class ForecastMap {
     ocean.setAttribute("height", String(this.mapHeight));
     ocean.setAttribute("class", "map-ocean");
     plot.append(ocean);
-    this.addInterpolatedField(plot, productKey, week, product);
+    this.addInterpolatedField(
+      plot,
+      productKey,
+      week,
+      product,
+      indiaDataClipPathId,
+    );
     this.addWorldBoundaries(plot);
     this.addGraticules(plot, svg);
     if (isWindProduct(productKey)) {
       if (windRenderingMode === "arrows") {
-        this.addWindVectors(svg, plot, productKey, week);
+        this.addWindVectors(svg, plot, productKey, week, indiaDataClipPathId);
       } else {
-        this.addWindStreamlines(svg, plot, productKey, week);
+        this.addWindStreamlines(
+          svg,
+          plot,
+          productKey,
+          week,
+          indiaDataClipPathId,
+        );
       }
     }
     this.addOutline(plot);
@@ -424,6 +449,7 @@ export class ForecastMap {
     plot: SVGGElement,
     productKey: WindProductKey,
     week: ForecastWeek,
+    indiaDataClipPathId?: string,
   ): void {
     const vectors = this.validWindVectors(productKey, week);
     if (!vectors) return;
@@ -434,6 +460,9 @@ export class ForecastMap {
 
     const group = svgElement("g");
     group.setAttribute("class", "map-wind-vectors");
+    if (indiaDataClipPathId) {
+      group.setAttribute("clip-path", `url(#${indiaDataClipPathId})`);
+    }
     for (let row = 1; row < latitude.length; row += WIND_VECTOR_STRIDE) {
       for (let column = 1; column < longitude.length; column += WIND_VECTOR_STRIDE) {
         const index = row * longitude.length + column;
@@ -486,6 +515,7 @@ export class ForecastMap {
     plot: SVGGElement,
     productKey: WindProductKey,
     week: ForecastWeek,
+    indiaDataClipPathId?: string,
   ): void {
     const vectors = this.validWindVectors(productKey, week);
     if (!vectors) return;
@@ -501,6 +531,9 @@ export class ForecastMap {
     );
     const group = svgElement("g");
     group.setAttribute("class", "map-wind-streamlines map-wind-vectors");
+    if (indiaDataClipPathId) {
+      group.setAttribute("clip-path", `url(#${indiaDataClipPathId})`);
+    }
     for (const points of streamlines) {
       const path = svgElement("path");
       path.setAttribute("d", pathData(points));
@@ -554,6 +587,7 @@ export class ForecastMap {
     productKey: ProductKey,
     week: ForecastWeek,
     product: ProductDefinition,
+    indiaDataClipPathId?: string,
   ): void {
     const values = week.fields[productKey];
     if (!values) throw new Error(`${productKey} is unavailable for Week ${week.week}`);
@@ -604,6 +638,9 @@ export class ForecastMap {
     image.setAttribute("preserveAspectRatio", "none");
     image.setAttribute("href", canvas.toDataURL("image/png"));
     image.setAttribute("class", "map-raster");
+    if (indiaDataClipPathId) {
+      image.setAttribute("clip-path", `url(#${indiaDataClipPathId})`);
+    }
     plot.append(image);
   }
 

@@ -109,9 +109,13 @@ The default precipitation layer loads first; other fields load and verify
 lazily when selected. The complete optional global payload is about 51 MB
 before HTTP compression.
 
-Country boundaries and labels use Natural Earth. `india-admin.json` is a
-simplified display derivative of the Survey of India Administrative Boundary
-Database state/UT layer and contains no raw shapefile.
+Global and configured non-India maps use Natural Earth. India forecast and
+outlook maps intentionally render no Natural Earth linework. Their India
+outline and state/UT lines use display derivatives of the
+[Survey of India Administrative Boundary Database](https://surveyofindia.gov.in/pages/administrative-boundary-data-base-abdb-)
+state/UT layer; forecast shading and wind vectors are clipped to that outline.
+`india-admin.json` contains no raw shapefile. Source: Survey of India,
+Government of India.
 
 The India startup path uses `india-map-geography.json`, a compact,
 pre-projected display derivative of those same checked geography files. It

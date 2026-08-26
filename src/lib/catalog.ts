@@ -8,6 +8,7 @@ import type {
 
 export type CatalogSource = IssueIndexData["initial_condition_sources"][number];
 export type CatalogIssue = CatalogSource["issues"][number];
+export type WebsiteProductKey = Exclude<AvailableProductKey, "wind850_mean">;
 
 const PRODUCT_KEYS: ProductKey[] = [
   "rainfall_total",
@@ -18,12 +19,22 @@ const PRODUCT_KEYS: ProductKey[] = [
   "wind850_anomaly",
 ];
 
+// Keep raw wind in the publication contract while limiting the interactive
+// dashboard to the climatology-relative wind product.
+const WEBSITE_PRODUCT_KEYS = PRODUCT_KEYS.filter(productIsWebsiteVisible);
+
 const LEGACY_PRODUCT_KEYS: ProductKey[] = [
   "rainfall_total",
   "rainfall_anomaly",
   "temperature_mean",
   "temperature_anomaly",
 ];
+
+export function productIsWebsiteVisible(
+  product: AvailableProductKey,
+): product is WebsiteProductKey {
+  return product !== "wind850_mean";
+}
 
 function newest(issues: CatalogIssue[]): CatalogIssue | undefined {
   return [...issues].sort((left, right) =>
@@ -163,7 +174,7 @@ export function productKeysForForecast(
   catalogProducts?: AvailableProductKey[],
 ): ProductKey[] {
   const declared = catalogProducts ?? forecast.issue.available_products;
-  return PRODUCT_KEYS.filter(
+  return WEBSITE_PRODUCT_KEYS.filter(
     (key) =>
       Boolean(forecast.products[key]) &&
       Boolean(forecast.weeks[0]?.fields[key]) &&

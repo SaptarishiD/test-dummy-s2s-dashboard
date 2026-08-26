@@ -652,7 +652,24 @@ def main() -> int:
         args.output_dir / "india-outline.json",
         {
             "schema_version": 1,
-            "description": "Simplified display-only India outline derived from the validated state boundary.",
+            "description": (
+                "Simplified display-only India outline dissolved from the Survey "
+                "of India ABDB state/UT boundary layer."
+            ),
+            "source": {
+                "name": "Survey of India Administrative Boundary Database (ABDB)",
+                "product": "Entire-country state/UT boundary layer",
+                "url": (
+                    "https://surveyofindia.gov.in/pages/"
+                    "administrative-boundary-data-base-abdb-"
+                ),
+                "source_sha256": sha256(args.india_shapefile),
+                "attribution": "Source: Survey of India, Government of India.",
+                "display_note": (
+                    "Presentation reference only; not a substitute for an official "
+                    "legal or cadastral boundary determination."
+                ),
+            },
             "geometry": rounded_geometry(mapping(india)),
         },
     )
