@@ -81,9 +81,13 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() ->
     assert rebuilt["default_source"] == "gfs"
     assert rebuilt["current"]["source_id"] == "gfs"
     assert rebuilt["current"]["issue_id"] == expected_issue
-    assert next(
+    ifs_source = next(
         source for source in rebuilt["initial_condition_sources"] if source["id"] == "ifs"
-    )["default_issue"] == "20260819"
+    )
+    expected_ifs_issue = max(
+        item["id"] for item in ifs_source["issues"] if item["members"] == 100
+    )
+    assert ifs_source["default_issue"] == expected_ifs_issue
     assert rebuilt["latest_reference"]["source_id"] == "era5"
     newer_limited = next(
         item

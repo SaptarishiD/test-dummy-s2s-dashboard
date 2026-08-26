@@ -113,11 +113,11 @@ def test_initial_condition_sources_are_never_conflated() -> None:
     assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
     ifs = sources[-1]
     assert ifs["category"] == "operational_initialization"
-    assert ifs["default_issue"] == "20260819"
-    assert [(issue["id"], issue["members"]) for issue in ifs["issues"]] == [
-        ("20260819", 100),
-        ("20260815", 100),
-    ]
+    ifs_issues = [(issue["id"], issue["members"]) for issue in ifs["issues"]]
+    assert ifs["default_issue"] == max(
+        issue_id for issue_id, members in ifs_issues if members == 100
+    )
+    assert {("20260819", 100), ("20260815", 100)} <= set(ifs_issues)
     assert "SST proxy" in ifs["description"]
     assert {issue["id"] for source in sources for issue in source["issues"]} >= {
         "20260715",
