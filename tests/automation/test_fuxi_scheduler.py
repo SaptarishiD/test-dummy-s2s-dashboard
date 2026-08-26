@@ -38,6 +38,9 @@ def settings(tmp_path: Path, **overrides: Any) -> Settings:
         "gfs_window_start": dt.time(0, 15, tzinfo=UTC),
         "gfs_window_end": dt.time(12, 0, tzinfo=UTC),
         "gfs_poll_minutes": 15,
+        "ifs_window_start": dt.time(0, 15, tzinfo=UTC),
+        "ifs_window_end": dt.time(12, 0, tzinfo=UTC),
+        "ifs_poll_minutes": 15,
         "era5_lookback_days": 35,
         "era5_max_probes_per_run": 4,
         "era5_poll_hours": 24,
@@ -226,29 +229,60 @@ def test_gfs_ignores_wrong_day_and_outside_window(tmp_path: Path) -> None:
     assert runner.commands == []
 
 
-def test_ifs_pilot_is_explicit_cadenced_and_submitted_once(tmp_path: Path) -> None:
+def test_ifs_poll_waits_then_submits_exactly_once(tmp_path: Path) -> None:
     config = settings(tmp_path)
     runner = FakeRunner(config.generated_config_root)
-    runner.availability("ifs", "20260805", True)
+    runner.availability("ifs", "20260805", False, True)
     controller = Controller(config, runner=runner)
 
-    off_cadence = controller.ifs_pilot(
+    off_cadence = controller.ifs_poll(
         utc("2026-08-06T12:00:00Z"), dt.date(2026, 8, 6)
     )
-    submitted = controller.ifs_pilot(
-        utc("2026-08-05T12:00:00Z"), dt.date(2026, 8, 5)
-    )
-    duplicate = controller.ifs_pilot(
-        utc("2026-08-05T12:05:00Z"), dt.date(2026, 8, 5)
-    )
+    waiting = controller.ifs_poll(utc("2026-08-05T00:15:00Z"))
+    submitted = controller.ifs_poll(utc("2026-08-05T00:30:00Z"))
+    duplicate = controller.ifs_poll(utc("2026-08-05T00:45:00Z"))
 
     assert "Wednesday/Saturday" in off_cadence[0]["reason"]
+    assert waiting[0]["outcome"] == "waiting"
     assert submitted[0]["stage"] == "submitted"
     assert duplicate[0]["outcome"] == "skipped"
     assert [command[2] for command in runner.commands].count("submit") == 1
     create = next(command for command in runner.commands if command[2] == "create")
     assert create[create.index("--source") + 1] == "ifs"
     assert "--ifs-probe" in create
+
+
+def test_ifs_pilot_remains_an_explicit_compatibility_alias(tmp_path: Path) -> None:
+    config = settings(tmp_path)
+    runner = FakeRunner(config.generated_config_root)
+    runner.availability("ifs", "20260805", True)
+    controller = Controller(config, runner=runner)
+
+    result = controller.ifs_pilot(
+        utc("2026-08-05T13:00:00Z"), dt.date(2026, 8, 5)
+    )
+
+    assert result[0]["stage"] == "submitted"
+
+
+def test_gfs_failure_does_not_block_ready_ifs_issue(tmp_path: Path) -> None:
+    config = settings(tmp_path)
+    runner = FakeRunner(config.generated_config_root)
+    runner.availability("gfs", "20260805", False)
+    runner.availability("ifs", "20260805", True)
+    controller = Controller(
+        config,
+        runner=runner,
+        alert=lambda *_: {"sent": False, "reason": "test"},
+    )
+
+    gfs = controller.gfs_poll(utc("2026-08-05T11:50:00Z"))
+    ifs = controller.ifs_poll(utc("2026-08-05T11:50:00Z"))
+
+    assert gfs[0]["stage"] == "failed"
+    assert ifs[0]["stage"] == "submitted"
+    assert controller.store.load("gfs", dt.date(2026, 8, 5))["stage"] == "failed"
+    assert controller.store.load("ifs", dt.date(2026, 8, 5))["stage"] == "submitted"
 
 
 def test_era5_watcher_backfills_ready_dates_independently(tmp_path: Path) -> None:
@@ -389,6 +423,7 @@ def test_reconcile_advances_validated_then_exported(tmp_path: Path) -> None:
                 "initial_condition_sources": [
                     {
                         "id": "gfs",
+                        "default_issue": "20260805",
                         "issues": [
                             {
                                 "id": "20260805",
@@ -398,7 +433,8 @@ def test_reconcile_advances_validated_then_exported(tmp_path: Path) -> None:
                             }
                         ],
                     }
-                ]
+                ],
+                "current": {"source_id": "gfs", "issue_id": "20260805"},
             }
         ),
         encoding="utf-8",
@@ -414,8 +450,96 @@ def test_reconcile_advances_validated_then_exported(tmp_path: Path) -> None:
     assert "next_action" not in state
 
 
-def test_reconcile_automatically_publishes_and_confirms_deployment(
+@pytest.mark.parametrize(
+    ("source", "default_issue", "top_pointer"),
+    [
+        (
+            "gfs",
+            "20260805",
+            {"current": {"source_id": "gfs", "issue_id": "20260801"}},
+        ),
+        (
+            "era5",
+            "20260805",
+            {
+                "latest_reference": {
+                    "source_id": "era5",
+                    "issue_id": "20260801",
+                }
+            },
+        ),
+        ("ifs", "20260801", {}),
+    ],
+)
+def test_existing_issue_is_not_adopted_until_latest_pointers_match(
     tmp_path: Path,
+    source: str,
+    default_issue: str,
+    top_pointer: dict[str, Any],
+) -> None:
+    config = settings(tmp_path)
+    runner = FakeRunner(config.generated_config_root)
+    runner.availability(source, "20260805", False)
+    controller = Controller(config, runner=runner)
+
+    forecast = (
+        config.dashboard_root / f"public/data/forecasts/{source}/20260805.json"
+    )
+    forecast.parent.mkdir(parents=True, exist_ok=True)
+    forecast.write_text(
+        json.dumps(
+            {
+                "issue": {
+                    "initialization": "2026-08-05T00:00:00Z",
+                    "members": 100,
+                    "lead_days": 42,
+                    "initial_condition_source": {"id": source},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    checksum = hashlib.sha256(forecast.read_bytes()).hexdigest()
+    index = config.dashboard_root / "public/data/index.json"
+    index.write_text(
+        json.dumps(
+            {
+                "initial_condition_sources": [
+                    {
+                        "id": source,
+                        "default_issue": default_issue,
+                        "issues": [
+                            {
+                                "id": "20260805",
+                                "members": 100,
+                                "forecast": f"forecasts/{source}/20260805.json",
+                                "checksums": {"forecast_sha256": checksum},
+                            }
+                        ],
+                    }
+                ],
+                **top_pointer,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    if source == "gfs":
+        result = controller.gfs_poll(utc("2026-08-05T00:15:00Z"))
+    elif source == "ifs":
+        result = controller.ifs_poll(utc("2026-08-05T00:15:00Z"))
+    else:
+        result = controller.era5_watch(
+            utc("2026-08-05T13:00:00Z"), dt.date(2026, 8, 5)
+        )
+
+    assert result[0]["outcome"] == "waiting"
+    assert controller.store.load(source, dt.date(2026, 8, 5))["stage"] == "pending"
+
+
+@pytest.mark.parametrize("source", ["gfs", "ifs"])
+def test_reconcile_automatically_publishes_and_confirms_deployment(
+    tmp_path: Path, source: str,
 ) -> None:
     config = settings(
         tmp_path,
@@ -441,9 +565,9 @@ def test_reconcile_automatically_publishes_and_confirms_deployment(
         ),
     )
     runner = FakeRunner(config.generated_config_root)
-    runner.availability("gfs", "20260805", True)
+    runner.availability(source, "20260805", True)
     runner.audit_payload = {
-        "source": "gfs",
+        "source": source,
         "date": "20260805",
         "manifest_exists": True,
         "status": "generated_valid",
@@ -451,7 +575,8 @@ def test_reconcile_automatically_publishes_and_confirms_deployment(
         "lead_days": 42,
     }
     controller = Controller(config, runner=runner)
-    controller.gfs_poll(utc("2026-08-05T00:15:00Z"))
+    poll = controller.gfs_poll if source == "gfs" else controller.ifs_poll
+    poll(utc("2026-08-05T00:15:00Z"))
 
     results = controller.reconcile(utc("2026-08-05T02:00:00Z"))
 
@@ -460,7 +585,7 @@ def test_reconcile_automatically_publishes_and_confirms_deployment(
         "pushed",
         "deployed",
     ]
-    state = controller.store.load("gfs", dt.date(2026, 8, 5))
+    state = controller.store.load(source, dt.date(2026, 8, 5))
     assert state is not None
     assert state["stage"] == "deployed"
     assert state["deployment"]["pushed_commit"] == "a" * 40

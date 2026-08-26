@@ -7,6 +7,10 @@ S2S_LAUNCHER=/home/raj.ayush/.local/share/s2s-fuxi/publisher/fuxi-s2s-dashboard/
 # cannot shift the scientific issue window.
 */15 * * * * /usr/bin/python3 $S2S_LAUNCHER gfs-poll 2>&1 | /usr/bin/logger -t s2s-fuxi-gfs
 
+# IFS uses the same scientific window but is offset by seven minutes so it does
+# not normally contend with the GFS heartbeat for the scheduler lock.
+7-52/15 * * * * /usr/bin/python3 $S2S_LAUNCHER ifs-poll 2>&1 | /usr/bin/logger -t s2s-fuxi-ifs
+
 # ERA5: daily at 18:35 IST, which is 13:05 UTC on this no-DST host.
 35 18 * * * /usr/bin/python3 $S2S_LAUNCHER era5-watch 2>&1 | /usr/bin/logger -t s2s-fuxi-era5
 

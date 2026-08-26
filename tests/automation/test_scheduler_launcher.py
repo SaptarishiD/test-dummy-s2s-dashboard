@@ -134,9 +134,10 @@ def test_cron_uses_host_time_and_staggers_the_lock_users() -> None:
         line.startswith("CRON_TZ=") for line in cron.splitlines()
     )
     assert "*/15 * * * * /usr/bin/python3 $S2S_LAUNCHER gfs-poll" in cron
+    assert "7-52/15 * * * * /usr/bin/python3 $S2S_LAUNCHER ifs-poll" in cron
     assert "35 18 * * * /usr/bin/python3 $S2S_LAUNCHER era5-watch" in cron
     assert "2-52/10 * * * * /usr/bin/python3 $S2S_LAUNCHER reconcile" in cron
-    assert cron.count("/usr/bin/logger -t s2s-fuxi-") == 3
+    assert cron.count("/usr/bin/logger -t s2s-fuxi-") == 4
 
 
 def test_default_path_does_not_depend_on_an_interactive_shell() -> None:

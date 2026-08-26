@@ -6,10 +6,13 @@ driver. It is intentionally independent by source:
 - GFS issues are considered only on Wednesday and Saturday. The controller
   polls every 15 minutes from 00:15 through 12:00 UTC and submits once all 16
   inputs are present.
+- IFS uses an independent Wednesday/Saturday rolling poll and state record.
+  Its window and interval are configurable separately and default to the same
+  00:15–12:00 UTC, 15-minute policy as GFS.
 - ERA5 is a delayed reference. A daily watcher revisits pending Wednesday and
   Saturday dates and submits only after all 768 ARCO objects are present.
 - One source never waits for the other. A delayed ERA5 issue can be published
-  later and paired with an already-published GFS issue by the publisher.
+  later, and a missing IFS issue does not block GFS or ERA5 publication.
 
 No timer or crontab is installed by this repository. The examples in `cron/`
 and `systemd/` become active only after an operator reviews and installs one of
@@ -45,6 +48,13 @@ without force. The persistent clone and research checkout remain clean on
 failure. The receipt advances `validated → exported → pushed`; later reconcile
 runs use the deployed-site smoke test to advance `pushed → deployed`.
 
+The forecast asset, checksum catalog entry, and source `default_issue` pointer
+cross the publication boundary in the same validated Git commit. Adoption of
+an existing export likewise requires its source default/latest pointer and,
+for GFS or ERA5, its top-level current/reference pointer to select the same
+checksum-verified 100-member issue. Merely finding an issue file or an archive
+catalog entry cannot advance scheduler state.
+
 Removing `publication.command` retains the explicit hand-off for sites that
 want a separate queue worker. `legacy_driver` remains a manual compatibility
 mode; it is not the production default.
@@ -62,8 +72,9 @@ automatically resubmitted. This prevents an expensive duplicate 100-member run.
 2. Set `schedule.start_date` to the first issue the automation should own.
    Dates before this boundary are never discovered, which prevents an
    accidental historical backfill.
-3. Keep `dashboard_root` pointed at a read-only local dashboard for adopting
-   already-exported issues. New exports use disposable publishing worktrees.
+3. Keep `dashboard_root` pointed at a read-only, publication-synchronized local
+   dashboard for adopting already-published issues. New exports use disposable
+   publishing worktrees.
 4. Create `/home/raj.ayush/.config/s2s-fuxi/automation.env` from `env.example`
    and add the private alert address. Do not commit the filled file. The cron
    launcher fails closed unless both private files are owned by the service
@@ -80,11 +91,12 @@ The controller itself uses only the Python standard library.
 ## Cron on the production host
 
 The production host uses `Asia/Kolkata` and Debian cron does not honor a
-per-user `CRON_TZ`. The tracked cron example therefore runs a lightweight GFS
-heartbeat every 15 minutes and leaves Wednesday/Saturday 00:15-12:00 UTC
-eligibility to the controller. ERA5 runs at 18:35 IST (13:05 UTC), while
-reconcile runs every ten minutes at a two-minute offset so it never starts on
-the same minute as the GFS heartbeat.
+per-user `CRON_TZ`. The tracked cron example therefore runs lightweight GFS and
+IFS heartbeats every 15 minutes and leaves Wednesday/Saturday UTC-window
+eligibility to the controller. IFS is offset seven minutes from GFS. ERA5 runs
+at 18:35 IST (13:05 UTC), while reconcile runs every ten minutes at a two-minute
+offset so none of the periodic commands intentionally contend for the private
+advisory lock.
 
 Cron calls `automation/run_scheduler.py`, not the controller directly. The
 launcher safely parses the allow-listed private environment without sourcing
@@ -111,6 +123,10 @@ Dry runs do not probe, submit, or write scheduler state:
 
 /usr/bin/python3 automation/fuxi_scheduler.py \
   --config /home/raj.ayush/.config/s2s-fuxi/scheduler.json \
+  --dry-run --now 2026-08-08T00:22:00Z ifs-poll
+
+/usr/bin/python3 automation/fuxi_scheduler.py \
+  --config /home/raj.ayush/.config/s2s-fuxi/scheduler.json \
   --dry-run --now 2026-08-10T13:00:00Z era5-watch
 ```
 
@@ -123,8 +139,9 @@ files:
 ```
 
 Use `--date YYYYMMDD` only for a deliberate Wednesday/Saturday recovery. An
-explicit date bypasses the GFS clock window but not the cadence or configured
-start boundary.
+explicit date bypasses the GFS or IFS clock window but not the cadence or
+configured start boundary. The former `ifs-pilot --date` command remains as a
+backward-compatible alias; new automation should use `ifs-poll`.
 
 For the requested no-inference replay, use a temporary config with a disposable
 state root and `start_date: 2026-07-29`, keep `--dry-run`, and pass `--date`
@@ -138,13 +155,14 @@ not reuse the temporary earlier start date in the enabled timer config.
 
 ```bash
 python3 automation/fuxi_scheduler.py --config PRIVATE.json gfs-poll
+python3 automation/fuxi_scheduler.py --config PRIVATE.json ifs-poll
 python3 automation/fuxi_scheduler.py --config PRIVATE.json era5-watch
 python3 automation/fuxi_scheduler.py --config PRIVATE.json reconcile
 python3 automation/fuxi_scheduler.py --config PRIVATE.json status
 ```
 
 Every source/date has an atomic JSON record under
-`STATE_ROOT/issues/{gfs,era5}/YYYYMMDD.json`. Normal progression is:
+`STATE_ROOT/issues/{gfs,ifs,era5}/YYYYMMDD.json`. Normal progression is:
 
 ```text
 pending -> submitted -> validated -> exported -> pushed -> deployed
@@ -208,7 +226,8 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q \
   tests/automation
 ```
 
-The focused suite covers cadence, duplicate prevention, delayed ERA5 backfill,
-retry/backoff, hard timeouts, safe compute-only submission, clean publication,
-deployment confirmation, reconciliation, cron cadence, private-file
-permissions, non-evaluating environment parsing, and dry-run behavior.
+The focused suite covers GFS/IFS rolling cadence and source isolation,
+duplicate prevention, delayed ERA5 backfill, retry/backoff, hard timeouts, safe
+compute-only submission, pointer-gated adoption, clean publication, deployment
+confirmation, reconciliation, cron cadence, private-file permissions,
+non-evaluating environment parsing, and dry-run behavior.

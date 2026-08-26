@@ -3,8 +3,8 @@
 
 This controller probes availability, asks the existing ``fuxi_operational.py``
 driver to create each source/date config, and submits the existing Slurm stage
-and inference scripts. GFS and ERA5 have independent entry points, so delayed
-ERA5 can never hold up a near-real-time GFS issue.
+and inference scripts. GFS, IFS, and ERA5 have independent entry points, so a
+delay or failure in one source cannot hold up another source.
 
 The private state directory is the source of truth for scheduler decisions.
 Publication and deployment may be performed by a separate clean-clone worker;
@@ -213,6 +213,12 @@ class Settings:
     deployment_check_command: tuple[str, ...] = ()
     deployment_check_timeout_seconds: int = 120
     deployment_stale_hours: int = 6
+    # Older private configs did not have IFS schedule keys.  ``None`` keeps
+    # direct Settings construction backward compatible and means "use GFS's
+    # rolling window"; Settings.load always materializes explicit values.
+    ifs_window_start: dt.time | None = None
+    ifs_window_end: dt.time | None = None
+    ifs_poll_minutes: int | None = None
 
     @classmethod
     def load(cls, path: Path) -> "Settings":
@@ -275,6 +281,23 @@ class Settings:
             deployment_stale_hours=int(
                 publication.get("deployment_stale_hours", 6)
             ),
+            ifs_window_start=parse_clock(
+                schedule.get(
+                    "ifs_window_start_utc",
+                    schedule.get("gfs_window_start_utc", "00:15"),
+                )
+            ),
+            ifs_window_end=parse_clock(
+                schedule.get(
+                    "ifs_window_end_utc",
+                    schedule.get("gfs_window_end_utc", "12:00"),
+                )
+            ),
+            ifs_poll_minutes=int(
+                schedule.get(
+                    "ifs_poll_minutes", schedule.get("gfs_poll_minutes", 15)
+                )
+            ),
         )
         settings.validate()
         return settings
@@ -282,6 +305,7 @@ class Settings:
     def validate(self) -> None:
         positive = {
             "gfs_poll_minutes": self.gfs_poll_minutes,
+            "ifs_poll_minutes": self.near_realtime_schedule("ifs")[2],
             "era5_lookback_days": self.era5_lookback_days,
             "era5_max_probes_per_run": self.era5_max_probes_per_run,
             "era5_poll_hours": self.era5_poll_hours,
@@ -303,6 +327,11 @@ class Settings:
             raise SchedulerError(f"config values must be positive: {', '.join(invalid)}")
         if self.gfs_window_start >= self.gfs_window_end:
             raise SchedulerError("GFS start must be before the end of the UTC window")
+        if (
+            self.near_realtime_schedule("ifs")[0]
+            >= self.near_realtime_schedule("ifs")[1]
+        ):
+            raise SchedulerError("IFS start must be before the end of the UTC window")
         if self.submission_mode not in {"inference_only", "legacy_driver"}:
             raise SchedulerError(
                 "submission_mode must be inference_only or legacy_driver"
@@ -340,6 +369,35 @@ class Settings:
 
     def generated_config(self, source: str, date: dt.date) -> Path:
         return self.generated_config_root / f"fuxi_{source}_{issue_id(date)}_ens100.json"
+
+    def near_realtime_schedule(self, source: str) -> tuple[dt.time, dt.time, int]:
+        """Return the independent rolling availability window for GFS or IFS."""
+
+        if source == "gfs":
+            return (
+                self.gfs_window_start,
+                self.gfs_window_end,
+                self.gfs_poll_minutes,
+            )
+        if source == "ifs":
+            return (
+                (
+                    self.ifs_window_start
+                    if self.ifs_window_start is not None
+                    else self.gfs_window_start
+                ),
+                (
+                    self.ifs_window_end
+                    if self.ifs_window_end is not None
+                    else self.gfs_window_end
+                ),
+                (
+                    self.ifs_poll_minutes
+                    if self.ifs_poll_minutes is not None
+                    else self.gfs_poll_minutes
+                ),
+            )
+        raise SchedulerError(f"{source!r} is not a rolling availability source")
 
 
 class StateStore:
@@ -525,40 +583,65 @@ class Controller:
     def gfs_poll(
         self, now: dt.datetime, requested_date: dt.date | None = None
     ) -> list[dict[str, Any]]:
+        return self._near_realtime_poll("gfs", now, requested_date)
+
+    def ifs_poll(
+        self, now: dt.datetime, requested_date: dt.date | None = None
+    ) -> list[dict[str, Any]]:
+        return self._near_realtime_poll("ifs", now, requested_date)
+
+    def _near_realtime_poll(
+        self,
+        source: str,
+        now: dt.datetime,
+        requested_date: dt.date | None = None,
+    ) -> list[dict[str, Any]]:
+        if source not in {"gfs", "ifs"}:
+            raise SchedulerError(f"{source!r} is not a rolling availability source")
         date = requested_date or now.date()
+        label = source.upper()
         if date.weekday() not in SCHEDULED_WEEKDAYS:
-            return [self._skip("gfs", date, "not a Wednesday/Saturday issue")]
+            return [self._skip(source, date, "not a Wednesday/Saturday issue")]
         if date > now.date():
-            return [self._skip("gfs", date, "future issue dates are not eligible")]
+            return [self._skip(source, date, "future issue dates are not eligible")]
         if date < self.settings.start_date:
-            return [self._skip("gfs", date, "before configured automation start")]
+            return [self._skip(source, date, "before configured automation start")]
+        window_start, window_end, _poll_minutes = (
+            self.settings.near_realtime_schedule(source)
+        )
         current_time = now.timetz()
-        if requested_date is None and current_time < self.settings.gfs_window_start:
-            return [self._skip("gfs", date, "before the configured GFS UTC window")]
-        if requested_date is None and current_time > self.settings.gfs_window_end:
-            record = self.store.load("gfs", date)
+        if requested_date is None and current_time < window_start:
+            return [
+                self._skip(source, date, f"before the configured {label} UTC window")
+            ]
+        if requested_date is None and current_time > window_end:
+            record = self.store.load(source, date)
             if record:
-                return [self._skip("gfs", date, f"window closed; already {record['stage']}")]
-            if self._public_export_exists("gfs", date):
-                return [self._process_pending("gfs", date, now)]
+                return [
+                    self._skip(
+                        source, date, f"window closed; already {record['stage']}"
+                    )
+                ]
+            if self._public_export_exists(source, date):
+                return [self._process_pending(source, date, now)]
             if self.dry_run:
                 return [
                     {
-                        "source": "gfs",
+                        "source": source,
                         "issue_date": issue_id(date),
                         "outcome": "dry-run",
                         "stage": "pending",
-                        "actions": ["record missed GFS availability window", "alert"],
+                        "actions": [f"record missed {label} availability window", "alert"],
                     }
                 ]
-            record = new_record("gfs", date, now)
+            record = new_record(source, date, now)
             self.store.save(record)
             return [
                 self._terminal_failure(
-                    record, now, "GFS polling window closed before submission"
+                    record, now, f"{label} polling window closed before submission"
                 )
             ]
-        return [self._process_pending("gfs", date, now)]
+        return [self._process_pending(source, date, now)]
 
     def era5_watch(
         self, now: dt.datetime, requested_date: dt.date | None = None
@@ -612,15 +695,9 @@ class Controller:
         return results
 
     def ifs_pilot(self, now: dt.datetime, date: dt.date) -> list[dict[str, Any]]:
-        """Run one explicitly requested 100-member IFS pilot; never poll automatically."""
+        """Backward-compatible alias for an explicitly dated IFS poll."""
 
-        if date.weekday() not in SCHEDULED_WEEKDAYS:
-            return [self._skip("ifs", date, "not a Wednesday/Saturday issue")]
-        if date > now.date():
-            return [self._skip("ifs", date, "future issue dates are not eligible")]
-        if date < self.settings.start_date:
-            return [self._skip("ifs", date, "before configured automation start")]
-        return [self._process_pending("ifs", date, now)]
+        return self.ifs_poll(now, date)
 
     def reconcile(self, now: dt.datetime) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
@@ -790,15 +867,20 @@ class Controller:
         record["last_probe"] = probe
         record["attempts"]["probe"] = 0
         if not probe.get("available"):
-            delay = (
-                dt.timedelta(minutes=self.settings.gfs_poll_minutes)
-                if source == "gfs"
-                else dt.timedelta(hours=self.settings.era5_poll_hours)
-            )
+            if source in {"gfs", "ifs"}:
+                poll_minutes = self.settings.near_realtime_schedule(source)[2]
+                delay = dt.timedelta(minutes=poll_minutes)
+            else:
+                delay = dt.timedelta(hours=self.settings.era5_poll_hours)
             record["next_attempt_at"] = _iso(now + delay)
             record["updated_at"] = _iso(now)
-            if source == "gfs" and self._gfs_last_poll(now):
-                message = "GFS inputs were incomplete at the end of the polling window"
+            if source in {"gfs", "ifs"} and self._near_realtime_last_poll(
+                source, now
+            ):
+                message = (
+                    f"{source.upper()} inputs were incomplete at the end of the "
+                    "polling window"
+                )
                 return self._terminal_failure(record, now, message)
             self.store.save(record)
             return self._result(record, "waiting", "source inputs incomplete")
@@ -1411,10 +1493,16 @@ class Controller:
         value = record.get("next_attempt_at")
         return not value or parse_now(str(value)) <= now
 
-    def _gfs_last_poll(self, now: dt.datetime) -> bool:
-        next_time = now + dt.timedelta(minutes=self.settings.gfs_poll_minutes)
-        end = dt.datetime.combine(now.date(), self.settings.gfs_window_end)
+    def _near_realtime_last_poll(self, source: str, now: dt.datetime) -> bool:
+        _start, window_end, poll_minutes = self.settings.near_realtime_schedule(source)
+        next_time = now + dt.timedelta(minutes=poll_minutes)
+        end = dt.datetime.combine(now.date(), window_end)
         return next_time > end
+
+    def _gfs_last_poll(self, now: dt.datetime) -> bool:
+        """Compatibility wrapper for callers of the former GFS-only helper."""
+
+        return self._near_realtime_last_poll("gfs", now)
 
     def _submission_is_stale(self, record: dict[str, Any], now: dt.datetime) -> bool:
         submitted = next(
@@ -1462,6 +1550,34 @@ class Controller:
                 item for item in catalog["issues"] if item.get("id") == issue_id(date)
             )
             checksum = catalog_issue.get("checksums", {}).get("forecast_sha256")
+            pointer_keys = {
+                "gfs": ("current", "current_gfs", "current_issue"),
+                "era5": ("latest_reference", "latest_era5", "reference_issue"),
+            }.get(source, ())
+            pointer_issue = ""
+            for key in pointer_keys:
+                pointer = index.get(key)
+                if isinstance(pointer, str):
+                    pointer_issue = pointer
+                    break
+                if isinstance(pointer, dict) and pointer.get("source_id") in (
+                    None,
+                    source,
+                ):
+                    pointer_issue = str(
+                        pointer.get("issue_id")
+                        or pointer.get("id")
+                        or pointer.get("issue")
+                        or ""
+                    )
+                    if pointer_issue:
+                        break
+            if not pointer_issue:
+                pointer_issue = str(catalog.get("default_issue", ""))
+            pointer_valid = (
+                catalog.get("default_issue") == issue_id(date)
+                and pointer_issue == issue_id(date)
+            )
             catalog_valid = (
                 int(catalog_issue.get("members", 0)) == 100
                 and catalog_issue.get("forecast")
@@ -1469,6 +1585,7 @@ class Controller:
                 and isinstance(checksum, str)
                 and len(checksum) == 64
                 and hashlib.sha256(path.read_bytes()).hexdigest() == checksum
+                and pointer_valid
             )
             return forecast_valid and catalog_valid
         except (
@@ -1530,13 +1647,16 @@ def build_parser() -> argparse.ArgumentParser:
     gfs = commands.add_parser("gfs-poll", help="Poll and submit today's GFS issue")
     gfs.add_argument("--date", type=parse_issue_date)
 
+    ifs = commands.add_parser("ifs-poll", help="Poll and submit today's IFS issue")
+    ifs.add_argument("--date", type=parse_issue_date)
+
     era5 = commands.add_parser("era5-watch", help="Backfill ready delayed ERA5 issues")
     era5.add_argument("--date", type=parse_issue_date)
 
-    ifs = commands.add_parser(
-        "ifs-pilot", help="Submit one explicit IFS pilot after its 5-member smoke run"
+    ifs_pilot = commands.add_parser(
+        "ifs-pilot", help="Deprecated alias for an explicitly dated IFS poll"
     )
-    ifs.add_argument("--date", type=parse_issue_date, required=True)
+    ifs_pilot.add_argument("--date", type=parse_issue_date, required=True)
 
     commands.add_parser("reconcile", help="Advance submitted/validated issue states")
     commands.add_parser("status", help="Print private scheduler state summary")
@@ -1567,6 +1687,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         with lock:
             if args.command == "gfs-poll":
                 result: Any = controller.gfs_poll(now, args.date)
+            elif args.command == "ifs-poll":
+                result = controller.ifs_poll(now, args.date)
             elif args.command == "era5-watch":
                 result = controller.era5_watch(now, args.date)
             elif args.command == "ifs-pilot":

@@ -1,0 +1,13 @@
+[Unit]
+Description=Check the FuXi IFS schedule every 15 minutes
+
+[Timer]
+# Offset from GFS and reconcile; the controller enforces Wednesday/Saturday
+# and the independently configurable IFS UTC availability window.
+OnCalendar=*-*-* *:07,22,37,52:00 UTC
+Persistent=true
+AccuracySec=10s
+Unit=fuxi-automation@ifs-poll.service
+
+[Install]
+WantedBy=timers.target
