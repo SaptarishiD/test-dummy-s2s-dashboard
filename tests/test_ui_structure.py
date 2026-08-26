@@ -22,47 +22,24 @@ def test_forecast_map_places_coordinate_labels_outside_the_plot() -> None:
     assert "this.mapHeight + 20" in forecast_map
 
 
-def test_india_forecast_paint_and_wind_are_clipped_to_the_abdb_outline() -> None:
+def test_india_maps_keep_the_original_full_regional_paint_order() -> None:
     forecast_map = read("src/components/ForecastMap.ts")
     forecast_page = read("src/pages/forecast.ts")
     outlook_map = read("src/components/TercileProbabilityMap.ts")
-    main = read("src/main.ts")
 
-    assert (
-        'indiaDataClipPath.setAttribute("d", this.geography.india_outline_path)'
-        in forecast_map
-    )
-    assert (
-        'image.setAttribute("clip-path", `url(#${indiaDataClipPathId})`)'
-        in forecast_map
-    )
-    assert forecast_map.count(
-        'group.setAttribute("clip-path", `url(#${indiaDataClipPathId})`)'
-    ) == 2
-    world_before_field = forecast_map.index(
-        "if (hasIndiaBoundary) {\n      this.addWorldBoundaries(plot);"
-    )
-    field = forecast_map.index("this.addInterpolatedField(", world_before_field)
-    configured_domain_world = forecast_map.index(
-        "if (!hasIndiaBoundary) {\n      this.addWorldBoundaries(plot);",
-        field,
-    )
-    assert world_before_field < field < configured_domain_world
-    outlook_world = outlook_map.index("this.addWorldBoundaries(svg);")
+    field = forecast_map.index("this.addInterpolatedField(plot")
+    world = forecast_map.index("this.addWorldBoundaries(plot)")
+    graticules = forecast_map.index("this.addGraticules(plot, svg)")
+    assert field < world < graticules
+    assert "indiaDataClipPathId" not in forecast_map
+
     outlook_field = outlook_map.index(
         "this.addProbabilityField(svg, variable, week);"
     )
+    outlook_world = outlook_map.index("this.addWorldBoundaries(svg);")
     outlook_outline = outlook_map.index("this.addOutline(svg);")
-    assert outlook_world < outlook_field < outlook_outline
-    assert "Survey of India ABDB display derivative" in forecast_page
-    assert "Source: Survey of India, Government of India." in forecast_page
-    assert "Neighboring-country context: Natural Earth" in forecast_page
-    assert "its India feature is excluded" in forecast_page
-    assert (
-        'fetchJson<IndiaMapGeographyData>(\n'
-        '      `./data/${activeDomain.geography}`,\n'
-        '      "no-store",'
-    ) in main
+    assert outlook_field < outlook_world < outlook_outline
+    assert "Survey of India ABDB display derivative" not in forecast_page
 
 
 def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:
@@ -168,13 +145,13 @@ def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     expected_order = (
         '"rainfall_anomaly"',
         '"rainfall_total"',
-        '"wind850_anomaly"',
         '"temperature_anomaly"',
     )
     order_start = forecast.index("const AUTO_PRODUCT_ORDER")
     order_end = forecast.index("];", order_start)
     order_block = forecast[order_start:order_end]
     assert '"wind850_mean"' not in order_block
+    assert '"wind850_anomaly"' not in order_block
     assert [order_block.index(product) for product in expected_order] == sorted(
         order_block.index(product) for product in expected_order
     )
@@ -191,7 +168,7 @@ def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     assert "routeCleanup = renderForecastPage(content, data);" in main
 
 
-def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
+def test_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     catalog = read("src/lib/catalog.ts")
     archive = read("src/pages/archive.ts")
     types = read("src/types.ts")
@@ -201,12 +178,15 @@ def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     product_keys = catalog[product_keys_start:product_keys_end]
     assert '"wind850_mean"' in product_keys
     assert '"wind850_anomaly"' in product_keys
-    assert 'Exclude<AvailableProductKey, "wind850_mean">' in catalog
-    assert 'return product !== "wind850_mean"' in catalog
+    assert '"wind850_mean" | "wind850_anomaly"' in catalog
+    assert (
+        'return product !== "wind850_mean" && product !== "wind850_anomaly";'
+        in catalog
+    )
     assert "return WEBSITE_PRODUCT_KEYS.filter(" in catalog
     assert "productIsWebsiteVisible(product)" in archive
     assert 'wind850_mean: "850 hPa wind"' not in archive
-    assert 'wind850_anomaly: "850 hPa wind anomaly"' in archive
+    assert 'wind850_anomaly: "850 hPa wind anomaly"' not in archive
     assert 'export type WindProductKey = "wind850_mean" | "wind850_anomaly"' in types
 
 

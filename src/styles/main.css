@@ -3580,13 +3580,6 @@ a {
   text-align: center;
 }
 
-.india-boundary-source a {
-  color: #173f8a;
-  font-weight: 750;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-
 .india-sheet__footer {
   display: flex;
   gap: 30px;

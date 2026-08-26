@@ -8,8 +8,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INDIA_ADMIN = ROOT / "public/data/india-admin.json"
-INDIA_OUTLINE = ROOT / "public/data/india-outline.json"
-INDIA_GEOGRAPHY = ROOT / "public/data/india-map-geography.json"
 
 
 def test_india_admin_has_complete_state_layer_and_provenance() -> None:
@@ -41,22 +39,3 @@ def test_india_admin_is_compact_and_contains_no_source_path() -> None:
         latitude = feature["properties"]["label_latitude"]
         assert 60 <= longitude <= 100
         assert 0 <= latitude <= 40
-
-
-def test_india_outline_declares_official_source_over_neighbor_context() -> None:
-    admin = json.loads(INDIA_ADMIN.read_text(encoding="utf-8"))
-    outline = json.loads(INDIA_OUTLINE.read_text(encoding="utf-8"))
-    geography = json.loads(INDIA_GEOGRAPHY.read_text(encoding="utf-8"))
-
-    assert outline["source"]["name"] == admin["source"]["name"]
-    assert outline["source"]["source_sha256"] == admin["source"]["source_sha256"]
-    assert outline["source"]["url"].startswith("https://surveyofindia.gov.in/")
-    assert outline["source"]["attribution"] == (
-        "Source: Survey of India, Government of India."
-    )
-    assert geography["boundary_sources"]["india"] == outline["source"]
-    assert geography["boundary_sources"]["natural_earth_context"] == {
-        "name": "Natural Earth 1:110m administrative boundaries",
-        "rendered_on_india_maps": True,
-        "india_feature_excluded": True,
-    }

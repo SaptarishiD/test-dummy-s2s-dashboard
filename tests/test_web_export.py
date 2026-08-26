@@ -10,10 +10,6 @@ from pathlib import Path
 import jsonschema
 import numpy as np
 
-from scripts.build_india_map_geography import (
-    feature_collection_path,
-    is_natural_earth_india,
-)
 from scripts.build_prototype_data import public_input_source
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -245,18 +241,3 @@ def test_india_map_geography_is_compact_and_source_locked() -> None:
         assert geography["sources"][key] == hashlib.sha256(
             source_path.read_bytes()
         ).hexdigest()
-
-    world = load(PUBLIC_DATA / "world-countries.geojson")
-    neighboring_countries = {
-        **world,
-        "features": [
-            feature
-            for feature in world["features"]
-            if not is_natural_earth_india(feature)
-        ],
-    }
-    assert len(world["features"]) - len(neighboring_countries["features"]) == 1
-    assert geography["world_path"] == feature_collection_path(
-        neighboring_countries,
-        regional_only=True,
-    )

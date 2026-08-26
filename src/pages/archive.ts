@@ -19,7 +19,6 @@ const PRODUCT_LABELS: Record<WebsiteProductKey, string> = {
   rainfall_anomaly: "Rainfall anomaly",
   temperature_mean: "Temperature",
   temperature_anomaly: "Temperature anomaly",
-  wind850_anomaly: "850 hPa wind anomaly",
   regional_probabilities: "Regional probabilities",
   india_pdf: "PDF briefing",
 };

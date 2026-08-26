@@ -530,21 +530,6 @@ export interface IndiaMapGeographyData {
   world_path: string;
   india_outline_path: string;
   india_admin_path: string;
-  boundary_sources?: {
-    india: {
-      name: string;
-      product: string;
-      url: string;
-      source_sha256: string;
-      attribution: string;
-      display_note: string;
-    };
-    natural_earth_context: {
-      name: string;
-      rendered_on_india_maps: boolean;
-      india_feature_excluded: boolean;
-    };
-  };
   sources: {
     world_countries_sha256: string;
     india_outline_sha256: string;

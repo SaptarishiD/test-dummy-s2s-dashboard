@@ -140,8 +140,8 @@ export class TercileProbabilityMap {
     definitions.append(clip);
     svg.append(definitions);
 
-    this.addWorldBoundaries(svg);
     this.addProbabilityField(svg, variable, week);
+    this.addWorldBoundaries(svg);
     this.addGraticules(svg);
     this.addInteraction(svg, variable, week);
     this.addOutline(svg);
