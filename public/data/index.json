@@ -119,19 +119,22 @@
     "initialization": "2026-08-26T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/gfs/20260826.json",
-    "forecast_sha256": "360109272d9298c926d23ba353877fbb0de1ef1e679ce1b763a1c1ff4544f526",
+    "forecast_sha256": "76e590b601c561d0573b57e0c9245d570717b464211ff7fd7433cd8e6e7e1735",
     "valid_through": "2026-10-06",
-    "published_at": "2026-08-26T10:12:35.310290+00:00",
+    "published_at": "2026-08-26T14:54:42.352445+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
       "rainfall_anomaly",
-      "temperature_anomaly"
+      "temperature_anomaly",
+      "wind850_mean",
+      "wind850_anomaly"
     ],
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
-      "wind850_anomaly": false,
+      "wind850_mean": true,
+      "wind850_anomaly": true,
       "regional_probabilities": true,
       "pdf": true
     },
@@ -140,7 +143,7 @@
   },
   "default_source": "gfs",
   "default_view": "india",
-  "generated_at": "2026-08-26T13:42:49Z",
+  "generated_at": "2026-08-26T14:54:51Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -172,46 +175,49 @@
       "id": "gfs",
       "issues": [
         {
+          "forecast": "forecasts/gfs/20260826.json",
+          "id": "20260826",
+          "initialization": "2026-08-26T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/gfs/20260826.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "current",
+            "label": "Current guidance",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "76e590b601c561d0573b57e0c9245d570717b464211ff7fd7433cd8e6e7e1735",
+            "regional_sha256": "96870c0190cf4c4e80292b07ff09f37eb4153f6de97d5d8803778c7acda66dfb",
+            "pdf_sha256": "8990f6a91bf41023a5174b8bd1eb6d688717a8a7388d3dcc8ecaf9b92dc08553"
+          },
+          "valid_through": "2026-10-06",
+          "published_at": "2026-08-26T14:54:42.352445+00:00",
+          "pdf": "downloads/gfs/20260826/S2S_Research_India_Weeks1-4_GFS_20260826.pdf",
           "archive": {
             "interactive_available": true,
             "pdf_available": true,
             "interactive_until": "2027-08-26T00:00:00Z",
             "pdf_until": "2026-10-21T00:00:00Z",
             "metadata": "indefinite"
-          },
-          "available_products": [
-            "rainfall_total",
-            "temperature_mean",
-            "rainfall_anomaly",
-            "temperature_anomaly"
-          ],
-          "capabilities": {
-            "raw_fields": true,
-            "anomalies": true,
-            "wind850_anomaly": false,
-            "regional_probabilities": true,
-            "pdf": true
-          },
-          "checksums": {
-            "forecast_sha256": "360109272d9298c926d23ba353877fbb0de1ef1e679ce1b763a1c1ff4544f526",
-            "regional_sha256": "57c9683781a68177e265869a2d624e349bbd943ef34df5bb74e508be5060cb4d",
-            "pdf_sha256": "66c4b41f8607d45755a94be996173e691b52a180795a6df08d16211695e33bf0"
-          },
-          "forecast": "forecasts/gfs/20260826.json",
-          "id": "20260826",
-          "initialization": "2026-08-26T00:00:00Z",
-          "members": 100,
-          "pdf": "downloads/gfs/20260826/S2S_Research_India_Weeks1-4_GFS_20260826.pdf",
-          "presentation": {
-            "section": "current",
-            "label": "Current guidance",
-            "member_class": "production"
-          },
-          "published_at": "2026-08-26T10:12:35.310290+00:00",
-          "regional_outlook": "regional/gfs/20260826.json",
-          "role": "operational_experimental",
-          "status": "warning",
-          "valid_through": "2026-10-06"
+          }
         },
         {
           "archive": {
@@ -230,6 +236,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -273,6 +280,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
@@ -315,6 +323,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -357,6 +366,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -399,6 +409,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -441,6 +452,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -483,6 +495,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -523,6 +536,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -565,6 +579,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -605,6 +620,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -645,6 +661,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -687,6 +704,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -729,6 +747,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -769,6 +788,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -809,6 +829,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -851,6 +872,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -891,6 +913,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -931,13 +954,13 @@
       "id": "era5",
       "issues": [
         {
-          "forecast": "forecasts/era5/20260819.json",
-          "id": "20260819",
-          "initialization": "2026-08-19T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/era5/20260819.json",
-          "role": "reference",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-19T00:00:00Z",
+            "pdf_until": "2026-10-14T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -947,30 +970,31 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
-          },
-          "presentation": {
-            "section": "archive",
-            "label": "Delayed ERA5 reference",
-            "member_class": "production"
           },
           "checksums": {
             "forecast_sha256": "30b3e6fb83a3fb00b60b9204911f3018b718b31b19f7e0156ca412b0496fe601",
             "regional_sha256": "cfb07edd7bbedcb4f27ef7d70bbe301084c0e8967e6ebc4e0391597831ccf6c6",
             "pdf_sha256": "c71930ebe106c530919be06d2a9dea41b2a061914fe8401342a7ad84efcb2ca3"
           },
-          "valid_through": "2026-09-29",
-          "published_at": "2026-08-26T13:42:29.744641+00:00",
+          "forecast": "forecasts/era5/20260819.json",
+          "id": "20260819",
+          "initialization": "2026-08-19T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/era5/20260819/S2S_Research_India_Weeks1-4_ERA5_20260819.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-08-19T00:00:00Z",
-            "pdf_until": "2026-10-14T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "published_at": "2026-08-26T13:42:29.744641+00:00",
+          "regional_outlook": "regional/era5/20260819.json",
+          "role": "reference",
+          "status": "warning",
+          "valid_through": "2026-09-29"
         },
         {
           "archive": {
@@ -990,6 +1014,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
@@ -1032,6 +1057,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -1075,6 +1101,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": true,
             "regional_probabilities": false,
             "pdf": true
@@ -1115,6 +1142,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -1157,6 +1185,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -1199,6 +1228,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -1239,6 +1269,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -1279,6 +1310,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -1319,6 +1351,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -1361,6 +1394,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -1401,6 +1435,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": false,
             "pdf": true
@@ -1441,6 +1476,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": false,
             "regional_probabilities": true,
             "pdf": true
@@ -1499,6 +1535,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
@@ -1542,6 +1579,7 @@
           "capabilities": {
             "raw_fields": true,
             "anomalies": true,
+            "wind850_mean": false,
             "wind850_anomaly": true,
             "regional_probabilities": true,
             "pdf": true
@@ -1591,6 +1629,7 @@
     "capabilities": {
       "raw_fields": true,
       "anomalies": true,
+      "wind850_mean": false,
       "wind850_anomaly": false,
       "regional_probabilities": true,
       "pdf": true
@@ -1601,7 +1640,7 @@
   "latest_successful_issue": "20260826",
   "operations": {
     "status": "on_schedule",
-    "last_successful_at": "2026-08-26T10:12:35.310290+00:00",
+    "last_successful_at": "2026-08-26T14:54:42.352445+00:00",
     "next_expected_at": "2026-08-29T12:00:00Z",
     "stale_after": "2026-08-30T00:00:00Z"
   },
@@ -1611,7 +1650,7 @@
       "Saturday"
     ],
     "target_time_utc": "12:00",
-    "last_successful_at": "2026-08-26T10:12:35.310290+00:00",
+    "last_successful_at": "2026-08-26T14:54:42.352445+00:00",
     "next_expected_at": "2026-08-29T12:00:00Z"
   },
   "retention": {
