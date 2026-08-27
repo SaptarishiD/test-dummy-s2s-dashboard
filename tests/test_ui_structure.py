@@ -145,13 +145,13 @@ def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     expected_order = (
         '"rainfall_anomaly"',
         '"rainfall_total"',
+        '"wind850_anomaly"',
         '"temperature_anomaly"',
     )
     order_start = forecast.index("const AUTO_PRODUCT_ORDER")
     order_end = forecast.index("];", order_start)
     order_block = forecast[order_start:order_end]
     assert '"wind850_mean"' not in order_block
-    assert '"wind850_anomaly"' not in order_block
     assert [order_block.index(product) for product in expected_order] == sorted(
         order_block.index(product) for product in expected_order
     )
@@ -168,7 +168,7 @@ def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
     assert "routeCleanup = renderForecastPage(content, data);" in main
 
 
-def test_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
+def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     catalog = read("src/lib/catalog.ts")
     archive = read("src/pages/archive.ts")
     types = read("src/types.ts")
@@ -178,15 +178,12 @@ def test_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     product_keys = catalog[product_keys_start:product_keys_end]
     assert '"wind850_mean"' in product_keys
     assert '"wind850_anomaly"' in product_keys
-    assert '"wind850_mean" | "wind850_anomaly"' in catalog
-    assert (
-        'return product !== "wind850_mean" && product !== "wind850_anomaly";'
-        in catalog
-    )
+    assert 'Exclude<AvailableProductKey, "wind850_mean">' in catalog
+    assert 'return product !== "wind850_mean"' in catalog
     assert "return WEBSITE_PRODUCT_KEYS.filter(" in catalog
     assert "productIsWebsiteVisible(product)" in archive
     assert 'wind850_mean: "850 hPa wind"' not in archive
-    assert 'wind850_anomaly: "850 hPa wind anomaly"' not in archive
+    assert 'wind850_anomaly: "850 hPa wind anomaly"' in archive
     assert 'export type WindProductKey = "wind850_mean" | "wind850_anomaly"' in types
 
 

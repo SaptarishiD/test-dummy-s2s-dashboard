@@ -207,6 +207,7 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
 const AUTO_PRODUCT_ORDER: ProductKey[] = [
   "rainfall_anomaly",
   "rainfall_total",
+  "wind850_anomaly",
   "temperature_anomaly",
 ];
 const AUTO_PRODUCT_DELAY_MS = 12_000;
