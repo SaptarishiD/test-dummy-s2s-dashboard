@@ -71,6 +71,18 @@ def test_forecast_uses_gfs_current_without_conflating_source_latest_issues() -> 
     assert 'Latest experimental IFS issue—not the current forecast' in forecast
 
 
+def test_initial_condition_sources_present_ifs_first_and_gfs_last() -> None:
+    catalog = read("src/lib/catalog.ts")
+    forecast = read("src/pages/forecast.ts")
+    archive = read("src/pages/archive.ts")
+    outlook = read("src/pages/outlook.ts")
+    assert '"ifs",\n  "era5",\n  "gfs",' in catalog
+    assert "INITIAL_CONDITION_SOURCE_DISPLAY_ORDER.filter(" in forecast
+    assert "const displaySources = sourcesForDisplay(index);" in forecast
+    assert "sourcesForDisplay(activeIndex).map((source)" in archive
+    assert "sourcesForDisplay(index).map((candidate)" in outlook
+
+
 def test_archive_distinguishes_ifs_from_the_gfs_proxy() -> None:
     archive = read("src/pages/archive.ts")
     assert 'source.id === "ifs"' in archive

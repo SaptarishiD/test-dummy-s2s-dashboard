@@ -6,8 +6,10 @@ import { createLegend } from "../components/Legend";
 import {
   currentGfsIssue,
   defaultIssueForSource,
+  INITIAL_CONDITION_SOURCE_DISPLAY_ORDER,
   issueIsCurrent,
   productKeysForForecast,
+  sourcesForDisplay,
 } from "../lib/catalog";
 import type {
   AppData,
@@ -251,7 +253,7 @@ function renderInitializationComparison(
   geography: AppData["indiaGeography"],
 ): void {
   if (!geography || !comparison.pairs.length) return;
-  const sourceOrder = (["gfs", "ifs", "era5"] as InitialConditionSourceId[]).filter(
+  const sourceOrder = INITIAL_CONDITION_SOURCE_DISPLAY_ORDER.filter(
     (source) => source in comparison.sources && forecasts[source],
   );
   if (sourceOrder.length < 2) return;
@@ -511,13 +513,14 @@ export function renderForecastPage(
         <div id="india-comparison-explorer"></div>
       </section>`
     : "";
+  const displaySources = sourcesForDisplay(index);
   const preferredIssues = new Map(
-    index.initial_condition_sources.map((candidate) => [
+    displaySources.map((candidate) => [
       candidate.id,
       defaultIssueForSource(index, candidate),
     ] as const),
   );
-  const latestSourceDates = index.initial_condition_sources
+  const latestSourceDates = displaySources
     .map((candidate) => {
       const preferred = preferredIssues.get(candidate.id);
       return preferred
@@ -572,7 +575,7 @@ export function renderForecastPage(
         </div>
         <div class="india-source-selection">
           <div class="india-source-tabs" role="navigation" aria-label="Initial-condition source" aria-describedby="india-source-guide india-source-date-notice">
-            ${index.initial_condition_sources.map((candidate) => {
+            ${displaySources.map((candidate) => {
               const preferred = preferredIssues.get(candidate.id);
               if (!preferred) return `<span class="is-pending" aria-disabled="true"><span>${candidate.short_label}</span><small>Pilot pending</small></span>`;
               return `
