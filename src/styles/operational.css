@@ -2041,3 +2041,626 @@ select:focus-visible {
     animation: none;
   }
 }
+
+/* Editorial science identity */
+
+:root {
+  --ashoka-red: #a3262a;
+  --ashoka-red-dark: #741b24;
+  --science-navy: #0b213c;
+  --science-navy-soft: #173a58;
+  --science-teal: #168586;
+  --science-teal-light: #75c5bd;
+  --warm-ivory: #f7f1e6;
+  --warm-ivory-deep: #eee3d1;
+  --science-green: #247a4c;
+  --science-purple: #63528f;
+  --science-orange: #c76328;
+  --science-rust: #a84a32;
+  --editorial-rule: #d8d3c8;
+  --editorial-shadow: 0 22px 55px rgb(11 33 60 / 10%);
+}
+
+html,
+body {
+  background: var(--warm-ivory);
+}
+
+body {
+  background:
+    radial-gradient(circle at 7% 18%, rgb(163 38 42 / 5%), transparent 28rem),
+    linear-gradient(90deg, rgb(11 33 60 / 2.5%) 1px, transparent 1px) 0 0 / 80px 80px,
+    var(--warm-ivory);
+}
+
+::selection {
+  background: var(--ashoka-red);
+}
+
+.site-header,
+.india-route .site-header,
+.archive-route .site-header,
+.briefing-route .site-header,
+.team-route .site-header {
+  min-height: 78px;
+  color: var(--warm-ivory);
+  background:
+    radial-gradient(circle at 83% 0, rgb(163 38 42 / 27%), transparent 25rem),
+    linear-gradient(105deg, #0b213c 0%, #132e49 58%, #241f30 100%);
+  border-top: 4px solid var(--ashoka-red);
+  border-bottom-color: rgb(247 241 230 / 15%);
+  box-shadow: 0 8px 28px rgb(6 22 39 / 18%);
+}
+
+.institution-brand {
+  gap: 8px;
+  padding: 5px 10px;
+  background: #fffefb;
+  border: 1px solid rgb(247 241 230 / 62%);
+  border-radius: 6px;
+  box-shadow: 0 7px 20px rgb(0 0 0 / 20%);
+}
+
+.institution-brand__ashoka {
+  width: 40px;
+  height: 40px;
+}
+
+.institution-brand__centre {
+  width: 124px;
+  height: 42px;
+}
+
+.site-nav {
+  background: rgb(247 241 230 / 8%);
+  border-color: rgb(247 241 230 / 14%);
+}
+
+.site-nav a,
+.site-nav .briefing-nav-link {
+  color: #d4d8d8;
+}
+
+.site-nav a:hover,
+.site-nav .briefing-nav-link:hover {
+  color: #fffdf7;
+  background: rgb(255 255 255 / 9%);
+}
+
+.site-nav a.is-active,
+.site-nav .briefing-nav-link.is-active {
+  color: #fff;
+  background: rgb(255 255 255 / 12%);
+  border-color: rgb(255 255 255 / 20%);
+  box-shadow: inset 0 -3px 0 var(--ashoka-red);
+}
+
+.site-nav .briefing-nav-link,
+.site-nav .briefing-nav-link.is-active {
+  color: #fff;
+  background: rgb(22 133 134 / 82%);
+  border-color: rgb(117 197 189 / 68%);
+  box-shadow: 0 5px 14px rgb(3 18 31 / 18%);
+}
+
+.site-nav .briefing-nav-link:hover,
+.site-nav .briefing-nav-link.is-active:hover {
+  background: #0f696d;
+  border-color: #a8dad5;
+}
+
+.header-status {
+  color: #e1ddd4;
+}
+
+.live-dot {
+  background: var(--science-teal-light);
+  box-shadow: 0 0 0 5px rgb(117 197 189 / 14%);
+}
+
+.site-footer,
+.india-route .site-footer,
+.archive-route .site-footer,
+.briefing-route .site-footer,
+.team-route .site-footer {
+  background:
+    linear-gradient(90deg, rgb(163 38 42 / 12%), transparent 26%),
+    var(--science-navy);
+  border-top: 4px solid var(--ashoka-red);
+}
+
+.site-footer__brand p,
+.site-footer__section p {
+  color: #b9c4c4;
+}
+
+.site-footer a {
+  color: #93d5cf;
+}
+
+.india-route {
+  color: var(--science-navy);
+  background:
+    radial-gradient(circle at 8% 10%, rgb(163 38 42 / 6%), transparent 30rem),
+    radial-gradient(circle at 92% 18%, rgb(22 133 134 / 7%), transparent 34rem),
+    var(--warm-ivory);
+}
+
+.india-sheet {
+  --product-accent: var(--science-purple);
+  --product-accent-dark: #44366d;
+  --product-surface: #f2eff8;
+  overflow: hidden;
+  margin: 28px auto 58px;
+  padding: 0 34px 48px;
+  background: #fffdfa;
+  border: 1px solid var(--editorial-rule);
+  border-radius: 8px;
+  box-shadow: var(--editorial-shadow);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.india-sheet[data-product="rainfall_total"] {
+  --product-accent: var(--science-green);
+  --product-accent-dark: #185c38;
+  --product-surface: #edf6ef;
+}
+
+.india-sheet[data-product="rainfall_anomaly"] {
+  --product-accent: var(--science-purple);
+  --product-accent-dark: #44366d;
+  --product-surface: #f2eff8;
+}
+
+.india-sheet[data-product="temperature_mean"] {
+  --product-accent: var(--science-orange);
+  --product-accent-dark: #934318;
+  --product-surface: #fff2e7;
+}
+
+.india-sheet[data-product="temperature_anomaly"] {
+  --product-accent: var(--science-rust);
+  --product-accent-dark: #7d3023;
+  --product-surface: #f9ede9;
+}
+
+.india-sheet[data-product="wind850_anomaly"] {
+  --product-accent: var(--science-teal);
+  --product-accent-dark: #0c6265;
+  --product-surface: #eaf6f4;
+}
+
+.india-sheet__header {
+  isolation: isolate;
+  min-height: 245px;
+  margin: 0 -34px;
+  padding: 48px 58px 42px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 84% 18%, rgb(22 133 134 / 42%), transparent 19rem),
+    radial-gradient(circle at 68% 118%, rgb(163 38 42 / 33%), transparent 27rem),
+    linear-gradient(122deg, #081b34 0%, #0d2a48 67%, #18374a 100%);
+  border-bottom: 0;
+}
+
+.india-sheet__header::before,
+.india-sheet__header::after {
+  position: absolute;
+  z-index: -1;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 50%;
+  content: "";
+}
+
+.india-sheet__header::before {
+  top: -150px;
+  right: 16%;
+}
+
+.india-sheet__header::after {
+  right: -74px;
+  bottom: -196px;
+  width: 370px;
+  height: 370px;
+  border-color: rgb(117 197 189 / 15%);
+}
+
+.india-sheet__brand {
+  margin-bottom: 20px;
+  color: #a9ded8;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+}
+
+.india-sheet__header h1 {
+  max-width: 900px;
+  color: #fffefa;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(42px, 4.8vw, 70px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.india-sheet__header p {
+  color: #d8e2e2;
+}
+
+.india-hero-badges {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 8px;
+  justify-items: end;
+}
+
+.india-model-badge {
+  display: inline-flex;
+  min-height: 46px;
+  padding: 0 18px;
+  align-items: center;
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  background: var(--ashoka-red);
+  border: 1px solid #d17472;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 20%);
+}
+
+.india-experimental {
+  margin-top: 0;
+  color: #f8ead7;
+  background: rgb(255 255 255 / 9%);
+  border-color: rgb(255 255 255 / 24%);
+}
+
+.india-run-console {
+  position: relative;
+  margin-top: 28px;
+  padding: 22px;
+  background:
+    linear-gradient(120deg, rgb(255 255 255 / 82%), rgb(247 241 230 / 72%)),
+    var(--warm-ivory);
+  border-color: #d8d0c3;
+  border-left: 5px solid var(--science-teal);
+  border-radius: 9px;
+  box-shadow: 0 13px 30px rgb(11 33 60 / 7%);
+}
+
+.india-run-console__heading {
+  border-bottom-color: #ddd3c4;
+}
+
+.india-run-console__heading strong,
+.india-domain-select select {
+  color: var(--science-navy);
+}
+
+.india-source-tabs a,
+.india-source-tabs > .is-pending {
+  border-color: #d8d1c6;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgb(11 33 60 / 3%);
+}
+
+.india-source-tabs a:hover {
+  color: var(--science-navy);
+  background: #fff;
+  border-color: var(--science-teal);
+  box-shadow: 0 7px 16px rgb(11 33 60 / 8%);
+  transform: translateY(-1px);
+}
+
+.india-source-tabs a.is-active {
+  color: #fff;
+  background: var(--science-navy);
+  border-color: var(--science-navy);
+  box-shadow: inset 4px 0 0 var(--ashoka-red), 0 8px 18px rgb(11 33 60 / 13%);
+}
+
+.india-source-date-notice {
+  color: #665129;
+  background: #fbf2df;
+  border-color: #e3d3b5;
+}
+
+.india-status-grid div {
+  background: #fffefb;
+  border-color: #ded7ca;
+  border-top: 3px solid #bdcac5;
+}
+
+.india-status-grid div:nth-child(1) {
+  border-top-color: var(--ashoka-red);
+}
+
+.india-status-grid div:nth-child(2) {
+  border-top-color: var(--science-teal);
+}
+
+.india-status-grid div:nth-child(3) {
+  border-top-color: var(--science-purple);
+}
+
+.india-status-grid dd {
+  color: var(--science-navy-soft);
+}
+
+.india-run-actions .india-briefing-cta {
+  background: var(--ashoka-red);
+  border-color: var(--ashoka-red);
+  box-shadow: 0 9px 22px rgb(163 38 42 / 16%);
+}
+
+.india-run-actions .india-briefing-cta:hover {
+  background: var(--ashoka-red-dark);
+  border-color: var(--ashoka-red-dark);
+}
+
+.india-run-actions__secondary a,
+.india-run-actions__secondary button {
+  color: var(--science-navy-soft);
+  border-color: #c8c0b5;
+}
+
+.india-toolbar {
+  padding: 12px;
+  background: var(--product-surface);
+  border-color: color-mix(in srgb, var(--product-accent) 25%, #d9d4cb);
+  border-left: 4px solid var(--product-accent);
+  border-radius: 9px;
+  box-shadow: 0 7px 18px rgb(11 33 60 / 5%);
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.india-product-tabs button,
+.india-range-tabs button,
+.india-wind-mode button {
+  background: rgb(255 255 255 / 78%);
+  border-color: #d5d1c8;
+  border-radius: 6px;
+}
+
+.india-product-tabs button:hover,
+.india-range-tabs button:hover,
+.india-wind-mode button:hover {
+  color: var(--science-navy);
+  background: #fff;
+  border-color: var(--product-accent);
+  transform: translateY(-1px);
+}
+
+.india-sheet[data-product="rainfall_total"] .india-product-tabs button[data-product="rainfall_total"].is-active,
+.india-sheet[data-product="rainfall_anomaly"] .india-product-tabs button[data-product="rainfall_anomaly"].is-active,
+.india-sheet[data-product="temperature_mean"] .india-product-tabs button[data-product="temperature_mean"].is-active,
+.india-sheet[data-product="temperature_anomaly"] .india-product-tabs button[data-product="temperature_anomaly"].is-active,
+.india-sheet[data-product="wind850_anomaly"] .india-product-tabs button[data-product="wind850_anomaly"].is-active {
+  color: #fff;
+  background: var(--product-accent-dark);
+  border-color: var(--product-accent-dark);
+  box-shadow: 0 6px 15px color-mix(in srgb, var(--product-accent) 24%, transparent);
+}
+
+.india-range-tabs button.is-active,
+.india-wind-mode button.is-active {
+  color: #fff;
+  background: var(--science-navy);
+  border-color: var(--science-navy);
+}
+
+.india-auto-cycle {
+  color: var(--product-accent-dark);
+  background: rgb(255 255 255 / 78%);
+  border-color: color-mix(in srgb, var(--product-accent) 35%, #d8d3c8);
+}
+
+.india-auto-cycle__indicator,
+.india-auto-cycle.is-counting::after {
+  background: var(--product-accent);
+}
+
+.india-map-panel {
+  background: #fffefb;
+  border-color: #ddd8cf;
+  border-top: 4px solid var(--product-accent);
+  border-radius: 8px;
+  box-shadow: 0 13px 28px rgb(11 33 60 / 8%);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.india-map-panel:hover {
+  box-shadow: 0 17px 34px rgb(11 33 60 / 12%);
+  transform: translateY(-2px);
+}
+
+.india-map-panel h2,
+.india-map-panel h2 strong {
+  color: var(--product-accent-dark);
+}
+
+.india-map-frame {
+  border-color: #293746;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
+}
+
+.india-shared-legend {
+  padding: 18px 24px 13px;
+  background: var(--product-surface);
+  border-color: color-mix(in srgb, var(--product-accent) 22%, #d9d4cb);
+  border-radius: 7px;
+  box-shadow: 0 8px 20px rgb(11 33 60 / 5%);
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.india-visual-note {
+  color: #53636c;
+}
+
+.india-sheet__footer {
+  background: #faf6ed;
+  border-color: #d9d3c8;
+  border-radius: 7px;
+}
+
+.india-sheet__footer span {
+  color: var(--ashoka-red-dark);
+}
+
+:where(a, button, select, summary):focus-visible {
+  outline-color: #58b8b3;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .india-sheet {
+    margin: 20px;
+    padding: 0 22px 42px;
+  }
+
+  .india-sheet__header {
+    margin-right: -22px;
+    margin-left: -22px;
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .institution-brand {
+    padding: 4px 7px;
+  }
+
+  .institution-brand__ashoka {
+    width: 34px;
+    height: 34px;
+  }
+
+  .institution-brand__centre {
+    width: 104px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header,
+  .india-route .site-header,
+  .archive-route .site-header,
+  .briefing-route .site-header,
+  .team-route .site-header {
+    padding-top: 8px;
+  }
+
+  .institution-brand {
+    justify-self: start;
+  }
+
+  .institution-brand__ashoka {
+    width: 30px;
+    height: 30px;
+  }
+
+  .institution-brand__centre {
+    width: 88px;
+    height: 32px;
+  }
+
+  .site-nav {
+    border-top: 1px solid rgb(255 255 255 / 11%);
+  }
+
+  .india-sheet {
+    margin: 0;
+    padding: 0 14px 36px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .india-sheet__header {
+    min-height: 0;
+    margin-right: -14px;
+    margin-left: -14px;
+    padding: 34px 20px 30px;
+  }
+
+  .india-sheet__header h1 {
+    font-size: clamp(34px, 11vw, 48px);
+  }
+
+  .india-hero-badges {
+    justify-items: start;
+    margin-top: 20px;
+  }
+
+  .india-model-badge {
+    min-height: 40px;
+    padding: 0 15px;
+    font-size: 16px;
+  }
+
+  .india-run-console {
+    padding: 15px;
+  }
+
+  .india-toolbar {
+    padding: 9px;
+  }
+
+  .india-map-panel {
+    border-radius: 7px;
+  }
+
+  .india-shared-legend {
+    padding-right: 19px;
+    padding-left: 19px;
+  }
+}
+
+@media (max-width: 480px) {
+  .institution-brand {
+    gap: 5px;
+    padding: 3px 5px;
+  }
+
+  .institution-brand__ashoka {
+    width: 26px;
+    height: 26px;
+  }
+
+  .institution-brand__centre {
+    width: 76px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .boot-mark {
+    animation: none;
+  }
+
+  .india-sheet,
+  .india-toolbar,
+  .india-map-panel,
+  .india-shared-legend {
+    transition: none;
+  }
+
+  .india-source-tabs a:hover,
+  .india-product-tabs button:hover,
+  .india-range-tabs button:hover,
+  .india-wind-mode button:hover,
+  .india-map-panel:hover {
+    transform: none;
+  }
+}

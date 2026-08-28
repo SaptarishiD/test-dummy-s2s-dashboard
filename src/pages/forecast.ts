@@ -455,6 +455,11 @@ export function renderForecastPage(
           : catalogIssue.members < 100
             ? "Archive · Limited experiment"
             : "Archive · Complete ensemble";
+  const modelBadge = sourceId === "ifs"
+    ? "IFS-main"
+    : sourceId === "gfs"
+      ? "GFS proxy"
+      : "ERA5 reference";
   const pdfPath = forecast.issue.downloads?.domain_pdf ??
     forecast.issue.downloads?.india_pdf;
   const pdfReady = typeof pdfPath === "string" && pdfPath.endsWith(".pdf");
@@ -529,14 +534,17 @@ export function renderForecastPage(
     .join(" · ");
 
   container.innerHTML = `
-    <section class="india-sheet">
+    <section class="india-sheet" data-product="${defaultProduct}">
       <header class="india-sheet__header">
         <div>
           <span class="india-sheet__brand">S2S RESEARCH · EXPERIMENTAL SUBSEASONAL FORECASTING</span>
           <h1 id="india-product-title">${PRESENTATION_PRODUCTS[defaultProduct].label}</h1>
           <p>${activeDomain?.label ?? "India"} <i>•</i> Initialized ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} <i>•</i> Valid through ${friendlyDate(validThrough, true)} <i>•</i> Weeks 1–6</p>
         </div>
-        <span class="india-experimental">${sourceBadge}</span>
+        <div class="india-hero-badges">
+          <span class="india-model-badge">${modelBadge}</span>
+          <span class="india-experimental">${sourceBadge}</span>
+        </div>
       </header>
 
       <section class="india-run-console" aria-label="Forecast run selection and downloads">
@@ -843,6 +851,8 @@ export function renderForecastPage(
 
   function update(): void {
     const product = PRESENTATION_PRODUCTS[selectedProduct];
+    container.querySelector<HTMLElement>(".india-sheet")!.dataset.product =
+      selectedProduct;
     container
       .querySelectorAll<HTMLButtonElement>(".india-product-tabs button")
       .forEach((button) => {

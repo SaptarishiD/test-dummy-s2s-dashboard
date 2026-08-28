@@ -85,6 +85,25 @@ def test_initial_condition_sources_present_ifs_first_and_gfs_last() -> None:
     assert "sourcesForDisplay(index).map((candidate)" in outlook
 
 
+def test_forecast_exposes_active_product_for_presentation_theming() -> None:
+    forecast = read("src/pages/forecast.ts")
+    stylesheet = read("src/styles/operational.css")
+    assert 'class="india-sheet" data-product="${defaultProduct}"' in forecast
+    assert '.dataset.product =\n      selectedProduct' in forecast
+    assert '.india-sheet[data-product="rainfall_total"]' in stylesheet
+    assert '.india-sheet[data-product="rainfall_anomaly"]' in stylesheet
+    assert '.india-sheet[data-product="temperature_mean"]' in stylesheet
+    assert '.india-sheet[data-product="temperature_anomaly"]' in stylesheet
+    assert '.india-sheet[data-product="wind850_anomaly"]' in stylesheet
+
+
+def test_forecast_hero_has_source_aware_model_badge() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert 'sourceId === "ifs"' in forecast
+    assert '"IFS-main"' in forecast
+    assert 'class="india-model-badge"' in forecast
+
+
 def test_archive_distinguishes_ifs_from_the_gfs_proxy() -> None:
     archive = read("src/pages/archive.ts")
     assert 'source.id === "ifs"' in archive
