@@ -159,7 +159,7 @@ def source_map(index: dict[str, Any]) -> dict[str, dict[str, Any]]:
             raise ValueError(f"duplicate source id: {source_id}")
         result[str(source_id)] = source
     if set(result) not in ({"gfs", "era5"}, {"gfs", "era5", "ifs"}):
-        raise ValueError("catalog must expose GFS, ERA5, and optional staged IFS")
+        raise ValueError("catalog must expose GFS, ERA5, and optional IFS")
     return result
 
 
@@ -199,14 +199,19 @@ def issue_records(sources: dict[str, dict[str, Any]]) -> dict[tuple[str, str], I
 def pointer_id(index: dict[str, Any], source: dict[str, Any], source_id: str) -> str:
     """Read schema-v2 defaults or schema-v3 explicit current/reference pointers."""
 
-    keys = (
-        ("current", "current_gfs", "current_issue")
+    aliases = (
+        ("current_gfs", "current_issue")
         if source_id == "gfs"
         else ("latest_reference", "latest_era5", "reference_issue")
+        if source_id == "era5"
+        else ()
     )
+    keys = ("current",) + aliases
     for key in keys:
         pointer = index.get(key)
         if isinstance(pointer, str):
+            if key == "current" and source_id != index.get("default_source"):
+                continue
             return pointer
         if isinstance(pointer, dict):
             if pointer.get("source_id") not in (None, source_id):
@@ -526,18 +531,35 @@ def choose_scope(
     sources: dict[str, dict[str, Any]],
     records: dict[tuple[str, str], IssueRef],
 ) -> tuple[list[IssueRef], str, str]:
+    primary_source_id = str(index.get("default_source", ""))
+    if primary_source_id not in sources:
+        raise ValueError(f"default source is not cataloged: {primary_source_id}")
+    primary_id = pointer_id(
+        index, sources[primary_source_id], primary_source_id
+    )
     gfs_id = pointer_id(index, sources["gfs"], "gfs")
     era5_id = pointer_id(index, sources["era5"], "era5")
+    current = index.get("current")
+    if not isinstance(current, dict) or (
+        current.get("source_id"), current.get("issue_id")
+    ) != (primary_source_id, primary_id):
+        raise ValueError("current pointer must match the default source")
+    if (primary_source_id, primary_id) not in records:
+        raise ValueError(
+            f"current {primary_source_id.upper()} pointer is not cataloged: {primary_id}"
+        )
     if ("gfs", gfs_id) not in records:
-        raise ValueError(f"current GFS pointer is not cataloged: {gfs_id}")
+        raise ValueError(f"latest GFS pointer is not cataloged: {gfs_id}")
     if ("era5", era5_id) not in records:
         raise ValueError(f"latest ERA5 pointer is not cataloged: {era5_id}")
+    if records[(primary_source_id, primary_id)].record.get("members") != 100:
+        raise ValueError("current issue must be a 100-member publication")
     if records[("gfs", gfs_id)].record.get("members") != 100:
-        raise ValueError("current GFS issue must be a 100-member publication")
+        raise ValueError("latest GFS issue must be a 100-member publication")
     if records[("era5", era5_id)].record.get("members") != 100:
         raise ValueError("latest ERA5 reference must be a 100-member publication")
-    if dt.datetime.strptime(gfs_id, "%Y%m%d").weekday() not in {2, 5}:
-        raise ValueError("current GFS pointer is not a Wednesday/Saturday issue")
+    if dt.datetime.strptime(primary_id, "%Y%m%d").weekday() not in {2, 5}:
+        raise ValueError("current pointer is not a Wednesday/Saturday issue")
     if args.expected_gfs_issue and args.expected_gfs_issue != gfs_id:
         raise ValueError(
             f"expected GFS {args.expected_gfs_issue}, catalog points to {gfs_id}"
@@ -551,7 +573,11 @@ def choose_scope(
             ref for ref in records.values() if archive_available(ref.record, "interactive")
         ]
     elif args.scope == "current":
-        selected = [records[("gfs", gfs_id)], records[("era5", era5_id)]]
+        selected = list({
+            (primary_source_id, primary_id): records[(primary_source_id, primary_id)],
+            ("gfs", gfs_id): records[("gfs", gfs_id)],
+            ("era5", era5_id): records[("era5", era5_id)],
+        }.values())
     else:
         if not args.source or not args.issue:
             raise ValueError("--scope issue requires --source and --issue")
@@ -596,8 +622,11 @@ def validate_v3_contract(
         if not operations.get(field):
             raise ValueError(f"schema-v3 operations field missing: {field}")
 
+    current_pointer = index.get("current", {})
+    current_source_id = str(current_pointer.get("source_id", ""))
+    current_issue_id = str(current_pointer.get("issue_id", ""))
     for key, source_id, issue_id in (
-        ("current", "gfs", gfs_id),
+        ("current", current_source_id, current_issue_id),
         ("latest_reference", "era5", era5_id),
     ):
         pointer = index.get(key)
@@ -669,8 +698,8 @@ def validate(args: argparse.Namespace) -> dict[str, Any]:
     public_root = args.public_root.resolve()
     index_path = public_root / "data/index.json"
     index = load_json(index_path)
-    if index.get("default_source") != "gfs":
-        raise ValueError("default source must be GFS")
+    if index.get("default_source") != "ifs":
+        raise ValueError("default source must be IFS")
     if not isinstance(index.get("schema_version"), int):
         raise ValueError("catalog has no integer schema_version")
     serialized_index = json.dumps(index).lower()
@@ -721,6 +750,8 @@ def validate(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "status": "validated",
         "catalog_schema": index["schema_version"],
+        "current_source": index["current"]["source_id"],
+        "current_issue": index["current"]["issue_id"],
         "current_gfs_issue": gfs_id,
         "latest_era5_issue": era5_id,
         "scope": args.scope,
@@ -742,6 +773,7 @@ def main() -> int:
         print(
             "operational publication: validated "
             f"{len(receipt['issues_validated'])} issue(s), "
+            f"main {receipt['current_source'].upper()} {receipt['current_issue']}, "
             f"GFS {receipt['current_gfs_issue']}, ERA5 {receipt['latest_era5_issue']}"
         )
     return 0

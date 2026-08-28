@@ -50,13 +50,16 @@ def decode_json(payload: bytes, label: str) -> Any:
 
 
 def pointer_id(index: dict[str, Any], source_id: str) -> str:
-    pointer_keys = {
-        "gfs": ("current", "current_gfs", "current_issue"),
+    aliases = {
+        "gfs": ("current_gfs", "current_issue"),
         "era5": ("latest_reference", "latest_era5", "reference_issue"),
     }.get(source_id, ())
+    pointer_keys = ("current",) + aliases
     for key in pointer_keys:
         pointer = index.get(key)
         if isinstance(pointer, str):
+            if key == "current" and source_id != index.get("default_source"):
+                continue
             return pointer
         if isinstance(pointer, dict):
             if pointer.get("source_id") not in (None, source_id):
@@ -121,8 +124,8 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("deployed index.html has no application root")
     index_bytes = fetch(args.base_url, "data/index.json", 1, args.timeout)
     index = decode_json(index_bytes, "deployed data/index.json")
-    if index.get("default_source") != "gfs":
-        raise ValueError("deployed default source is not GFS")
+    if index.get("default_source") != "ifs":
+        raise ValueError("deployed default source is not IFS")
     manifest = decode_json(
         fetch(args.base_url, "data/manifest.json", 1, args.timeout),
         "deployed data/manifest.json",
@@ -139,6 +142,10 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
 
     actual_gfs = pointer_id(index, "gfs")
     actual_era5 = pointer_id(index, "era5")
+    actual_current_source = str(index.get("current", {}).get("source_id", ""))
+    actual_current_issue = pointer_id(index, actual_current_source)
+    if actual_current_source != index.get("default_source"):
+        raise ValueError("deployed current pointer does not match the default source")
     expected_gfs, expected_era5 = expected_issues(args)
     if expected_gfs and actual_gfs != expected_gfs:
         raise ValueError(f"deployed GFS issue is {actual_gfs}, expected {expected_gfs}")
@@ -161,7 +168,11 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
     sources = {
         source["id"]: source for source in index.get("initial_condition_sources", [])
     }
-    selected_assets = [("gfs", actual_gfs), ("era5", actual_era5)]
+    selected_assets = list(dict.fromkeys([
+        (actual_current_source, actual_current_issue),
+        ("gfs", actual_gfs),
+        ("era5", actual_era5),
+    ]))
     if expected_source and (expected_source, expected_issue) not in selected_assets:
         selected_assets.append((expected_source, expected_issue))
     verified_assets: list[str] = []
@@ -195,6 +206,8 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
         "status": "healthy",
         "deployed_commit": manifest.get("deployed_commit"),
         "default_source": index.get("default_source"),
+        "current_source": actual_current_source,
+        "current_issue": actual_current_issue,
         "current_gfs_issue": actual_gfs,
         "latest_era5_issue": actual_era5,
         "verified_assets": verified_assets,
@@ -231,7 +244,7 @@ def main() -> int:
     else:
         print(
             "post-deploy smoke: healthy; "
-            f"default {receipt['default_source'].upper()}, "
+            f"main {receipt['current_source'].upper()} {receipt['current_issue']}, "
             f"GFS {receipt['current_gfs_issue']}, "
             f"ERA5 {receipt['latest_era5_issue']}, "
             f"commit {receipt['deployed_commit']}"

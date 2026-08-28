@@ -4,7 +4,7 @@ import {
 } from "../components/ForecastMap";
 import { createLegend } from "../components/Legend";
 import {
-  currentGfsIssue,
+  currentForecast,
   defaultIssueForSource,
   INITIAL_CONDITION_SOURCE_DISPLAY_ORDER,
   issueIsCurrent,
@@ -425,9 +425,9 @@ export function renderForecastPage(
     : availableProducts[0];
   const sourceLink = (id: InitialConditionSourceId, issue: string): string =>
     `./?source=${id}&issue=${issue}${activeDomain && activeDomain.id !== "india" ? `&domain=${activeDomain.id}` : ""}#india`;
-  const currentGfs = currentGfsIssue(index);
-  const currentGfsLink = currentGfs
-    ? sourceLink("gfs", currentGfs.id)
+  const currentSelection = currentForecast(index);
+  const currentForecastLink = currentSelection
+    ? sourceLink(currentSelection.source.id, currentSelection.issue.id)
     : "./#india";
   const sourceLatestIssue = defaultIssueForSource(index, source);
   const isSourceLatest = sourceLatestIssue?.id === catalogIssue.id;
@@ -437,11 +437,9 @@ export function renderForecastPage(
       candidate.issues.some((issue) => issue.id === currentIssueId),
   );
   const sourceBadge = isCurrent
-    ? sourceId === "gfs"
-      ? "Current · Experimental GFS proxy"
-      : sourceId === "ifs"
-        ? "Default · Experimental IFS initialization"
-        : "Default · Delayed ERA5 reference"
+    ? sourceId === "ifs"
+      ? "Main · Experimental IFS initialization"
+      : "Main experimental forecast"
     : sourceId === "ifs"
       ? isSourceLatest
         ? "Latest source issue · Experimental IFS"
@@ -471,24 +469,24 @@ export function renderForecastPage(
   const initializationComparison = data.initializationComparison;
   const validThrough = forecast.weeks.at(-1)?.valid_end ?? "";
   const issueSelectionLabel = isCurrent
-    ? "Current forecast"
+    ? "Main forecast"
     : isSourceLatest
       ? sourceId === "era5"
         ? "Latest delayed reference"
         : "Latest validated source issue"
       : "Selected archive issue";
   const archiveTitle = sourceId === "era5" && isSourceLatest
-    ? "Latest delayed reference—not the current forecast"
-    : sourceId === "ifs" && isSourceLatest
-      ? "Latest experimental IFS issue—not the current forecast"
+    ? "Latest delayed reference—not the main forecast"
+    : sourceId === "gfs" && isSourceLatest
+      ? "Latest GFS proxy—not the main forecast"
       : "You are viewing an archived issue";
   const archiveMessage = sourceId === "era5" && isSourceLatest
     ? "This is ERA5's latest validated delayed reference. Source initialization dates are independent, and ERA5 normally arrives 5–7 days after real time."
-    : sourceId === "ifs" && isSourceLatest
-      ? "This is IFS's latest validated issue. IFS remains experimental and is separate from the dashboard's current GFS guidance; source initialization dates can differ."
+    : sourceId === "gfs" && isSourceLatest
+      ? "This is the latest secondary GFS-proxy issue. IFS initialization is the dashboard's main experimental forecast; source initialization dates can differ."
       : catalogIssue.members < 100
         ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
-        : "This older issue is retained in the archive. The current page points to the latest validated GFS-proxy issue.";
+        : "This older issue is retained in the archive. The main page points to the latest validated IFS-initialized issue.";
   const archiveBanner = !isCurrent
     ? `
       <aside class="india-archive-banner" aria-label="Non-current forecast notice">
@@ -496,7 +494,7 @@ export function renderForecastPage(
           <strong>${archiveTitle}</strong>
           <p>${archiveMessage}</p>
         </div>
-        <a href="${currentGfsLink}">Return to current forecast →</a>
+        <a href="${currentForecastLink}">Return to main forecast →</a>
       </aside>
     `
     : "";
@@ -566,8 +564,8 @@ export function renderForecastPage(
               <strong>One forecast system, three input sources</strong>
               <p>These labels describe how the same experimental forecasting system is initialized.</p>
               <dl>
-                <div><dt>IFS</dt><dd>ECMWF Integrated Forecasting System inputs; experimental initialization.</dd></div>
-                <div><dt>GFS</dt><dd>Global Forecast System inputs; near-real-time proxy for current guidance.</dd></div>
+                <div><dt>IFS</dt><dd>ECMWF Integrated Forecasting System inputs; main experimental guidance.</dd></div>
+                <div><dt>GFS</dt><dd>Global Forecast System inputs; secondary near-real-time proxy.</dd></div>
                 <div><dt>ERA5</dt><dd>Delayed ECMWF reanalysis reference for controlled comparisons, not current guidance.</dd></div>
               </dl>
             </div>
@@ -581,7 +579,7 @@ export function renderForecastPage(
               return `
               <a href="${sourceLink(candidate.id, preferred.id)}" class="${candidate.id === sourceId ? "is-active" : ""}" ${candidate.id === sourceId ? "aria-current=\"page\"" : ""}>
                 <span>${candidate.short_label}</span>
-                <small>${candidate.category === "operational_proxy" ? "Current proxy" : candidate.category === "operational_initialization" ? "Experimental initialization" : "Delayed reference"}</small>
+                <small>${candidate.id === index.default_source ? "Main forecast" : candidate.category === "operational_proxy" ? "Secondary proxy" : "Delayed reference"}</small>
               </a>
             `;}).join("")}
           </div>
@@ -909,8 +907,10 @@ export function renderForecastPage(
       ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
       : activeDomain?.id !== "india"
         ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
+        : sourceId === "ifs"
+        ? "Main experimental IFS initialization using ECMWF Open Data; IFS skin temperature over ocean is the disclosed SST proxy."
         : sourceId === "gfs"
-        ? "Experimental initialization from operational analysis and short-range forecast proxy inputs."
+        ? "Secondary experimental initialization from operational analysis and short-range GFS proxy inputs."
         : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 

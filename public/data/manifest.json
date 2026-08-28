@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-26T15:08:40.336577+00:00",
+  "generated_at": "2026-08-28T05:31:42.770601+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -376,8 +376,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 64136,
-      "sha256": "85ce9296a660c7fb416e12e484efe39d1e6d519397feb1c73ae28caf15d460e3"
+      "size_bytes": 64165,
+      "sha256": "e0ffcf13bf1ead315a0eb4dff03bb4cef3c7eff1d2c42f5e718a086c65c07fdb"
     },
     {
       "path": "data/india-admin.json",
@@ -511,8 +511,8 @@
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5941,
-      "sha256": "3a7349a5a2efedddf9b06ecc80c3c8ff79613c018d5d33d4dcdf577bb4dd0dc8"
+      "size_bytes": 5965,
+      "sha256": "efafd202d592b17bef42062e4a5f6edb48a0dd8b90b1e78c579aa25bc4774020"
     },
     {
       "path": "data/world-countries.geojson",
@@ -728,6 +728,16 @@
       "path": "reports/s2s-summary-india-2026-08-19.pdf",
       "size_bytes": 2115128,
       "sha256": "37f82e735bdebcfb7a9fdb917a7d69d10506c5b08e1f187ca13241aa7d084bc4"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-08-26-cover.png",
+      "size_bytes": 409658,
+      "sha256": "0166ff75a6c504ab87cc0ba8755ea885c0970ba9cd0ff68da733df04921a5f6f"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-08-26.pdf",
+      "size_bytes": 2023310,
+      "sha256": "f4506a825ec6b0f015bff17a32e9962004abb60ad73a0bc2dee2212819486f49"
     },
     {
       "path": "team/ayush-raj.webp",

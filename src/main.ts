@@ -12,7 +12,7 @@ import type {
 } from "./types";
 import {
   checksumVersionedPath,
-  currentGfsIssue,
+  currentForecast,
   findIssue,
   issueChecksum,
 } from "./lib/catalog";
@@ -188,7 +188,7 @@ function shell(): string {
       </div>
       <div class="site-footer__section" id="schedule">
         <strong>Update schedule</strong>
-        <p>GFS-proxy runs are targeted every Wednesday and Saturday after source-data checks. ERA5 is a delayed reference, normally 5–7 days behind.</p>
+        <p>Main IFS-initialized guidance is targeted every Wednesday and Saturday after source-data checks. GFS is retained as a secondary proxy, and ERA5 is a delayed reference.</p>
       </div>
       <div class="site-footer__section" id="limitations">
         <strong>Limitations & contact</strong>
@@ -212,7 +212,7 @@ async function renderRoute(data: AppData): Promise<void> {
   document.body.classList.toggle("briefing-route", route === "briefing");
   document.body.classList.toggle("team-route", route === "team");
   const statusDate = data.forecast?.issue.initialization ??
-    (data.index ? currentGfsIssue(data.index)?.initialization : undefined);
+    (data.index ? currentForecast(data.index)?.issue.initialization : undefined);
   const statusLabel = route === "briefing"
     ? "Latest Thursday briefing"
     : route === "team"

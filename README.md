@@ -2,12 +2,11 @@
 
 A static, source-aware India subseasonal research forecast interface with a
 separate dated Global Demo. India is the default page. It separates
-near-real-time GFS-proxy initializations, delayed ERA5 references, and a gated
-IFS-initialized pilot, exposes the available issue dates and ensemble sizes,
-and provides compact issue-level downloads.
-The landing forecast is the latest validated GFS-proxy issue. Selecting IFS or
-ERA5 opens that source's independently dated latest validated issue; IFS remains
-explicitly experimental.
+main experimental IFS initializations, secondary near-real-time GFS-proxy
+initializations, and delayed ERA5 references, exposes the available issue dates
+and ensemble sizes, and provides compact issue-level downloads.
+The landing forecast is the latest validated 100-member IFS issue. Selecting
+GFS or ERA5 opens that source's independently dated latest validated issue.
 
 The dated Global Demo animates a pinned 28 July 2026 set of 42 daily
 ensemble-mean fields for
@@ -22,17 +21,16 @@ credentials, or cluster paths.
 
 Each forecast package records its initialization-source family explicitly:
 
-- **GFS operational proxy** uses near-real-time daily proxy fields for
-  experimental guidance. The model was trained with ERA5-style inputs, and no
-  matched GFS-initialized hindcast calibration exists yet.
+- **IFS operational initialization** is the main experimental guidance, built
+  from ECMWF Open Data. IFS skin temperature over ocean is used as the
+  disclosed SST proxy.
+- **GFS operational proxy** is the secondary near-real-time source. It uses
+  daily proxy fields for experimental guidance. The model was trained with
+  ERA5-style inputs, and no matched GFS-initialized hindcast calibration exists
+  yet.
 - **ERA5 reanalysis reference** uses scientifically matched but delayed inputs
   for reference experiments and initialization-sensitivity comparisons. It is
   not a near-real-time forecast.
-- **IFS operational initialization** is a staged experimental source built from
-  ECMWF Open Data. IFS skin temperature over ocean is used as the disclosed SST
-  proxy. It remains pilot-only until a 5-member smoke run and matched
-  100-member validation case pass.
-
 The 22 July 2026 issue is available from both sources with 100 members, giving
 one controlled comparison in which the source is changed without changing the
 initialization date. All displayed products remain experimental research

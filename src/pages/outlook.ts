@@ -178,10 +178,10 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
     ? `
       <aside class="india-archive-banner outlook-archive-banner">
         <div>
-          <strong>${sourceId === "era5" ? "Delayed ERA5 reference" : "Archived regional issue"}</strong>
-          <p>${sourceId === "era5" ? "This reference experiment normally arrives 5–7 days after real time and is never labeled current." : "The current forecast is the newest validated 100-member GFS-proxy issue."}</p>
+          <strong>${sourceId === "era5" ? "Delayed ERA5 reference" : "Secondary regional issue"}</strong>
+          <p>${sourceId === "era5" ? "This reference experiment normally arrives 5–7 days after real time and is never labeled main." : "The main forecast is the newest validated 100-member IFS-initialized issue."}</p>
         </div>
-        <a href="./#outlook">Return to current regional outlook →</a>
+        <a href="./#india">Return to main forecast →</a>
       </aside>
     `
     : "";

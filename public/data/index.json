@@ -114,14 +114,14 @@
     "assets": "checksum-versioned"
   },
   "current": {
-    "source_id": "gfs",
+    "source_id": "ifs",
     "issue_id": "20260826",
     "initialization": "2026-08-26T00:00:00Z",
     "members": 100,
-    "forecast": "forecasts/gfs/20260826.json",
-    "forecast_sha256": "76e590b601c561d0573b57e0c9245d570717b464211ff7fd7433cd8e6e7e1735",
+    "forecast": "forecasts/ifs/20260826.json",
+    "forecast_sha256": "15097a39f35cb0c1dd2e1ebf64a975d4412eaf9d10584ec8df64ef10d7bceef9",
     "valid_through": "2026-10-06",
-    "published_at": "2026-08-26T14:54:42.352445+00:00",
+    "published_at": "2026-08-26T15:08:24.832138+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
@@ -138,12 +138,12 @@
       "regional_probabilities": true,
       "pdf": true
     },
-    "regional_outlook": "regional/gfs/20260826.json",
-    "pdf": "downloads/gfs/20260826/S2S_Research_India_Weeks1-4_GFS_20260826.pdf"
+    "regional_outlook": "regional/ifs/20260826.json",
+    "pdf": "downloads/ifs/20260826/S2S_Research_India_Weeks1-4_IFS_20260826.pdf"
   },
-  "default_source": "gfs",
+  "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-08-26T15:08:36Z",
+  "generated_at": "2026-08-28T05:30:00Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -209,8 +209,8 @@
           "members": 100,
           "pdf": "downloads/gfs/20260826/S2S_Research_India_Weeks1-4_GFS_20260826.pdf",
           "presentation": {
-            "section": "current",
-            "label": "Current guidance",
+            "section": "archive",
+            "label": "Archived guidance",
             "member_class": "production"
           },
           "published_at": "2026-08-26T14:54:42.352445+00:00",
@@ -1554,8 +1554,8 @@
     },
     {
       "availability": {
-        "mode": "staged_experimental",
-        "notice": "IFS initialization remains experimental while the ocean skin-temperature SST proxy is evaluated."
+        "mode": "primary_experimental",
+        "notice": "IFS initialization is the dashboard's primary experimental guidance while the ocean skin-temperature SST proxy is evaluated."
       },
       "category": "operational_initialization",
       "default_issue": "20260826",
@@ -1587,8 +1587,8 @@
             "pdf": true
           },
           "presentation": {
-            "section": "archive",
-            "label": "Archived guidance",
+            "section": "current",
+            "label": "Current guidance",
             "member_class": "production"
           },
           "checksums": {
@@ -1732,7 +1732,7 @@
   "latest_successful_issue": "20260826",
   "operations": {
     "status": "on_schedule",
-    "last_successful_at": "2026-08-26T14:54:42.352445+00:00",
+    "last_successful_at": "2026-08-26T15:08:24.832138+00:00",
     "next_expected_at": "2026-08-29T12:00:00Z",
     "stale_after": "2026-08-30T00:00:00Z"
   },
@@ -1742,7 +1742,7 @@
       "Saturday"
     ],
     "target_time_utc": "12:00",
-    "last_successful_at": "2026-08-26T14:54:42.352445+00:00",
+    "last_successful_at": "2026-08-26T15:08:24.832138+00:00",
     "next_expected_at": "2026-08-29T12:00:00Z"
   },
   "retention": {

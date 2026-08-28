@@ -2,7 +2,7 @@
 
 The catalog is deliberately derived from files that are already safe for the
 website.  It never scans private forecast storage and it advances the Current
-pointer only when a complete 100-member GFS package is present.
+pointer only when a complete 100-member IFS package is present.
 """
 
 from __future__ import annotations
@@ -23,6 +23,7 @@ RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
 CADENCE_WEEKDAYS = (2, 5)  # Wednesday and Saturday, datetime.weekday().
 TARGET_HOUR_UTC = 12
+PRIMARY_SOURCE_ID = "ifs"
 
 
 def sha256(path: Path) -> str:
@@ -252,6 +253,10 @@ def build_catalog(
                 complete_by_source[source_id].append(item)
         enriched.sort(key=lambda item: item["id"], reverse=True)
         source["issues"] = enriched
+        if complete_by_source[source_id]:
+            source["default_issue"] = max(
+                complete_by_source[source_id], key=lambda item: item["id"]
+            )["id"]
         if source_id == "era5":
             source["availability"] = {
                 "mode": "delayed_reference",
@@ -260,16 +265,18 @@ def build_catalog(
             }
         elif source_id == "ifs":
             source["availability"] = {
-                "mode": "staged_experimental",
+                "mode": "primary_experimental",
                 "notice": (
-                    "IFS initialization remains experimental while the ocean "
-                    "skin-temperature SST proxy is evaluated."
+                    "IFS initialization is the dashboard's primary experimental "
+                    "guidance while the ocean skin-temperature SST proxy is evaluated."
                 ),
             }
 
-    if not complete_by_source["gfs"]:
-        raise ValueError("no complete 100-member GFS issue; Current is unchanged")
-    current_issue = max(complete_by_source["gfs"], key=lambda item: item["id"])
+    if not complete_by_source.get(PRIMARY_SOURCE_ID):
+        raise ValueError("no complete 100-member IFS issue; Current is unchanged")
+    current_issue = max(
+        complete_by_source[PRIMARY_SOURCE_ID], key=lambda item: item["id"]
+    )
     current_issue["presentation"] = {
         "section": "current",
         "label": "Current guidance",
@@ -281,7 +288,7 @@ def build_catalog(
         else None
     )
 
-    current = _pointer(current_issue, "gfs")
+    current = _pointer(current_issue, PRIMARY_SOURCE_ID)
     reference = _pointer(reference_issue, "era5") if reference_issue else None
     current_schedule_target = parse_datetime(
         str(current_issue["initialization"])
@@ -293,7 +300,7 @@ def build_catalog(
     payload.update(
         {
             "schema_version": 3,
-            "default_source": "gfs",
+            "default_source": PRIMARY_SOURCE_ID,
             "generated_at": iso_z(now),
             "latest_successful_issue": current_issue["id"],
             "current": current,

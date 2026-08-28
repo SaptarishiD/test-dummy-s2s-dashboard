@@ -234,8 +234,8 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     source_ids = [source["id"] for source in sources]
     if source_ids not in (["gfs", "era5"], ["gfs", "era5", "ifs"]):
         raise ValueError("initial-condition sources must be GFS, ERA5, then optional IFS")
-    if index["default_source"] != "gfs" or index["default_view"] != "india":
-        raise ValueError("India/GFS defaults are not locked")
+    if index["default_source"] != "ifs" or index["default_view"] != "india":
+        raise ValueError("India/IFS defaults are not locked")
     default_source = next(
         (source for source in sources if source["id"] == index["default_source"]),
         None,
@@ -387,7 +387,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
     if matched_22 != {"gfs", "era5"}:
         raise ValueError("the matched 22 July GFS/ERA5 IC pair is incomplete")
     return (
-        "GFS, ERA5, and staged IFS sources are separated with PDF-only public briefings.",
+        "Main IFS, secondary GFS, and delayed ERA5 sources are separated with PDF-only public briefings.",
         {
             "sources": len(sources),
             "issues": issue_count,

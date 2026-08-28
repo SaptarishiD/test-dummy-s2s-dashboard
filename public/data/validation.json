@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-05T14:53:49.691270+00:00",
+  "generated_at": "2026-08-28T05:31:42.150178+00:00",
   "overall_status": "warning",
   "presentation_allowed": true,
   "checks": [
@@ -153,11 +153,11 @@
       "label": "Initial-condition source catalog",
       "group": "publication",
       "status": "green",
-      "summary": "GFS and ERA5 issues are source-separated with PDF-only public briefings.",
+      "summary": "Main IFS, secondary GFS, and delayed ERA5 sources are separated with PDF-only public briefings.",
       "details": {
-        "sources": 2,
-        "issues": 18,
-        "regional_outlooks": 7,
+        "sources": 3,
+        "issues": 35,
+        "regional_outlooks": 22,
         "matched_issue": "20260722"
       }
     },
@@ -168,8 +168,8 @@
       "status": "green",
       "summary": "Public JSON is finite and free of internal paths, credentials, and raw assets.",
       "details": {
-        "json_files_scanned": 42,
-        "bytes_scanned": 11455857
+        "json_files_scanned": 78,
+        "bytes_scanned": 27604091
       }
     }
   ],

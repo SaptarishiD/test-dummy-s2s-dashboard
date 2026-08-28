@@ -104,12 +104,12 @@ def test_member_count_is_not_promoted_in_the_public_interface() -> None:
     assert "FEATURED_REPORT.ensemble" not in briefing
 
 
-def test_current_forecast_links_target_the_current_gfs_issue() -> None:
+def test_main_forecast_links_target_the_catalog_current_issue() -> None:
     forecast = read("src/pages/forecast.ts")
     archive = read("src/pages/archive.ts")
-    assert 'currentGfsIssue(index)' in forecast
-    assert 'href="${currentGfsLink}"' in forecast
-    assert 'issueUrl(currentSource, current, activeDomain?.id)' in archive
+    assert 'currentForecast(index)' in forecast
+    assert 'href="${currentForecastLink}"' in forecast
+    assert 'issueUrl(currentSelection.source, currentSelection.issue, activeDomain?.id)' in archive
     assert 'href="${currentHref}"' in archive
 
 

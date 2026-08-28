@@ -115,18 +115,19 @@ def test_operational_validator_accepts_both_wind_products(tmp_path: Path) -> Non
 
 def test_current_pointer_cannot_select_limited_ensemble() -> None:
     index = {
-        "current": {"source_id": "gfs", "issue_id": "20260801"},
+        "default_source": "ifs",
+        "current": {"source_id": "ifs", "issue_id": "20260801"},
         "latest_reference": {"source_id": "era5", "issue_id": "20260722"},
         "initial_condition_sources": [
             {
                 "id": "gfs",
-                "default_issue": "20260801",
+                "default_issue": "20260805",
                 "issues": [
                     {
-                        "id": "20260801",
-                        "initialization": "2026-08-01T00:00:00Z",
-                        "members": 5,
-                        "forecast": "forecasts/gfs/20260801.json",
+                        "id": "20260805",
+                        "initialization": "2026-08-05T00:00:00Z",
+                        "members": 100,
+                        "forecast": "forecasts/gfs/20260805.json",
                     }
                 ],
             },
@@ -142,6 +143,18 @@ def test_current_pointer_cannot_select_limited_ensemble() -> None:
                     }
                 ],
             },
+            {
+                "id": "ifs",
+                "default_issue": "20260801",
+                "issues": [
+                    {
+                        "id": "20260801",
+                        "initialization": "2026-08-01T00:00:00Z",
+                        "members": 5,
+                        "forecast": "forecasts/ifs/20260801.json",
+                    }
+                ],
+            },
         ],
     }
     sources = source_map(index)
@@ -153,13 +166,14 @@ def test_current_pointer_cannot_select_limited_ensemble() -> None:
         expected_gfs_issue=None,
         expected_era5_issue=None,
     )
-    with pytest.raises(ValueError, match="current GFS issue must be a 100-member"):
+    with pytest.raises(ValueError, match="current issue must be a 100-member"):
         choose_scope(args, index, sources, records)
 
 
 def test_latest_era5_pointer_accepts_manual_off_cadence_reference() -> None:
     index = {
-        "current": {"source_id": "gfs", "issue_id": "20260826"},
+        "default_source": "ifs",
+        "current": {"source_id": "ifs", "issue_id": "20260826"},
         "latest_reference": {"source_id": "era5", "issue_id": "20260820"},
         "initial_condition_sources": [
             {
@@ -186,6 +200,18 @@ def test_latest_era5_pointer_accepts_manual_off_cadence_reference() -> None:
                     }
                 ],
             },
+            {
+                "id": "ifs",
+                "default_issue": "20260826",
+                "issues": [
+                    {
+                        "id": "20260826",
+                        "initialization": "2026-08-26T00:00:00Z",
+                        "members": 100,
+                        "forecast": "forecasts/ifs/20260826.json",
+                    }
+                ],
+            },
         ],
     }
     sources = source_map(index)
@@ -201,6 +227,7 @@ def test_latest_era5_pointer_accepts_manual_off_cadence_reference() -> None:
     selected, gfs_id, era5_id = choose_scope(args, index, sources, records)
 
     assert {(ref.source_id, ref.issue_id) for ref in selected} == {
+        ("ifs", "20260826"),
         ("gfs", "20260826"),
         ("era5", "20260820"),
     }
@@ -289,8 +316,8 @@ def build_smoke_site(root: Path) -> None:
     (root / "data/forecasts/ifs").mkdir(parents=True)
     (root / "index.html").write_text('<main id="app"></main>\n', encoding="utf-8")
     index = {
-        "default_source": "gfs",
-        "current": {"source_id": "gfs", "issue_id": "20260805"},
+        "default_source": "ifs",
+        "current": {"source_id": "ifs", "issue_id": "20260815"},
         "latest_reference": {"source_id": "era5", "issue_id": "20260722"},
         "initial_condition_sources": [],
     }
@@ -364,19 +391,21 @@ def test_postdeploy_smoke_verifies_commit_pointers_and_forecasts(
     )
     receipt = postdeploy.smoke(args)
     assert receipt["status"] == "healthy"
-    assert receipt["default_source"] == "gfs"
+    assert receipt["default_source"] == "ifs"
+    assert receipt["current_source"] == "ifs"
+    assert receipt["current_issue"] == "20260815"
     assert receipt["current_gfs_issue"] == "20260805"
     assert receipt["latest_era5_issue"] == "20260722"
-    assert len(receipt["verified_assets"]) == 2
+    assert len(receipt["verified_assets"]) == 3
 
 
-def test_postdeploy_smoke_rejects_a_non_gfs_default(
+def test_postdeploy_smoke_rejects_a_non_ifs_default(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     build_smoke_site(tmp_path)
     index_path = tmp_path / "data/index.json"
     index = json.loads(index_path.read_text(encoding="utf-8"))
-    index["default_source"] = "ifs"
+    index["default_source"] = "gfs"
     index_path.write_text(json.dumps(index), encoding="utf-8")
     monkeypatch.setattr(
         postdeploy,
@@ -392,11 +421,11 @@ def test_postdeploy_smoke_rejects_a_non_gfs_default(
         attempts=1,
         timeout=2.0,
     )
-    with pytest.raises(ValueError, match="deployed default source is not GFS"):
+    with pytest.raises(ValueError, match="deployed default source is not IFS"):
         postdeploy.smoke(args)
 
 
-def test_postdeploy_smoke_verifies_selected_ifs_pilot(
+def test_postdeploy_smoke_verifies_selected_ifs_issue(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     build_smoke_site(tmp_path)

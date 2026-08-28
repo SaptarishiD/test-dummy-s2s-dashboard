@@ -89,6 +89,22 @@ export function currentGfsIssue(index: IssueIndexData): CatalogIssue | undefined
   return complete.find((issue) => issue.id === latestId) ?? newest(complete);
 }
 
+export function currentForecast(
+  index: IssueIndexData,
+): { source: CatalogSource; issue: CatalogIssue } | undefined {
+  const pointer = index.current;
+  const source = sourceById(
+    index,
+    pointer?.source_id ?? index.default_source,
+  );
+  if (!source) return undefined;
+  const pointed = pointer?.source_id === source.id
+    ? source.issues.find((issue) => issue.id === pointer.issue_id)
+    : undefined;
+  const issue = pointed ?? defaultIssueForSource(index, source);
+  return issue ? { source, issue } : undefined;
+}
+
 export function latestReferenceIssue(
   index: IssueIndexData,
 ): CatalogIssue | undefined {

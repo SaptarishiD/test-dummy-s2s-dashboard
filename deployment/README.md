@@ -49,10 +49,10 @@ publisher, so neither the research checkout nor the persistent publishing
 clone receives generated web files.
 
 The GitHub Pages workflow independently stamps the deployed commit, audits the
-current GFS issue, delayed ERA5 reference, entire retained archive, and global
-demo, then type-checks and builds. Validation or build failures occur before
-deployment and preserve the previously successful site. After deployment the
-workflow fetches the live catalog and both current forecast packages, checking
-their SHA-256 values and expected commit. A post-deploy smoke failure makes the
-workflow visibly red for alerting and requires operator review; it does not
-claim an automatic Pages rollback.
+main IFS issue, secondary GFS proxy, delayed ERA5 reference, entire retained
+archive, and global demo, then type-checks and builds. Validation or build
+failures occur before deployment and preserve the previously successful site.
+After deployment the workflow fetches the live catalog and all three selected
+forecast packages, checking their SHA-256 values and expected commit. A
+post-deploy smoke failure makes the workflow visibly red for alerting and
+requires operator review; it does not claim an automatic Pages rollback.

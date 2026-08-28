@@ -21,16 +21,16 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_current_is_latest_complete_production_gfs_not_newer_limited_run() -> None:
+def test_current_is_latest_complete_production_ifs_issue() -> None:
     index = load(DATA / "index.json")
-    gfs = index["initial_condition_sources"][0]
-    production = [item for item in gfs["issues"] if item["members"] == 100]
-    limited = [item for item in gfs["issues"] if item["members"] < 100]
-    assert index["default_source"] == "gfs"
-    assert index["current"]["source_id"] == "gfs"
+    ifs = next(
+        source for source in index["initial_condition_sources"] if source["id"] == "ifs"
+    )
+    production = [item for item in ifs["issues"] if item["members"] == 100]
+    assert index["default_source"] == "ifs"
+    assert index["current"]["source_id"] == "ifs"
     assert index["current"]["members"] == 100
     assert index["current"]["issue_id"] == max(item["id"] for item in production)
-    assert any(item["id"] > "20260801" for item in limited)
     assert index["latest_successful_issue"] == index["current"]["issue_id"]
 
 
@@ -66,11 +66,14 @@ def test_catalog_assets_are_checksum_versioned_and_capability_scoped() -> None:
             assert issue["archive"]["metadata"] == "indefinite"
 
 
-def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() -> None:
+def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_ifs_issue() -> None:
     index = load(DATA / "index.json")
+    ifs_source = next(
+        source for source in index["initial_condition_sources"] if source["id"] == "ifs"
+    )
     expected_issue = max(
         item["id"]
-        for item in index["initial_condition_sources"][0]["issues"]
+        for item in ifs_source["issues"]
         if item["members"] == 100
     )
     rebuilt = build_catalog(
@@ -78,16 +81,16 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_gfs_issue() ->
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
-    assert rebuilt["default_source"] == "gfs"
-    assert rebuilt["current"]["source_id"] == "gfs"
+    assert rebuilt["default_source"] == "ifs"
+    assert rebuilt["current"]["source_id"] == "ifs"
     assert rebuilt["current"]["issue_id"] == expected_issue
-    ifs_source = next(
+    rebuilt_ifs = next(
         source for source in rebuilt["initial_condition_sources"] if source["id"] == "ifs"
     )
     expected_ifs_issue = max(
-        item["id"] for item in ifs_source["issues"] if item["members"] == 100
+        item["id"] for item in rebuilt_ifs["issues"] if item["members"] == 100
     )
-    assert ifs_source["default_issue"] == expected_ifs_issue
+    assert rebuilt_ifs["default_issue"] == expected_ifs_issue
     assert rebuilt["latest_reference"]["source_id"] == "era5"
     newer_limited = next(
         item
