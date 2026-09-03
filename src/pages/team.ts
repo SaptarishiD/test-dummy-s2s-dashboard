@@ -58,7 +58,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     expertise: "Artificial intelligence for weather, climate, and data-driven forecasting.",
     image: "./team/saptarishi-dhanuka.jpg",
     imagePosition: "center 20%",
-    profile: "https://www.ashoka.edu.in/profile/saptarishi-dhanuka/",
+    profile: "https://www.linkedin.com/in/saptarishi-dhanuka/",
   },
 ];
 
