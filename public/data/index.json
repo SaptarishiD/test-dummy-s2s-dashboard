@@ -161,7 +161,7 @@
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-09-05T00:42:59Z",
+  "generated_at": "2026-09-05T13:54:25Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -193,13 +193,13 @@
       "id": "gfs",
       "issues": [
         {
-          "forecast": "forecasts/gfs/20260905.json",
-          "id": "20260905",
-          "initialization": "2026-09-05T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/gfs/20260905.json",
-          "role": "operational_experimental",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-05T00:00:00Z",
+            "pdf_until": "2026-10-31T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -216,26 +216,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "archive",
-            "label": "Archived guidance",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "00400ef34047646325f66010512fbf9284fa2f4b6152d1d7d407f0dd96179f6e",
             "regional_sha256": "e0cb2f05d27e1cf3d310f7dfa0da0ee8737dde9842e0acc770b87894b2dbc32a",
             "pdf_sha256": "b54ea8ac338fd8225046860ed405021592c3634f3600c1adf1163ed030b48db9"
           },
-          "valid_through": "2026-10-16",
-          "published_at": "2026-09-05T00:42:50.501360+00:00",
+          "forecast": "forecasts/gfs/20260905.json",
+          "id": "20260905",
+          "initialization": "2026-09-05T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/gfs/20260905/S2S_Research_India_Weeks1-4_GFS_20260905.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-09-05T00:00:00Z",
-            "pdf_until": "2026-10-31T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Archived guidance",
+            "member_class": "production"
+          },
+          "published_at": "2026-09-05T00:42:50.501360+00:00",
+          "regional_outlook": "regional/gfs/20260905.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "valid_through": "2026-10-16"
         },
         {
           "archive": {
@@ -1102,10 +1102,55 @@
         "notice": "ERA5 is a delayed research reference, never live guidance."
       },
       "category": "reanalysis_reference",
-      "default_issue": "20260822",
+      "default_issue": "20260829",
       "description": "Delayed, scientifically matched reanalysis initializations for reference experiments and IC-sensitivity comparisons; not near-real-time guidance.",
       "id": "era5",
       "issues": [
+        {
+          "forecast": "forecasts/era5/20260829.json",
+          "id": "20260829",
+          "initialization": "2026-08-29T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/era5/20260829.json",
+          "role": "reference",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "dc648d2cd662866b7981013488da1e5ac27198f4f1d960fc921636f18bb33223",
+            "regional_sha256": "4a62f93557c52dcc5ac1002c876444a40aaa92c9a4daf2c1e598755ea3bdc809",
+            "pdf_sha256": "c141b51b630e368a45ebf5aba090bd88d841b4507a97e9758c439842f13fa471"
+          },
+          "valid_through": "2026-10-09",
+          "published_at": "2026-09-05T13:54:17.073304+00:00",
+          "pdf": "downloads/era5/20260829/S2S_Research_India_Weeks1-4_ERA5_20260829.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-29T00:00:00Z",
+            "pdf_until": "2026-10-24T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
         {
           "archive": {
             "interactive_available": true,
@@ -1946,13 +1991,13 @@
   ],
   "latest_reference": {
     "source_id": "era5",
-    "issue_id": "20260822",
-    "initialization": "2026-08-22T00:00:00Z",
+    "issue_id": "20260829",
+    "initialization": "2026-08-29T00:00:00Z",
     "members": 100,
-    "forecast": "forecasts/era5/20260822.json",
-    "forecast_sha256": "727ac1ee5a6e85e18c4c4ba029325464c9b61ed67e7b31c3b405013c7a19dc2f",
-    "valid_through": "2026-10-02",
-    "published_at": "2026-08-28T13:42:45.934070+00:00",
+    "forecast": "forecasts/era5/20260829.json",
+    "forecast_sha256": "dc648d2cd662866b7981013488da1e5ac27198f4f1d960fc921636f18bb33223",
+    "valid_through": "2026-10-09",
+    "published_at": "2026-09-05T13:54:17.073304+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
@@ -1969,8 +2014,8 @@
       "regional_probabilities": true,
       "pdf": true
     },
-    "regional_outlook": "regional/era5/20260822.json",
-    "pdf": "downloads/era5/20260822/S2S_Research_India_Weeks1-4_ERA5_20260822.pdf"
+    "regional_outlook": "regional/era5/20260829.json",
+    "pdf": "downloads/era5/20260829/S2S_Research_India_Weeks1-4_ERA5_20260829.pdf"
   },
   "latest_successful_issue": "20260902",
   "operations": {
