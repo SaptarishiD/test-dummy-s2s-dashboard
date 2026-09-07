@@ -172,6 +172,9 @@ def test_team_navigation_lists_research_contributors_by_first_name() -> None:
     assert 'id="team-title">Research contributors</h1>' in team
     assert "Listed alphabetically by first name" in team
     assert "s2s.scdlds@ashoka.edu.in" in team
+    assert 'id="team-contact-title">Talk to the research team</h2>' in team
+    assert 'href="mailto:${CONTACT_EMAIL}"' in team
+    assert "questions about the forecast, data access, or research" in team
     assert "not an operational weather" in team
     assert "publication workflow" not in team.casefold()
     assert "website maintenance" not in team.casefold()

@@ -122,19 +122,30 @@ export function renderTeamPage(container: HTMLElement): void {
         </div>
       </section>
 
-      <aside class="team-context" aria-label="Experimental guidance and team contact">
-        <div>
-          <span>Experimental guidance</span>
+      <section class="team-contact" aria-labelledby="team-contact-title">
+        <div class="team-contact__intro">
+          <span class="team-contact__eyebrow">Contact us</span>
+          <h2 id="team-contact-title">Talk to the research team</h2>
           <p>
-            For research use only. This dashboard is not an operational weather
-            forecast or warning.
+            For questions about the forecast, data access, or research
+            collaboration, write to the S2S team.
           </p>
         </div>
-        <div class="team-context__links">
+
+        <a class="team-contact__email" href="mailto:${CONTACT_EMAIL}">
+          <span>Email the team</span>
+          <strong>${CONTACT_EMAIL}</strong>
+          <span class="team-contact__arrow" aria-hidden="true">→</span>
+        </a>
+
+        <div class="team-contact__note">
+          <p>
+            <strong>Experimental guidance.</strong>
+            For research use only—not an operational weather forecast or warning.
+          </p>
           <a href="./#briefing">Latest briefing →</a>
-          <a class="team-context__email" href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>
         </div>
-      </aside>
+      </section>
     </section>
   `;
 }

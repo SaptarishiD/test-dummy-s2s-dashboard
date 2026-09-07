@@ -165,6 +165,9 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     assert 'aria-describedby="team-order-note"' in team
     assert 'class="team-grid" role="list"' in team
     assert 'role="listitem"' in team
+    assert 'class="team-contact"' in team
+    assert 'aria-labelledby="team-contact-title"' in team
+    assert ".team-contact__email" in read("src/styles/operational.css")
     assert 'class="briefing-team"' not in briefing
 
 
