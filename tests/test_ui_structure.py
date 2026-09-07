@@ -22,6 +22,23 @@ def test_forecast_map_places_coordinate_labels_outside_the_plot() -> None:
     assert "this.mapHeight + 20" in forecast_map
 
 
+def test_forecast_map_inspection_is_keyboard_touch_and_edge_safe() -> None:
+    forecast_map = read("src/components/ForecastMap.ts")
+    assert 'this.tooltip.setAttribute("role", "tooltip")' in forecast_map
+    assert '"aria-keyshortcuts"' in forecast_map
+    assert 'marker.setAttribute("class", "map-sample-marker")' in forecast_map
+    assert 'interactionSurface.addEventListener("pointerdown"' in forecast_map
+    assert 'interactionSurface.addEventListener("pointerup"' in forecast_map
+    assert 'interactionSurface.addEventListener("pointercancel"' in forecast_map
+    assert "let tapCandidate:" in forecast_map
+    assert "Math.hypot(" in forecast_map
+    assert 'svg.addEventListener("keydown"' in forecast_map
+    assert "ArrowUp: [-1, 0]" in forecast_map
+    assert "ArrowRight: [0, 1]" in forecast_map
+    assert "const maximumLeft = Math.max(" in forecast_map
+    assert "const maximumTop = Math.max(" in forecast_map
+
+
 def test_india_maps_keep_the_original_full_regional_paint_order() -> None:
     forecast_map = read("src/components/ForecastMap.ts")
     forecast_page = read("src/pages/forecast.ts")
@@ -66,8 +83,8 @@ def test_forecast_uses_ifs_as_main_without_conflating_source_latest_issues() -> 
     assert 'sourceById(index, index.default_source)' in catalog
     assert "if (index.current)" in catalog
     assert "source.id === index.current.source_id" in catalog
-    assert 'Main · Experimental IFS initialization' in forecast
-    assert 'Latest source issue · Experimental GFS proxy' in forecast
+    assert "IFS is the main forecast" in forecast
+    assert "GFS is a secondary proxy" in forecast
     assert 'Latest GFS proxy—not the main forecast' in forecast
     assert 'candidate.id === index.default_source ? "Main forecast"' in forecast
     assert '"Secondary proxy"' in forecast
@@ -94,14 +111,19 @@ def test_forecast_exposes_active_product_for_presentation_theming() -> None:
     assert '.india-sheet[data-product="rainfall_anomaly"]' in stylesheet
     assert '.india-sheet[data-product="temperature_mean"]' in stylesheet
     assert '.india-sheet[data-product="temperature_anomaly"]' in stylesheet
+    assert '.india-sheet[data-product="wind850_mean"]' in stylesheet
     assert '.india-sheet[data-product="wind850_anomaly"]' in stylesheet
 
 
-def test_forecast_hero_has_source_aware_model_badge() -> None:
+def test_forecast_hero_presents_the_title_and_timing_cleanly() -> None:
     forecast = read("src/pages/forecast.ts")
-    assert 'sourceId === "ifs"' in forecast
-    assert '"IFS-main"' in forecast
-    assert 'class="india-model-badge"' in forecast
+    assert '<h1>India six-week forecast maps</h1>' in forecast
+    assert 'class="india-forecast-window" aria-label="Forecast timing"' in forecast
+    assert "<dt>Forecast run</dt>" in forecast
+    assert "· 00 UTC</dd>" in forecast
+    assert "<dt>Maps cover</dt>" in forecast
+    assert "<dt>Available</dt><dd>Weeks 1–6</dd>" in forecast
+    assert '<h1 class="ops-visually-hidden">India six-week forecast maps</h1>' not in forecast
 
 
 def test_archive_distinguishes_ifs_from_the_gfs_proxy() -> None:
@@ -135,13 +157,20 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     assert 'await import("./pages/team")' in main
     assert "renderTeamPage(content)" in main
     assert 'class="team-page"' in team
+    assert 'class="team-directory"' in team
+    assert 'class="team-directory__header"' in team
     assert 'class="team-grid"' in team
-    assert 'aria-label="Contributors ordered by project responsibility"' in team
+    assert 'class="team-person-card__project-role"' in team
+    assert 'aria-label="Research contributors"' in team
+    assert 'aria-describedby="team-order-note"' in team
+    assert 'class="team-grid" role="list"' in team
+    assert 'role="listitem"' in team
     assert 'class="briefing-team"' not in briefing
 
 
 def test_forecast_explains_initial_condition_sources_accessibly() -> None:
     forecast = read("src/pages/forecast.ts")
+    stylesheet = read("src/styles/operational.css")
     assert 'class="india-source-guide"' in forecast
     assert 'id="india-source-guide"' in forecast
     assert 'aria-describedby="india-source-guide india-source-date-notice"' in forecast
@@ -150,18 +179,35 @@ def test_forecast_explains_initial_condition_sources_accessibly() -> None:
     assert "Global Forecast System" in forecast
     assert "Delayed ECMWF reanalysis reference" in forecast
     assert "same experimental forecasting system is initialized" in forecast
+    assert ".india-source-guide[open]" in stylesheet
+    assert ".india-source-tabs a:focus-visible" in stylesheet
+    assert "outline-offset: -3px" in stylesheet
+    assert "--ops-ink-faint: #5d6c7e" in stylesheet
 
 
-def test_forecast_warns_that_source_latest_dates_can_differ() -> None:
+def test_forecast_explains_that_source_latest_dates_can_differ() -> None:
     forecast = read("src/pages/forecast.ts")
     refresh = read("src/styles/operational.css")
     assert "const preferredIssues = new Map(" in forecast
     assert "defaultIssueForSource(index, candidate)" in forecast
     assert 'id="india-source-date-notice"' in forecast
-    assert "Latest validated:" in forecast
-    assert "Dates can differ between sources" in forecast
-    assert "opens its latest validated initialization" in forecast
+    assert "Latest validated runs" in forecast
+    assert "Sources update on different dates" in forecast
+    assert "opens its latest run" in forecast
     assert ".india-source-date-notice" in refresh
+
+
+def test_forecast_removes_redundant_instructions_and_metadata() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert "Explore the maps" not in forecast
+    assert "Choose a variable" not in forecast
+    assert "IFS-main" not in forecast
+    assert "Main · Experimental IFS initialization" not in forecast
+    assert 'class="india-status-grid"' not in forecast
+    assert "Sources and downloads" in forecast
+    assert "Open forecast PDF" in forecast
+    assert "Download PDF" in forecast
+    assert "Browse archive" in forecast
 
 
 def test_forecast_date_formatter_accepts_full_iso_initializations() -> None:
@@ -172,33 +218,79 @@ def test_forecast_date_formatter_accepts_full_iso_initializations() -> None:
     assert "new Date(`${isoDate}T12:00:00Z`)" not in forecast
 
 
-def test_forecast_idle_product_rotation_is_controlled_and_cleaned_up() -> None:
+def test_forecast_variable_and_week_selection_are_manual_and_accessible() -> None:
     main = read("src/main.ts")
     forecast = read("src/pages/forecast.ts")
-    expected_order = (
-        '"rainfall_anomaly"',
-        '"rainfall_total"',
-        '"wind850_anomaly"',
-        '"temperature_anomaly"',
+    assert "AUTO_PRODUCT_ORDER" not in forecast
+    assert 'id="india-auto-cycle"' not in forecast
+    assert 'id="india-range-select"' in forecast
+    assert '<option value="0">Weeks 1–4</option>' in forecast
+    assert '<option value="2">Weeks 3–6</option>' in forecast
+    assert "productIcon(productKey)" in forecast
+    assert 'india-variable-icon--rainfall"' in forecast
+    assert 'india-variable-icon--rainfall-anomaly"' in forecast
+    assert 'india-variable-icon--temperature"' in forecast
+    assert 'india-variable-icon--temperature-anomaly"' in forecast
+    assert 'india-variable-icon--wind"' in forecast
+    assert "-webkit-backdrop-filter: blur(24px) saturate(150%)" in read(
+        "src/styles/operational.css"
     )
-    order_start = forecast.index("const AUTO_PRODUCT_ORDER")
-    order_end = forecast.index("];", order_start)
-    order_block = forecast[order_start:order_end]
-    assert '"wind850_mean"' not in order_block
-    assert [order_block.index(product) for product in expected_order] == sorted(
-        order_block.index(product) for product in expected_order
-    )
-    assert "AUTO_PRODUCT_DELAY_MS = 12_000" in forecast
-    assert "AUTO_PRODUCT_IDLE_DELAY_MS = 30_000" in forecast
-    assert "AUTO_PRODUCT_ORDER.filter" in forecast
-    assert 'id="india-auto-cycle"' in forecast
-    assert 'aria-pressed="true"' in forecast
+    assert 'button.setAttribute("aria-pressed", String(active))' in forecast
     assert 'matchMedia("(prefers-reduced-motion: reduce)")' in forecast
-    assert 'document.addEventListener("visibilitychange"' in forecast
+    assert 'class="india-visualization" id="india-visualization"' in forecast
+    assert 'class="india-map-workspace"' in forecast
+    assert 'productIndicator.className = "india-product-indicator"' in forecast
+    assert 'typeof document.startViewTransition === "function"' in forecast
+    assert 'window.removeEventListener("resize", positionProductIndicator)' in forecast
     assert "return () => {" in forecast
-    assert "clearAutoCycleTimer();" in forecast
+    assert "panelAnimationTimer" in forecast
     assert "routeCleanup?.();" in main
     assert "routeCleanup = renderForecastPage(content, data);" in main
+
+
+def test_forecast_explains_the_selected_product_below_the_maps() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert "PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS" in forecast
+    assert 'class="india-map-key"' in forecast
+    assert 'id="india-product-explanation"' in forecast
+    assert "wetter or drier" in forecast
+    assert "warmer or cooler" in forecast
+    assert forecast.index('id="india-panel-grid"') < forecast.index(
+        'id="india-product-explanation"'
+    )
+    assert "Showing ${product.label}." in forecast
+    assert "Showing Weeks ${rangeStart + 1}–${rangeStart + 4}." in forecast
+
+
+def test_forecast_map_headers_prioritize_week_and_semantic_dates() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert 'class="india-map-panel__period"' in forecast
+    assert '<time datetime="${week.valid_start}">' in forecast
+    assert '<time datetime="${week.valid_end}">' in forecast
+    assert "<i>|</i>" not in forecast
+
+
+def test_forecast_polish_uses_one_workspace_rail_and_desktop_sticky_controls() -> None:
+    stylesheet = read("src/styles/operational.css")
+    assert "--india-workspace-width: 1180px" in stylesheet
+    assert "view-transition-name: india-forecast-visualization" in stylesheet
+    assert "@media (min-width: 1181px)" in stylesheet
+    assert "--product-indicator-x" in stylesheet
+    assert ".india-map-panel:focus-within" in stylesheet
+    assert "scroll-margin-top: 92px" in stylesheet
+    assert ".india-product-tabs button::after," in stylesheet
+    assert ".skip-link {" in stylesheet
+
+
+def test_skip_link_does_not_enter_the_hash_router() -> None:
+    main = read("src/main.ts")
+    assert 'querySelector<HTMLAnchorElement>(".skip-link")' in main
+    assert "event.preventDefault();" in main
+    assert "content.focus({ preventScroll: true });" in main
+    assert "focusContentAfterRoute" in main
+    assert "hasRenderedRoute" in main
+    assert "rememberRouteFocus();" in main
+    assert "ROUTE_FOCUS_STORAGE_KEY" in main
 
 
 def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
@@ -223,9 +315,32 @@ def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
 def test_forecast_has_a_prominent_full_briefing_action() -> None:
     forecast = read("src/pages/forecast.ts")
     refresh = read("src/styles/operational.css")
-    assert 'class="india-briefing-cta" href="./#briefing"' in forecast
-    assert "Summary and full report" in forecast
+    assert 'class="india-hero-briefing" href="./#briefing"' in forecast
+    assert "Plain-language summary and full report" in forecast
     assert 'class="india-pdf-download-secondary"' in forecast
     assert 'class="india-pdf-download-tertiary"' in forecast
-    assert ".india-run-actions .india-briefing-cta" in refresh
-    assert ".site-nav .briefing-nav-link.is-active" in refresh
+    assert ".india-hero-briefing" in refresh
+    assert '.site-nav a[aria-current="page"]' in refresh
+
+
+def test_shared_header_uses_the_page_rail_and_purpose_labeled_navigation() -> None:
+    main = read("src/main.ts")
+    stylesheet = read("src/styles/operational.css")
+    assert 'class="site-header__inner"' in main
+    assert 'class="institution-brand__marks"' in main
+    assert 'class="institution-brand__service"' in main
+    assert main.index('data-route="briefing"') < main.index('data-route="archive"')
+    assert "Latest maps" in main
+    assert "Weekly analysis" in main
+    assert "Past issues" in main
+    assert "People &amp; methods" in main
+    assert "briefing-nav-link__icon" not in main
+    assert "width: min(calc(100% - 48px), 1180px)" in stylesheet
+    assert "grid-template-columns: repeat(4, minmax(0, 1fr))" in stylesheet
+    assert ".site-nav a[aria-current=\"page\"]::after" in stylesheet
+    assert ".site-nav a:focus-visible" in stylesheet
+    assert ".site-nav a::after," in stylesheet
+    assert 'headerUtility.hidden = route === "team"' in main
+    assert "Latest run ·" in main
+    assert "Latest briefing · ${FEATURED_REPORT.date}" in main
+    assert "Catalogue through ·" in main

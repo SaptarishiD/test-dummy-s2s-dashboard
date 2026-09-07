@@ -16,6 +16,7 @@ import {
   findIssue,
   issueChecksum,
 } from "./lib/catalog";
+import { FEATURED_REPORT } from "./lib/reports";
 
 type Route = "india" | "archive" | "briefing" | "team";
 
@@ -25,6 +26,31 @@ const ROUTES = new Set<Route>([
   "briefing",
   "team",
 ]);
+const ROUTE_FOCUS_STORAGE_KEY = "fuxi-dashboard-focus-content";
+
+function storedRouteFocus(): boolean {
+  try {
+    return window.sessionStorage.getItem(ROUTE_FOCUS_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function rememberRouteFocus(): void {
+  try {
+    window.sessionStorage.setItem(ROUTE_FOCUS_STORAGE_KEY, "true");
+  } catch {
+    // Focus transfer still works for same-document navigation.
+  }
+}
+
+function clearStoredRouteFocus(): void {
+  try {
+    window.sessionStorage.removeItem(ROUTE_FOCUS_STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable in privacy-restricted contexts.
+  }
+}
 
 function currentRoute(): Route {
   const hash = window.location.hash.replace("#", "") as Route;
@@ -136,42 +162,52 @@ async function loadData(): Promise<AppData> {
 function shell(): string {
   return `
     <header class="site-header">
-      <a
-        class="institution-brand"
-        href="./#india"
-        aria-label="Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University forecast home"
-      >
-        <img
-          class="institution-brand__ashoka"
-          src="./brand/ashoka-university.png"
-          alt=""
-        />
-        <img
-          class="institution-brand__centre"
-          src="./brand/scdlds-centre.png"
-          alt=""
-        />
-      </a>
-      <nav class="site-nav" aria-label="Primary">
-        <a href="./#india" data-route="india">Forecast</a>
-        <a href="./#archive" data-route="archive">Archive</a>
-        <a class="briefing-nav-link" href="./#briefing" data-route="briefing">
-          <svg
-            class="briefing-nav-link__icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path d="M7 2.75h6.6L18.25 7.4V21.25H7z" />
-            <path d="M13.5 2.75V7.5h4.75M9.75 12h5.5M9.75 15.5h5.5" />
-          </svg>
-          <span>Briefing</span>
+      <div class="site-header__inner">
+        <a
+          class="institution-brand"
+          href="./#india"
+          aria-label="Go to the latest India forecast — Safexpress Centre for Data, Learning and Decision Sciences, Ashoka University"
+        >
+          <span class="institution-brand__marks" aria-hidden="true">
+            <img
+              class="institution-brand__ashoka"
+              src="./brand/ashoka-university.png"
+              alt=""
+            />
+            <img
+              class="institution-brand__centre"
+              src="./brand/scdlds-centre.png"
+              alt=""
+            />
+          </span>
+          <span class="institution-brand__service" aria-hidden="true">
+            <strong>S2S Forecast</strong>
+            <small>Research dashboard</small>
+          </span>
         </a>
-        <a href="./#team" data-route="team">Team</a>
-      </nav>
-      <div class="header-utility">
-        <div class="header-status">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span class="header-status__label">Loading latest issue</span>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="./#india" data-route="india">
+            <strong>Forecast</strong>
+            <small>Latest maps</small>
+          </a>
+          <a href="./#briefing" data-route="briefing">
+            <strong>Briefing</strong>
+            <small>Weekly analysis</small>
+          </a>
+          <a href="./#archive" data-route="archive">
+            <strong>Archive</strong>
+            <small>Past issues</small>
+          </a>
+          <a href="./#team" data-route="team">
+            <strong>Team</strong>
+            <small>People &amp; methods</small>
+          </a>
+        </nav>
+        <div class="header-utility">
+          <div class="header-status" role="status" aria-live="polite">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="header-status__label">Loading latest issue</span>
+          </div>
         </div>
       </div>
     </header>
@@ -192,13 +228,15 @@ function shell(): string {
       </div>
       <div class="site-footer__section" id="limitations">
         <strong>Limitations & contact</strong>
-        <p>Long leads describe broad ensemble tendencies, not local weather. Public contact: <a href="mailto:raj.ayush@students.iiserpune.ac.in">raj.ayush@students.iiserpune.ac.in</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
+        <p>Long leads describe broad ensemble tendencies, not local weather. Public contact: <a href="mailto:s2s.scdlds@ashoka.edu.in">s2s.scdlds@ashoka.edu.in</a> · <a href="https://scdlds.ashoka.edu.in/" target="_blank" rel="noreferrer">Centre website ↗</a></p>
       </div>
     </footer>
   `;
 }
 
 let routeCleanup: (() => void) | undefined;
+let focusContentAfterRoute = storedRouteFocus();
+let hasRenderedRoute = false;
 
 async function renderRoute(data: AppData): Promise<void> {
   const route = currentRoute();
@@ -213,15 +251,28 @@ async function renderRoute(data: AppData): Promise<void> {
   document.body.classList.toggle("team-route", route === "team");
   const statusDate = data.forecast?.issue.initialization ??
     (data.index ? currentForecast(data.index)?.issue.initialization : undefined);
+  const formattedStatusDate = statusDate
+    ? new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
+    }).format(new Date(statusDate))
+    : undefined;
   const statusLabel = route === "briefing"
-    ? "Latest Thursday briefing"
+    ? `Latest briefing · ${FEATURED_REPORT.date}`
     : route === "team"
-      ? "Scientific team"
-      : statusDate
-        ? new Intl.DateTimeFormat("en-IN", {
-          day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
-        }).format(new Date(statusDate))
-        : "Forecast archive";
+      ? ""
+      : route === "archive"
+        ? formattedStatusDate
+          ? `Catalogue through · ${formattedStatusDate}`
+          : "Validated issue catalogue"
+        : formattedStatusDate
+          ? `Latest run · ${formattedStatusDate}`
+          : "Loading latest issue";
+  const headerUtility = document.querySelector<HTMLElement>(".header-utility")!;
+  const headerStatus = document.querySelector<HTMLElement>(".header-status")!;
+  headerUtility.hidden = route === "team";
+  headerStatus.dataset.state = route === "india" || route === "archive"
+    ? "validated"
+    : "context";
   document.querySelector<HTMLElement>(".header-status__label")!.textContent = statusLabel;
   document
     .querySelectorAll<HTMLAnchorElement>(".site-nav a")
@@ -250,6 +301,12 @@ async function renderRoute(data: AppData): Promise<void> {
     const { renderTeamPage } = await import("./pages/team");
     renderTeamPage(content);
   }
+  if (hasRenderedRoute || focusContentAfterRoute) {
+    content.focus({ preventScroll: true });
+  }
+  hasRenderedRoute = true;
+  focusContentAfterRoute = false;
+  clearStoredRouteFocus();
   window.scrollTo(0, 0);
   window.requestAnimationFrame(() => window.scrollTo(0, 0));
 }
@@ -269,15 +326,34 @@ function renderLoadFailure(error: unknown): void {
 async function start(): Promise<void> {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   app.innerHTML = shell();
+  const content = document.querySelector<HTMLElement>("#content")!;
+  document.querySelector<HTMLAnchorElement>(".skip-link")
+    ?.addEventListener("click", (event) => {
+      event.preventDefault();
+      content.focus({ preventScroll: true });
+      content.scrollIntoView({ block: "start" });
+    });
+  app.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const link = target.closest<HTMLAnchorElement>("a");
+    const route = link?.hash.replace("#", "") as Route | undefined;
+    if (route && ROUTES.has(route) && link?.href !== window.location.href) {
+      focusContentAfterRoute = true;
+      rememberRouteFocus();
+    }
+  });
   try {
     const data = await loadData();
     await renderRoute(data);
     window.addEventListener("hashchange", () => {
       if (currentRoute() === "india" && !data.forecast) {
+        rememberRouteFocus();
         window.location.reload();
         return;
       }
       if (currentRoute() === "archive" && !data.index) {
+        rememberRouteFocus();
         window.location.reload();
         return;
       }

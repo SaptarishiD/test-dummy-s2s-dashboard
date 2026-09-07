@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_EMAIL = "raj.ayush@students.iiserpune.ac.in"
+PUBLIC_EMAIL = "s2s.scdlds@ashoka.edu.in"
 EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
@@ -69,7 +69,7 @@ def test_header_uses_the_official_scdlds_lockup() -> None:
     assert shell.count('./brand/ashoka-university.png') == 1
     assert "institution-brand__badge" not in shell
     assert "institution-brand__divider" not in shell
-    assert "Safexpress Centre for Data, Learning and Decision Sciences at Ashoka University forecast home" in shell
+    assert "Go to the latest India forecast — Safexpress Centre for Data, Learning and Decision Sciences, Ashoka University" in shell
     assert './brand/s2s-research-mark.svg' not in shell
     assert "Loading latest issue" in shell
 
@@ -117,8 +117,8 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     shell = read("src/main.ts")
     briefing = read("src/pages/briefing.ts")
     report_metadata = read("src/lib/reports.ts")
-    report_path = "reports/s2s-summary-india-2026-08-26.pdf"
-    cover_path = "reports/s2s-summary-india-2026-08-26-cover.png"
+    report_path = "reports/s2s-summary-india-2026-09-02.pdf"
+    cover_path = "reports/s2s-summary-india-2026-09-02-cover.png"
     report = ROOT / "public" / report_path
     cover = ROOT / "public" / cover_path
     assert f'href: "./{report_path}"' in report_metadata
@@ -128,39 +128,51 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert 'type="application/pdf"' in briefing
     assert 'href="${FEATURED_REPORT.href}" download type="application/pdf"' in briefing
     assert 'aria-describedby="briefing-report-fallback"' in briefing
-    assert "26 August 2026 (PDF, 2.0 MB)" in report_metadata
+    assert "2 September 2026 (PDF, 2.0 MB)" in report_metadata
     assert report.read_bytes().startswith(b"%PDF-")
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
 
-def test_team_navigation_lists_scientific_contributors_by_project_role() -> None:
+def test_team_navigation_lists_research_contributors_by_first_name() -> None:
     shell = read("src/main.ts")
     team = read("src/pages/team.ts")
     assert 'href="./#briefing" data-route="briefing"' in shell
     assert 'href="./#team" data-route="team"' in shell
-    names_by_project_role = (
-        "Manmeet Singh",
+    names_by_first_name = (
         "Ayush Raj",
-        "Sandeep Juneja",
+        "Manmeet Singh",
         "Parthasarathi Mukhopadhyay",
+        "Sandeep Juneja",
         "Saptarishi Dhanuka",
     )
-    for name in names_by_project_role:
+    for name in names_by_first_name:
         assert name in team
-    assert [team.index(name) for name in names_by_project_role] == sorted(
-        team.index(name) for name in names_by_project_role
+    assert [team.index(name) for name in names_by_first_name] == sorted(
+        team.index(name) for name in names_by_first_name
     )
+    for designation in (
+        "Assistant Professor",
+        "MS Thesis Researcher · AI weather research",
+        "Professor of Computer Science · Centre Director",
+        "Visiting Faculty · Earth & Environmental Sciences",
+        "Pre-doctoral Fellow · AI weather research",
+    ):
+        assert designation in team
     for project_role in (
+        "Lead Researcher",
         "Lead Scientist",
-        "Main Researcher",
         "Senior Scientist",
-        "Research Contributor",
+        "Principal Investigator",
+        "Researcher",
     ):
         assert project_role in team
-    assert team.count('projectRole: "Senior Scientist"') == 2
+    assert "projectRole" in team
     assert "People behind the forecast" not in team
     assert "alphabetically by surname" not in team
-    assert 'id="team-title">Scientific contributors</h1>' in team
+    assert 'id="team-title">Research contributors</h1>' in team
+    assert "Listed alphabetically by first name" in team
+    assert "s2s.scdlds@ashoka.edu.in" in team
+    assert "not an operational weather" in team
     assert "publication workflow" not in team.casefold()
     assert "website maintenance" not in team.casefold()
 
@@ -177,6 +189,33 @@ def test_briefing_is_report_only_and_keeps_the_complete_pdf() -> None:
     assert 'title="Full ${FEATURED_REPORT.title} for ${FEATURED_REPORT.date}"' in briefing
     assert "Your browser cannot display embedded PDFs." in briefing
     assert "If the embedded report is unavailable," in briefing
+
+
+def test_briefing_leads_with_the_issue_and_only_essential_report_facts() -> None:
+    briefing = read("src/pages/briefing.ts")
+    refresh = read("src/styles/operational.css")
+    assert 'class="briefing-issue-date">${FEATURED_REPORT.date}</time>' in briefing
+    assert '<h1 id="latest-briefing-title">${FEATURED_REPORT.title}</h1>' in briefing
+    assert "Latest forecast briefing" not in briefing
+    assert "<dt>Initialized</dt>" not in briefing
+    assert [briefing.index(label) for label in (
+        "<dt>Valid period</dt>",
+        "<dt>Forecast range</dt>",
+        "<dt>Document</dt>",
+    )] == sorted(briefing.index(label) for label in (
+        "<dt>Valid period</dt>",
+        "<dt>Forecast range</dt>",
+        "<dt>Document</dt>",
+    ))
+    assert 'aria-describedby="briefing-document-details"' in briefing
+    assert "opens in a new tab" in briefing
+    assert 'class="briefing-outlook"' in briefing
+    assert "${FEATURED_REPORT.outlook}" in briefing
+    assert "A wetter first week is favored across north-central and eastern India." in read(
+        "src/lib/reports.ts"
+    )
+    assert ".briefing-issue-date" in refresh
+    assert "min-height: 48px" in refresh
 
 
 def test_team_portraits_are_local_assets() -> None:

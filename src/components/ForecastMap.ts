@@ -325,6 +325,8 @@ export class ForecastMap {
     this.instanceId = ++forecastMapSequence;
     this.tooltip = document.createElement("div");
     this.tooltip.className = "map-tooltip";
+    this.tooltip.id = `forecast-map-tooltip-${this.instanceId}`;
+    this.tooltip.setAttribute("role", "tooltip");
     this.tooltip.hidden = true;
     this.container.append(this.tooltip);
   }
@@ -664,6 +666,11 @@ export class ForecastMap {
     if (!values) throw new Error(`${productKey} is unavailable for Week ${week.week}`);
     const { latitude, longitude } = this.forecast.grid;
     svg.setAttribute("tabindex", "0");
+    svg.setAttribute("aria-describedby", this.tooltip.id);
+    svg.setAttribute(
+      "aria-keyshortcuts",
+      "ArrowUp ArrowDown ArrowLeft ArrowRight",
+    );
     svg.classList.add("forecast-map--interactive");
     const interactionSurface = svgElement("rect");
     interactionSurface.setAttribute("x", String(AXIS_LEFT));
@@ -675,32 +682,64 @@ export class ForecastMap {
     interactionSurface.setAttribute("aria-hidden", "true");
     interactionSurface.setAttribute("class", "map-interaction-surface");
     svg.append(interactionSurface);
-    const show = (event?: PointerEvent): void => {
-      let latIndex = Math.floor(latitude.length / 2);
-      let lonIndex = Math.floor(longitude.length / 2);
-      if (event) {
-        const bounds = interactionSurface.getBoundingClientRect();
-        const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
-        const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
-        const hoveredLongitude = this.longitudeMinimum +
-          x * (this.longitudeMaximum - this.longitudeMinimum);
-        const hoveredLatitude = this.latitudeMaximum -
-          y * (this.latitudeMaximum - this.latitudeMinimum);
-        lonIndex = Math.max(
-          0,
-          Math.min(
-            longitude.length - 1,
-            Math.round((hoveredLongitude - longitude[0]) / this.forecast.grid.spacing_degrees),
-          ),
-        );
-        latIndex = Math.max(
-          0,
-          Math.min(
-            latitude.length - 1,
-            Math.round((latitude[0] - hoveredLatitude) / this.forecast.grid.spacing_degrees),
-          ),
-        );
-      }
+
+    const marker = svgElement("g");
+    marker.setAttribute("class", "map-sample-marker");
+    marker.setAttribute("aria-hidden", "true");
+    marker.setAttribute("visibility", "hidden");
+    const markerRing = svgElement("circle");
+    markerRing.setAttribute("r", "8");
+    markerRing.setAttribute("class", "map-sample-marker__ring");
+    const markerDot = svgElement("circle");
+    markerDot.setAttribute("r", "2.75");
+    markerDot.setAttribute("class", "map-sample-marker__dot");
+    marker.append(markerRing, markerDot);
+    svg.append(marker);
+
+    let latIndex = Math.floor(latitude.length / 2);
+    let lonIndex = Math.floor(longitude.length / 2);
+    let pinnedSelection = false;
+    let tapCandidate:
+      | { pointerId: number; x: number; y: number }
+      | undefined;
+
+    const hide = (): void => {
+      this.tooltip.hidden = true;
+      marker.setAttribute("visibility", "hidden");
+    };
+
+    const positionTooltip = (lat: number, lon: number): void => {
+      const surfaceBounds = interactionSurface.getBoundingClientRect();
+      const containerBounds = this.container.getBoundingClientRect();
+      const anchorX = surfaceBounds.left - containerBounds.left +
+        ((lon - this.longitudeMinimum) /
+          (this.longitudeMaximum - this.longitudeMinimum)) * surfaceBounds.width;
+      const anchorY = surfaceBounds.top - containerBounds.top +
+        ((this.latitudeMaximum - lat) /
+          (this.latitudeMaximum - this.latitudeMinimum)) * surfaceBounds.height;
+      const gap = 12;
+      const edge = 8;
+      const tooltipWidth = this.tooltip.offsetWidth;
+      const tooltipHeight = this.tooltip.offsetHeight;
+      const maximumLeft = Math.max(
+        edge,
+        this.container.clientWidth - tooltipWidth - edge,
+      );
+      const maximumTop = Math.max(
+        edge,
+        this.container.clientHeight - tooltipHeight - edge,
+      );
+      const preferredLeft = anchorX + gap + tooltipWidth <= this.container.clientWidth - edge
+        ? anchorX + gap
+        : anchorX - tooltipWidth - gap;
+      const preferredTop = anchorY + gap + tooltipHeight <= this.container.clientHeight - edge
+        ? anchorY + gap
+        : anchorY - tooltipHeight - gap;
+      this.tooltip.style.left = `${Math.max(edge, Math.min(maximumLeft, preferredLeft))}px`;
+      this.tooltip.style.top = `${Math.max(edge, Math.min(maximumTop, preferredTop))}px`;
+    };
+
+    const show = (): void => {
       const lat = latitude[latIndex];
       const lon = longitude[lonIndex];
       const value = values[latIndex * longitude.length + lonIndex];
@@ -724,27 +763,111 @@ export class ForecastMap {
         <small>Native ${this.forecast.grid.spacing_degrees}° grid cell</small>
       `;
       this.tooltip.hidden = false;
+      marker.setAttribute(
+        "transform",
+        `translate(${AXIS_LEFT + this.mapX(lon)} ${this.mapY(lat)})`,
+      );
+      marker.setAttribute("visibility", "visible");
+      positionTooltip(lat, lon);
       svg.setAttribute(
         "aria-label",
-        `${product.label}, Week ${week.week}; selected cell ${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formatValue(value, product.units)}`,
+        `${product.label}, Week ${week.week}; selected cell ${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formatValue(value, product.units)}. Use arrow keys to inspect nearby grid cells.`,
       );
-      if (event) {
-        const bounds = this.container.getBoundingClientRect();
-        this.tooltip.style.left = `${event.clientX - bounds.left + 14}px`;
-        this.tooltip.style.top = `${event.clientY - bounds.top + 14}px`;
-      } else {
-        this.tooltip.style.left = "16px";
-        this.tooltip.style.top = "16px";
-      }
     };
-    interactionSurface.addEventListener("pointermove", (event) => show(event));
-    interactionSurface.addEventListener("pointerenter", (event) => show(event));
+
+    const selectFromPointer = (event: PointerEvent): void => {
+      const bounds = interactionSurface.getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+      const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+      const hoveredLongitude = this.longitudeMinimum +
+        x * (this.longitudeMaximum - this.longitudeMinimum);
+      const hoveredLatitude = this.latitudeMaximum -
+        y * (this.latitudeMaximum - this.latitudeMinimum);
+      lonIndex = Math.max(
+        0,
+        Math.min(
+          longitude.length - 1,
+          Math.round((hoveredLongitude - longitude[0]) / this.forecast.grid.spacing_degrees),
+        ),
+      );
+      latIndex = Math.max(
+        0,
+        Math.min(
+          latitude.length - 1,
+          Math.round((latitude[0] - hoveredLatitude) / this.forecast.grid.spacing_degrees),
+        ),
+      );
+      show();
+    };
+
+    interactionSurface.addEventListener("pointermove", (event) => {
+      if (tapCandidate?.pointerId === event.pointerId) {
+        const movement = Math.hypot(
+          event.clientX - tapCandidate.x,
+          event.clientY - tapCandidate.y,
+        );
+        if (movement > 8) {
+          tapCandidate = undefined;
+          pinnedSelection = false;
+          if (document.activeElement !== svg) hide();
+        }
+        if (event.pointerType === "touch" || event.buttons > 0) return;
+      }
+      if (event.pointerType === "touch") return;
+      pinnedSelection = false;
+      selectFromPointer(event);
+    });
+    interactionSurface.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "touch") selectFromPointer(event);
+    });
+    interactionSurface.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+      tapCandidate = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+      };
+    });
+    interactionSurface.addEventListener("pointerup", (event) => {
+      if (tapCandidate?.pointerId !== event.pointerId) return;
+      const movement = Math.hypot(
+        event.clientX - tapCandidate.x,
+        event.clientY - tapCandidate.y,
+      );
+      tapCandidate = undefined;
+      if (movement > 8) return;
+      pinnedSelection = true;
+      selectFromPointer(event);
+      svg.focus({ preventScroll: true });
+    });
+    interactionSurface.addEventListener("pointercancel", () => {
+      tapCandidate = undefined;
+      pinnedSelection = false;
+      if (document.activeElement !== svg) hide();
+    });
     svg.addEventListener("focus", () => show());
     interactionSurface.addEventListener("pointerleave", () => {
-      this.tooltip.hidden = true;
+      if (!pinnedSelection && document.activeElement !== svg) hide();
+    });
+    svg.addEventListener("keydown", (event) => {
+      const movement: Record<string, [number, number]> = {
+        ArrowUp: [-1, 0],
+        ArrowDown: [1, 0],
+        ArrowLeft: [0, -1],
+        ArrowRight: [0, 1],
+      };
+      const delta = movement[event.key];
+      if (!delta) return;
+      event.preventDefault();
+      pinnedSelection = false;
+      latIndex = Math.max(0, Math.min(latitude.length - 1, latIndex + delta[0]));
+      lonIndex = Math.max(0, Math.min(longitude.length - 1, lonIndex + delta[1]));
+      show();
     });
     svg.addEventListener("blur", () => {
-      this.tooltip.hidden = true;
+      tapCandidate = undefined;
+      pinnedSelection = false;
+      hide();
     });
   }
 

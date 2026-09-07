@@ -341,7 +341,7 @@ export function renderGlobalPage(
         <button class="speed-button" id="speed-button" type="button" aria-label="Change animation speed">1×</button>
       </div>
 
-      <p class="global-disclaimer">Dated 28 Jul 2026 demonstration · not updated with the current India forecast · broad guidance, not local weather · <a href="mailto:raj.ayush@students.iiserpune.ac.in">public contact</a></p>
+      <p class="global-disclaimer">Dated 28 Jul 2026 demonstration · not updated with the current India forecast · broad guidance, not local weather · <a href="mailto:s2s.scdlds@ashoka.edu.in">public contact</a></p>
     </section>
   `;
 

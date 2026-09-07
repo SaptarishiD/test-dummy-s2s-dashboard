@@ -206,17 +206,52 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
   },
 };
 
-const AUTO_PRODUCT_ORDER: ProductKey[] = [
-  "rainfall_anomaly",
-  "rainfall_total",
-  "wind850_anomaly",
-  "temperature_anomaly",
-];
-const AUTO_PRODUCT_DELAY_MS = 12_000;
-const AUTO_PRODUCT_IDLE_DELAY_MS = 30_000;
+const PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS: Record<ProductKey, string> = {
+  rainfall_total: "Shows how much rain is expected per day, averaged across each forecast week.",
+  rainfall_anomaly: "Shows where a week may be wetter or drier than the model usually expects for that place and time of year.",
+  temperature_mean: "Shows the expected average near-surface temperature during each forecast week.",
+  temperature_anomaly: "Shows where a week may be warmer or cooler than the model usually expects for that place and time of year.",
+  wind850_mean: "Shows the expected average lower-atmosphere wind speed and direction during each forecast week.",
+  wind850_anomaly: "Shows where lower-atmosphere winds may be stronger, weaker or differently directed than usual.",
+};
 
 function isWindProduct(product: ProductKey): boolean {
   return product === "wind850_mean" || product === "wind850_anomaly";
+}
+
+function productIcon(product: ProductKey): string {
+  if (product === "rainfall_total") {
+    return `
+      <svg class="india-variable-icon india-variable-icon--rainfall" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7.2 15.2h9.2a3.6 3.6 0 0 0 .4-7.2 5.3 5.3 0 0 0-9.9 1.7 2.8 2.8 0 0 0 .3 5.5Z" />
+        <path d="m8 18.1-.8 1.5M12.3 18.1l-.8 1.5M16.6 18.1l-.8 1.5" />
+      </svg>`;
+  }
+  if (product === "rainfall_anomaly") {
+    return `
+      <svg class="india-variable-icon india-variable-icon--rainfall-anomaly" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7.2 14.2h9.2a3.6 3.6 0 0 0 .4-7.2 5.3 5.3 0 0 0-9.9 1.7 2.8 2.8 0 0 0 .3 5.5Z" />
+        <path d="M8.5 20v-4m0 0-1.7 1.7M8.5 16l1.7 1.7M15.5 16v4m0 0-1.7-1.7M15.5 20l1.7-1.7" />
+      </svg>`;
+  }
+  if (product === "temperature_mean") {
+    return `
+      <svg class="india-variable-icon india-variable-icon--temperature" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 14.4V5.7a2 2 0 1 1 4 0v8.7a4 4 0 1 1-4 0Z" />
+        <path d="M12 9v7.2" />
+      </svg>`;
+  }
+  if (product === "temperature_anomaly") {
+    return `
+      <svg class="india-variable-icon india-variable-icon--temperature-anomaly" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7.5 14.4V5.7a2 2 0 1 1 4 0v8.7a4 4 0 1 1-4 0Z" />
+        <path d="M9.5 9v7.2M15.5 7h5M18 4.5v5M15.5 15.5h5" />
+      </svg>`;
+  }
+  return `
+    <svg class="india-variable-icon india-variable-icon--wind" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 8.2h10.4c2.5 0 2.5-3.7.1-3.7-1.2 0-1.9.7-2.1 1.5M4 12h14c2.7 0 2.7 4 0 4-1.2 0-2-.7-2.2-1.6M4 15.8h7" />
+    </svg>`;
 }
 
 function friendlyDate(isoDate: string, includeYear = false): string {
@@ -265,8 +300,8 @@ function renderInitializationComparison(
   host.innerHTML = `
     <div class="india-comparison-toolbar">
       <div role="group" aria-label="Comparison variable">
-        <button type="button" data-variable="rainfall" class="is-active">Rainfall</button>
-        <button type="button" data-variable="temperature">Temperature</button>
+        <button type="button" data-variable="rainfall" class="is-active" aria-pressed="true">Rainfall</button>
+        <button type="button" data-variable="temperature" aria-pressed="false">Temperature</button>
       </div>
       <label>Forecast week
         <select aria-label="Comparison forecast week">
@@ -339,8 +374,11 @@ function renderInitializationComparison(
   host.querySelectorAll<HTMLButtonElement>("[data-variable]").forEach((button) => {
     button.addEventListener("click", () => {
       variable = button.dataset.variable as keyof typeof COMPARISON_PRODUCTS;
-      host.querySelectorAll<HTMLButtonElement>("[data-variable]").forEach((candidate) =>
-        candidate.classList.toggle("is-active", candidate === button));
+      host.querySelectorAll<HTMLButtonElement>("[data-variable]").forEach((candidate) => {
+        const active = candidate === button;
+        candidate.classList.toggle("is-active", active);
+        candidate.setAttribute("aria-pressed", String(active));
+      });
       render();
     });
   });
@@ -436,30 +474,6 @@ export function renderForecastPage(
       candidate.id !== sourceId &&
       candidate.issues.some((issue) => issue.id === currentIssueId),
   );
-  const sourceBadge = isCurrent
-    ? sourceId === "ifs"
-      ? "Main · Experimental IFS initialization"
-      : "Main experimental forecast"
-    : sourceId === "ifs"
-      ? isSourceLatest
-        ? "Latest source issue · Experimental IFS"
-        : catalogIssue.members < 100
-          ? "Archive · Limited IFS experiment"
-          : "Archive · Experimental IFS"
-      : sourceId === "era5"
-        ? isSourceLatest
-          ? "Latest · Delayed ERA5 reference"
-          : "Archive · Delayed ERA5 reference"
-        : isSourceLatest
-          ? "Latest source issue · Experimental GFS proxy"
-          : catalogIssue.members < 100
-            ? "Archive · Limited experiment"
-            : "Archive · Complete ensemble";
-  const modelBadge = sourceId === "ifs"
-    ? "IFS-main"
-    : sourceId === "gfs"
-      ? "GFS proxy"
-      : "ERA5 reference";
   const pdfPath = forecast.issue.downloads?.domain_pdf ??
     forecast.issue.downloads?.india_pdf;
   const pdfReady = typeof pdfPath === "string" && pdfPath.endsWith(".pdf");
@@ -472,6 +486,8 @@ export function renderForecastPage(
     ? `./${pdfPath}?v=${pdfVersion}`
     : "";
   const initializationComparison = data.initializationComparison;
+  const validFrom = forecast.weeks.at(0)?.valid_start ??
+    forecast.issue.initialization.slice(0, 10);
   const validThrough = forecast.weeks.at(-1)?.valid_end ?? "";
   const issueSelectionLabel = isCurrent
     ? "Main forecast"
@@ -527,27 +543,78 @@ export function renderForecastPage(
     .map((candidate) => {
       const preferred = preferredIssues.get(candidate.id);
       return preferred
-        ? `<strong>${candidate.short_label} ${friendlyDate(preferred.initialization, true)}</strong>`
+        ? `<span><strong>${candidate.short_label}</strong><time datetime="${preferred.initialization.slice(0, 10)}">${friendlyDate(preferred.initialization, true)}</time></span>`
         : "";
     })
     .filter(Boolean)
-    .join(" · ");
+    .join("");
 
   container.innerHTML = `
     <section class="india-sheet" data-product="${defaultProduct}">
       <header class="india-sheet__header">
-        <div>
-          <span class="india-sheet__brand">S2S RESEARCH · EXPERIMENTAL SUBSEASONAL FORECASTING</span>
-          <h1 id="india-product-title">${PRESENTATION_PRODUCTS[defaultProduct].label}</h1>
-          <p>${activeDomain?.label ?? "India"} <i>•</i> Initialized ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} <i>•</i> Valid through ${friendlyDate(validThrough, true)} <i>•</i> Weeks 1–6</p>
+        <div class="india-hero-copy">
+          <span class="india-sheet__brand">INDIA SUBSEASONAL FORECAST</span>
+          <h1>India six-week forecast maps</h1>
+          <dl class="india-forecast-window" aria-label="Forecast timing">
+            <div><dt>Forecast run</dt><dd><time datetime="${forecast.issue.initialization.slice(0, 10)}">${friendlyDate(forecast.issue.initialization.slice(0, 10), true)}</time> · 00 UTC</dd></div>
+            <div><dt>Maps cover</dt><dd><time datetime="${validFrom}">${friendlyDate(validFrom)}</time> – <time datetime="${validThrough}">${friendlyDate(validThrough, true)}</time></dd></div>
+            <div><dt>Available</dt><dd>Weeks 1–6</dd></div>
+          </dl>
         </div>
-        <div class="india-hero-badges">
-          <span class="india-model-badge">${modelBadge}</span>
-          <span class="india-experimental">${sourceBadge}</span>
-        </div>
+        <a class="india-hero-briefing" href="./#briefing">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 2.75h6.6L18.25 7.4V21.25H7z" />
+            <path d="M13.5 2.75V7.5h4.75M9.75 12h5.5M9.75 15.5h5.5" />
+          </svg>
+          <span><strong>Read forecast briefing</strong><small>Plain-language summary and full report</small></span>
+          <i aria-hidden="true">→</i>
+        </a>
       </header>
 
-      <section class="india-run-console" aria-label="Forecast run selection and downloads">
+      ${archiveBanner}
+
+      <div class="india-map-workspace">
+        <div class="india-toolbar">
+          <div class="india-toolbar__variables">
+            <div class="india-product-tabs" id="india-product-tabs" role="group" aria-label="Forecast variable"></div>
+          </div>
+          <div class="india-view-controls">
+            <div class="india-wind-mode" id="india-wind-mode" role="group" aria-label="Wind direction display" hidden>
+              <span>Wind display</span>
+              <button type="button" data-wind-mode="streamlines" class="is-active">Streamlines</button>
+              <button type="button" data-wind-mode="arrows">Arrows</button>
+            </div>
+            <label class="india-range-select">
+              <span>Forecast window</span>
+              <select id="india-range-select" aria-label="Displayed forecast weeks">
+                <option value="0">Weeks 1–4</option>
+                <option value="2">Weeks 3–6</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <p class="ops-visually-hidden" id="india-product-status" aria-live="polite" aria-atomic="true"></p>
+
+        <div class="india-visualization" id="india-visualization">
+          <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
+          <div class="india-map-key">
+            <div class="india-shared-legend" id="india-shared-legend"></div>
+            <section class="india-map-guide" aria-labelledby="india-map-guide-title">
+              <span>How to read these maps</span>
+              <h2 id="india-map-guide-title" class="india-selected-product">${PRESENTATION_PRODUCTS[defaultProduct].label}</h2>
+              <p><span id="india-product-explanation">${PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[defaultProduct]}</span> Hover, tap, or focus a map for local values.</p>
+              <p class="india-visual-note" id="india-visual-note"></p>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <section class="india-forecast-details" aria-labelledby="india-forecast-details-title">
+        <header class="india-forecast-details__header">
+          <h2 id="india-forecast-details-title">Sources and downloads</h2>
+          <p>This experimental AI ensemble can start from different datasets. IFS is the main forecast, GFS is a secondary proxy, and ERA5 is a delayed research reference.</p>
+        </header>
         ${domainCatalog && domainCatalog.domains.length > 1 ? `
           <label class="india-domain-select">Forecast domain
             <select aria-label="Forecast domain">
@@ -555,18 +622,20 @@ export function renderForecastPage(
             </select>
           </label>
         ` : ""}
+      <section class="india-run-console" aria-label="Forecast sources and files">
         <div class="india-run-console__heading">
           <div>
             <span>${issueSelectionLabel}</span>
             <strong>${forecast.issue.initial_condition_source.label}</strong>
           </div>
+          <span class="india-experimental">Experimental AI ensemble</span>
           <details class="india-source-guide">
             <summary
               aria-label="Explain IFS, GFS, and ERA5 sources"
               title="Explain forecast sources"
             >
               <span class="india-source-guide__icon" aria-hidden="true">i</span>
-              <span class="ops-visually-hidden">Source guide</span>
+              <span>About sources</span>
             </summary>
             <div class="india-source-guide__panel" id="india-source-guide">
               <strong>One forecast system, three input sources</strong>
@@ -591,66 +660,28 @@ export function renderForecastPage(
               </a>
             `;}).join("")}
           </div>
-          <p class="india-source-date-notice" id="india-source-date-notice" role="note">
-            <span>Latest validated: ${latestSourceDates}</span>
-            Dates can differ between sources. Selecting a source opens its latest validated initialization.
-          </p>
+          <div class="india-source-date-notice" id="india-source-date-notice" role="note">
+            <span>Latest validated runs</span>
+            <div>${latestSourceDates}</div>
+            <small>Sources update on different dates. Selecting one opens its latest run.</small>
+          </div>
+          ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Compare this ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} run with ${matchedSource.short_label} inputs →</a>` : ""}
         </div>
-        <dl class="india-status-grid" aria-label="Issue status">
-          <div><dt>Initialized</dt><dd>${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} · 00 UTC</dd></div>
-          <div><dt>Valid through</dt><dd>${friendlyDate(validThrough, true)}</dd></div>
-          <div><dt>Source</dt><dd>${sourceId === "gfs" ? "GFS proxy" : sourceId === "ifs" ? "IFS experimental" : "ERA5 delayed"}</dd></div>
-        </dl>
         <div class="india-run-actions" aria-label="Forecast downloads">
-          <a class="india-briefing-cta" href="./#briefing">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 2.75h6.6L18.25 7.4V21.25H7z" />
-              <path d="M13.5 2.75V7.5h4.75M9.75 12h5.5M9.75 15.5h5.5" />
-            </svg>
-            <span><strong>Forecast briefing</strong><small>Summary and full report</small></span>
-            <i aria-hidden="true">→</i>
-          </a>
           <div class="india-run-actions__secondary">
             ${pdfReady
-              ? `<a class="india-pdf-download-secondary" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">${isCurrent ? "Current" : "Selected"} issue PDF ↗</a><a class="india-pdf-download-tertiary" href="${pdfUrl}" download type="application/pdf">Download ↓</a>`
-              : `<button class="india-pdf-download-secondary" type="button" disabled>${isCurrent ? "Current" : "Selected"} PDF preparing</button>`}
-            <a class="india-archive-action" href="./#archive">Archive →</a>
+              ? `<a class="india-pdf-download-secondary" href="${pdfUrl}" target="_blank" rel="noopener noreferrer" type="application/pdf">Open forecast PDF ↗</a><a class="india-pdf-download-tertiary" href="${pdfUrl}" download type="application/pdf">Download PDF ↓</a>`
+              : `<button class="india-pdf-download-secondary" type="button" disabled>Forecast PDF preparing</button>`}
+            <a class="india-archive-action" href="./#archive">Browse archive →</a>
           </div>
         </div>
-        ${matchedSource ? `<a class="india-matched-run" href="${sourceLink(matchedSource.id, currentIssueId)}">Same ${friendlyDate(forecast.issue.initialization.slice(0, 10), true)} issue is available with ${matchedSource.short_label} initial conditions →</a>` : ""}
+      </section>
       </section>
 
-      ${archiveBanner}
       ${comparisonCard}
-
-      <div class="india-toolbar">
-        <div class="india-product-tabs" id="india-product-tabs" role="group" aria-label="India forecast field"></div>
-        <div class="india-view-controls">
-          <button class="india-auto-cycle" id="india-auto-cycle" type="button" aria-pressed="true">
-            <span class="india-auto-cycle__indicator" aria-hidden="true"></span>
-            <span class="india-auto-cycle__label">Auto on</span>
-          </button>
-          <div class="india-wind-mode" id="india-wind-mode" role="group" aria-label="Wind direction display" hidden>
-            <span>Wind display</span>
-            <button type="button" data-wind-mode="streamlines" class="is-active">Streamlines</button>
-            <button type="button" data-wind-mode="arrows">Arrows</button>
-          </div>
-          <div class="india-range-tabs" role="group" aria-label="Displayed forecast weeks">
-            <button type="button" data-range="0" class="is-active">Weeks 1–4</button>
-            <button type="button" data-range="2">Weeks 3–6</button>
-          </div>
-        </div>
-      </div>
-
-      <p class="ops-visually-hidden" id="india-product-status" aria-live="polite" aria-atomic="true"></p>
-
-      <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
-      <div class="india-shared-legend" id="india-shared-legend"></div>
-      <p class="india-visual-note" id="india-visual-note"></p>
-
       <footer class="india-sheet__footer">
         <p id="india-baseline-note"></p>
-        <span>Experimental S2S research guidance · Not an operational weather forecast or warning</span>
+        <p class="india-research-notice"><strong>Experimental research guidance</strong><span>Not an operational weather forecast or warning.</span></p>
       </footer>
     </section>
   `;
@@ -661,126 +692,11 @@ export function renderForecastPage(
   const productTabs = container.querySelector<HTMLDivElement>("#india-product-tabs")!;
   const panelGrid = container.querySelector<HTMLDivElement>("#india-panel-grid")!;
   const windModeControl = container.querySelector<HTMLDivElement>("#india-wind-mode")!;
-  const autoCycleButton = container.querySelector<HTMLButtonElement>("#india-auto-cycle")!;
-  const autoCycleLabel = autoCycleButton.querySelector<HTMLElement>(".india-auto-cycle__label")!;
+  const rangeSelect = container.querySelector<HTMLSelectElement>("#india-range-select")!;
   const productStatus = container.querySelector<HTMLElement>("#india-product-status")!;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const automaticProducts = AUTO_PRODUCT_ORDER.filter((product) =>
-    availableProducts.includes(product)
-  );
-  let autoCycleEnabled = !reducedMotion.matches && automaticProducts.length > 1;
-  let autoCycleTimer: number | undefined;
   let panelAnimationTimer: number | undefined;
-  let pointerPauseCount = 0;
-  let nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
-  let destroyed = false;
-
-  const pauseRegions = [
-    container.querySelector<HTMLElement>(".india-run-console")!,
-    container.querySelector<HTMLElement>(".india-toolbar")!,
-    panelGrid,
-  ];
-  const sourceGuide = container.querySelector<HTMLDetailsElement>(".india-source-guide")!;
-
-  function clearAutoCycleTimer(): void {
-    if (autoCycleTimer !== undefined) {
-      window.clearTimeout(autoCycleTimer);
-      autoCycleTimer = undefined;
-    }
-    autoCycleButton.classList.remove("is-counting");
-  }
-
-  function interactionHasFocus(): boolean {
-    return pauseRegions.some((region) => region.contains(document.activeElement));
-  }
-
-  function updateAutoCycleControl(): void {
-    const available = automaticProducts.length > 1;
-    autoCycleButton.disabled = !available;
-    autoCycleButton.setAttribute("aria-pressed", String(autoCycleEnabled));
-    autoCycleButton.dataset.state = autoCycleEnabled ? "on" : "off";
-    autoCycleLabel.textContent = available
-      ? `Auto ${autoCycleEnabled ? "on" : "off"}`
-      : "Auto unavailable";
-    autoCycleButton.setAttribute(
-      "aria-label",
-      autoCycleEnabled
-        ? "Pause automatic forecast field rotation"
-        : "Start automatic forecast field rotation",
-    );
-  }
-
-  function scheduleAutoCycle(delay = nextAutoDelay): void {
-    clearAutoCycleTimer();
-    updateAutoCycleControl();
-    if (
-      destroyed ||
-      !autoCycleEnabled ||
-      automaticProducts.length < 2 ||
-      document.hidden ||
-      pointerPauseCount > 0 ||
-      interactionHasFocus() ||
-      sourceGuide.open
-    ) return;
-
-    autoCycleButton.style.setProperty("--auto-cycle-duration", `${delay}ms`);
-    void autoCycleButton.offsetWidth;
-    autoCycleButton.classList.add("is-counting");
-    autoCycleTimer = window.setTimeout(() => {
-      autoCycleTimer = undefined;
-      if (destroyed || !panelGrid.isConnected) return;
-      const currentIndex = automaticProducts.indexOf(selectedProduct);
-      const nextProduct = automaticProducts[
-        (currentIndex + 1 + automaticProducts.length) % automaticProducts.length
-      ];
-      selectedProduct = nextProduct;
-      update();
-      productStatus.textContent = `Automatically showing ${PRESENTATION_PRODUCTS[nextProduct].label}.`;
-      nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
-      scheduleAutoCycle();
-    }, delay);
-  }
-
-  function holdForUser(): void {
-    productStatus.textContent = "";
-    nextAutoDelay = AUTO_PRODUCT_IDLE_DELAY_MS;
-    scheduleAutoCycle(AUTO_PRODUCT_IDLE_DELAY_MS);
-  }
-
-  function onPointerEnter(): void {
-    pointerPauseCount += 1;
-    clearAutoCycleTimer();
-  }
-
-  function onPointerLeave(): void {
-    pointerPauseCount = Math.max(0, pointerPauseCount - 1);
-    scheduleAutoCycle();
-  }
-
-  function onFocusIn(): void {
-    clearAutoCycleTimer();
-  }
-
-  function onFocusOut(): void {
-    window.setTimeout(() => scheduleAutoCycle(), 0);
-  }
-
-  function onVisibilityChange(): void {
-    if (document.hidden) clearAutoCycleTimer();
-    else scheduleAutoCycle();
-  }
-
-  function onMotionPreferenceChange(event: MediaQueryListEvent): void {
-    if (!event.matches) return;
-    autoCycleEnabled = false;
-    clearAutoCycleTimer();
-    updateAutoCycleControl();
-  }
-
-  function onSourceGuideToggle(): void {
-    if (sourceGuide.open) clearAutoCycleTimer();
-    else scheduleAutoCycle();
-  }
+  let productIndicatorFrame: number | undefined;
 
   container.querySelector<HTMLSelectElement>(".india-domain-select select")
     ?.addEventListener("change", (event) => {
@@ -798,58 +714,73 @@ export function renderForecastPage(
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.product = productKey;
-    button.innerHTML = `<span class="product-swatch product-swatch--${productKey}" aria-hidden="true"></span><strong>${product.short_label}</strong>`;
+    button.innerHTML = `<span class="india-variable-mark">${productIcon(productKey)}</span><strong>${product.short_label}</strong>`;
     button.addEventListener("click", () => {
       selectedProduct = productKey;
-      update();
-      holdForUser();
+      refreshPresentation(`Showing ${product.label}.`);
     });
     productTabs.append(button);
   });
+  const productIndicator = document.createElement("span");
+  productIndicator.className = "india-product-indicator";
+  productIndicator.setAttribute("aria-hidden", "true");
+  productTabs.append(productIndicator);
+  window.addEventListener("resize", positionProductIndicator);
 
-  container
-    .querySelectorAll<HTMLButtonElement>(".india-range-tabs button")
-    .forEach((button) => {
-      button.addEventListener("click", () => {
-        rangeStart = Number(button.dataset.range);
-        update();
-        holdForUser();
-      });
-    });
+  rangeSelect.addEventListener("change", () => {
+    rangeStart = Number(rangeSelect.value);
+    refreshPresentation(`Showing Weeks ${rangeStart + 1}–${rangeStart + 4}.`);
+  });
 
   windModeControl
     .querySelectorAll<HTMLButtonElement>("button[data-wind-mode]")
     .forEach((button) => {
       button.addEventListener("click", () => {
         windRenderingMode = button.dataset.windMode as WindRenderingMode;
-        update();
-        holdForUser();
+        refreshPresentation(`Showing wind as ${windRenderingMode}.`);
       });
     });
 
-  autoCycleButton.addEventListener("click", () => {
-    autoCycleEnabled = !autoCycleEnabled;
-    if (autoCycleEnabled) {
-      nextAutoDelay = AUTO_PRODUCT_DELAY_MS;
-      scheduleAutoCycle();
+  function positionProductIndicator(): void {
+    if (productIndicatorFrame !== undefined) {
+      window.cancelAnimationFrame(productIndicatorFrame);
     }
-    else {
-      clearAutoCycleTimer();
-      updateAutoCycleControl();
+    productIndicatorFrame = window.requestAnimationFrame(() => {
+      const activeButton = productTabs.querySelector<HTMLButtonElement>(
+        "button.is-active",
+      );
+      if (!activeButton) return;
+      productTabs.style.setProperty(
+        "--product-indicator-x",
+        `${activeButton.offsetLeft}px`,
+      );
+      productTabs.style.setProperty(
+        "--product-indicator-y",
+        `${activeButton.offsetTop}px`,
+      );
+      productTabs.style.setProperty(
+        "--product-indicator-width",
+        `${activeButton.offsetWidth}px`,
+      );
+      productTabs.style.setProperty(
+        "--product-indicator-height",
+        `${activeButton.offsetHeight}px`,
+      );
+      productTabs.classList.add("has-positioned-indicator");
+      productIndicatorFrame = undefined;
+    });
+  }
+
+  function refreshPresentation(statusMessage: string): void {
+    productStatus.textContent = statusMessage;
+    if (!reducedMotion.matches && typeof document.startViewTransition === "function") {
+      document.startViewTransition(() => update(false));
+      return;
     }
-  });
+    update(!reducedMotion.matches);
+  }
 
-  pauseRegions.forEach((region) => {
-    region.addEventListener("pointerenter", onPointerEnter);
-    region.addEventListener("pointerleave", onPointerLeave);
-    region.addEventListener("focusin", onFocusIn);
-    region.addEventListener("focusout", onFocusOut);
-  });
-  document.addEventListener("visibilitychange", onVisibilityChange);
-  reducedMotion.addEventListener("change", onMotionPreferenceChange);
-  sourceGuide.addEventListener("toggle", onSourceGuideToggle);
-
-  function update(): void {
+  function update(animateMaps: boolean): void {
     const product = PRESENTATION_PRODUCTS[selectedProduct];
     container.querySelector<HTMLElement>(".india-sheet")!.dataset.product =
       selectedProduct;
@@ -860,13 +791,8 @@ export function renderForecastPage(
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-pressed", String(active));
       });
-    container
-      .querySelectorAll<HTMLButtonElement>(".india-range-tabs button")
-      .forEach((button) => {
-        const active = Number(button.dataset.range) === rangeStart;
-        button.classList.toggle("is-active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
+    positionProductIndicator();
+    rangeSelect.value = String(rangeStart);
     windModeControl.hidden = !isWindProduct(selectedProduct);
     windModeControl
       .querySelectorAll<HTMLButtonElement>("button[data-wind-mode]")
@@ -876,14 +802,19 @@ export function renderForecastPage(
         button.setAttribute("aria-pressed", String(active));
       });
 
-    container.querySelector("#india-product-title")!.textContent = product.label;
+    container.querySelector(".india-selected-product")!.textContent = product.label;
+    container.querySelector("#india-product-explanation")!.textContent =
+      PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[selectedProduct];
     panelGrid.replaceChildren();
     activeForecast.weeks.slice(rangeStart, rangeStart + 4).forEach((sourceWeek) => {
       const week = displayWeek(sourceWeek, selectedProduct);
       const panel = document.createElement("article");
       panel.className = "india-map-panel";
       panel.innerHTML = `
-        <h2><strong>Week ${week.week}</strong><i>|</i>${friendlyDate(week.valid_start)} – ${friendlyDate(week.valid_end, true)}</h2>
+        <h2>
+          <strong>Week ${week.week}</strong>
+          <span class="india-map-panel__period"><time datetime="${week.valid_start}">${friendlyDate(week.valid_start)}</time> – <time datetime="${week.valid_end}">${friendlyDate(week.valid_end, true)}</time></span>
+        </h2>
         <div class="india-map-frame"></div>
       `;
       panelGrid.append(panel);
@@ -895,7 +826,7 @@ export function renderForecastPage(
       );
       map.render(selectedProduct, week, product, windRenderingMode);
     });
-    if (!reducedMotion.matches) {
+    if (animateMaps) {
       if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
       panelGrid.classList.remove("is-refreshing");
       void panelGrid.offsetWidth;
@@ -903,7 +834,7 @@ export function renderForecastPage(
       panelAnimationTimer = window.setTimeout(() => {
         panelGrid.classList.remove("is-refreshing");
         panelAnimationTimer = undefined;
-      }, 260);
+      }, 380);
     }
 
     const legend = container.querySelector<HTMLDivElement>("#india-shared-legend")!;
@@ -924,8 +855,7 @@ export function renderForecastPage(
         : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 
-  updateAutoCycleControl();
-  update();
+  update(false);
   if (initializationComparison && data.comparisonForecasts) {
     renderInitializationComparison(
       container,
@@ -934,20 +864,11 @@ export function renderForecastPage(
       activeGeography,
     );
   }
-  scheduleAutoCycle();
-
   return () => {
-    destroyed = true;
-    clearAutoCycleTimer();
     if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
-    pauseRegions.forEach((region) => {
-      region.removeEventListener("pointerenter", onPointerEnter);
-      region.removeEventListener("pointerleave", onPointerLeave);
-      region.removeEventListener("focusin", onFocusIn);
-      region.removeEventListener("focusout", onFocusOut);
-    });
-    document.removeEventListener("visibilitychange", onVisibilityChange);
-    reducedMotion.removeEventListener("change", onMotionPreferenceChange);
-    sourceGuide.removeEventListener("toggle", onSourceGuideToggle);
+    if (productIndicatorFrame !== undefined) {
+      window.cancelAnimationFrame(productIndicatorFrame);
+    }
+    window.removeEventListener("resize", positionProductIndicator);
   };
 }

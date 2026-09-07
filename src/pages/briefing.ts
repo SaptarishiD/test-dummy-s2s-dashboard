@@ -3,48 +3,42 @@ import { FEATURED_REPORT } from "../lib/reports";
 export function renderBriefingPage(container: HTMLElement): void {
   container.innerHTML = `
     <section class="briefing-page">
-      <header class="briefing-hero">
-        <span class="briefing-eyebrow">S2S Research · Thursday briefing</span>
-        <h1>Latest forecast briefing</h1>
-        <p>
-          The complete India subseasonal outlook for weekly scientific review
-          and interpretation.
-        </p>
-      </header>
-
       <article class="briefing-feature briefing-report-summary" aria-labelledby="latest-briefing-title">
+        <header class="briefing-hero">
+          <span class="briefing-eyebrow">Latest Thursday briefing</span>
+          <time class="briefing-issue-date">${FEATURED_REPORT.date}</time>
+          <h1 id="latest-briefing-title">${FEATURED_REPORT.title}</h1>
+        </header>
+
         <div class="briefing-details">
-          <span class="briefing-details__status">Latest briefing</span>
-          <h2 id="latest-briefing-title">${FEATURED_REPORT.title}</h2>
-          <p>
-            Experimental Weeks 1–4 guidance covering rainfall, temperature
-            anomalies, and 850 hPa circulation over India.
-          </p>
+          <div class="briefing-outlook" role="note" aria-label="Forecast outlook">
+            <span>At a glance</span>
+            <p>${FEATURED_REPORT.outlook}</p>
+          </div>
 
           <dl class="briefing-facts">
-            <div><dt>Initialized</dt><dd>${FEATURED_REPORT.date}</dd></div>
             <div><dt>Valid period</dt><dd>${FEATURED_REPORT.validPeriod}</dd></div>
             <div><dt>Forecast range</dt><dd>${FEATURED_REPORT.forecastRange}</dd></div>
-            <div><dt>Product</dt><dd>Scientific forecast briefing</dd></div>
+            <div><dt>Document</dt><dd id="briefing-document-details">${FEATURED_REPORT.details}</dd></div>
           </dl>
 
-          <div class="briefing-actions">
+          <div class="briefing-actions" aria-describedby="briefing-document-details">
             <a
               class="briefing-action briefing-action--primary"
               href="${FEATURED_REPORT.href}"
               target="_blank"
               rel="noopener noreferrer"
               type="application/pdf"
-              aria-label="${FEATURED_REPORT.accessibleLabel}"
-            >Read briefing ↗</a>
+              aria-label="${FEATURED_REPORT.accessibleLabel}; opens in a new tab"
+            >Open full briefing <span aria-hidden="true">↗</span></a>
             <a
               class="briefing-action"
               href="${FEATURED_REPORT.href}"
               download
               type="application/pdf"
-            >Download PDF ↓</a>
+              aria-label="Download ${FEATURED_REPORT.title} for ${FEATURED_REPORT.date} (${FEATURED_REPORT.details})"
+            >Download PDF <span aria-hidden="true">↓</span></a>
           </div>
-          <small>${FEATURED_REPORT.details}</small>
         </div>
       </article>
 
@@ -52,9 +46,9 @@ export function renderBriefingPage(container: HTMLElement): void {
         <header class="briefing-section-heading briefing-section-heading--report">
           <div>
             <span>Full report</span>
-            <h2 id="briefing-report-title">Read the complete briefing</h2>
+            <h2 id="briefing-report-title">Read the briefing</h2>
           </div>
-          <p>Review the complete ${FEATURED_REPORT.details.split(" · ")[0]} without leaving the dashboard.</p>
+          <p>Embedded PDF preview</p>
         </header>
 
         <div class="briefing-report__viewer">
@@ -91,8 +85,8 @@ export function renderBriefingPage(container: HTMLElement): void {
       <aside class="briefing-context">
         <span>Research context</span>
         <p>
-          Briefings and dashboard products are experimental research guidance
-          for scientific review, not operational forecasts or warnings.
+          Experimental research guidance for scientific review—not an
+          operational forecast or warning.
         </p>
       </aside>
     </section>

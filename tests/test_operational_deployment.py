@@ -39,8 +39,11 @@ def digest(payload: bytes) -> str:
 
 def test_checked_in_catalog_passes_issue_scoped_live_inventory() -> None:
     index = json.loads((ROOT / "public/data/index.json").read_text(encoding="utf-8"))
-    gfs_issue = index["current"]["issue_id"]
-    era5_issue = index["latest_reference"]["issue_id"]
+    sources = {
+        source["id"]: source for source in index["initial_condition_sources"]
+    }
+    gfs_issue = sources["gfs"]["default_issue"]
+    era5_issue = sources["era5"]["default_issue"]
     args = SimpleNamespace(
         public_root=ROOT / "public",
         scope="issue",
