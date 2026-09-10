@@ -117,8 +117,8 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     shell = read("src/main.ts")
     briefing = read("src/pages/briefing.ts")
     report_metadata = read("src/lib/reports.ts")
-    report_path = "reports/s2s-summary-india-2026-09-02.pdf"
-    cover_path = "reports/s2s-summary-india-2026-09-02-cover.png"
+    report_path = "reports/s2s-summary-india-2026-09-09.pdf"
+    cover_path = "reports/s2s-summary-india-2026-09-09-cover.png"
     report = ROOT / "public" / report_path
     cover = ROOT / "public" / cover_path
     assert f'href: "./{report_path}"' in report_metadata
@@ -128,7 +128,7 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert 'type="application/pdf"' in briefing
     assert 'href="${FEATURED_REPORT.href}" download type="application/pdf"' in briefing
     assert 'aria-describedby="briefing-report-fallback"' in briefing
-    assert "2 September 2026 (PDF, 2.0 MB)" in report_metadata
+    assert "9 September 2026 (PDF, 2.5 MB)" in report_metadata
     assert report.read_bytes().startswith(b"%PDF-")
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
@@ -214,7 +214,7 @@ def test_briefing_leads_with_the_issue_and_only_essential_report_facts() -> None
     assert "opens in a new tab" in briefing
     assert 'class="briefing-outlook"' in briefing
     assert "${FEATURED_REPORT.outlook}" in briefing
-    assert "A wetter first week is favored across north-central and eastern India." in read(
+    assert "Week 1 favors wetter conditions over Gujarat and adjoining western India." in read(
         "src/lib/reports.ts"
     )
     assert ".briefing-issue-date" in refresh
