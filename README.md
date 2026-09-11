@@ -1,4 +1,4 @@
-# S2S Research
+# S2S Research India
 
 A static, source-aware India subseasonal research forecast interface with a
 separate dated Global Demo. India is the default page. It separates
