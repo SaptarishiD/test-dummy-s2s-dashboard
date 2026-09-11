@@ -1978,7 +1978,7 @@ select:focus-visible {
 .team-roster__note {
   margin: 0 0 10px;
   color: var(--ops-ink-faint);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.5;
   text-align: right;
 }
@@ -1990,46 +1990,48 @@ select:focus-visible {
   border-radius: 10px;
 }
 
-.team-directory__header,
-.team-person-card {
-  display: grid;
-  grid-template-columns: 64px minmax(210px, 1.05fr) minmax(130px, 0.6fr) minmax(250px, 1.2fr) 88px;
-  gap: 18px;
-  align-items: center;
+.team-directory + .team-directory {
+  margin-top: 18px;
 }
 
 .team-directory__header {
+  display: flex;
   min-height: 38px;
-  padding: 8px 20px;
-  color: var(--ops-ink-faint);
+  margin: 0;
+  padding: 10px 20px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ops-teal);
   background: var(--ops-surface-muted);
   border-bottom: 1px solid var(--ops-line);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.team-directory__header span:first-child {
-  grid-column: 1 / 3;
-}
-
 .team-grid {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 32px;
+  padding: 30px 24px 34px;
+  justify-content: center;
 }
 
 .team-person-card {
-  min-height: 118px;
-  padding: 18px 20px;
+  display: flex;
+  flex: 0 1 286px;
+  max-width: 320px;
   min-width: 0;
-  background: var(--ops-surface);
+  padding: 14px 12px 16px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  background: transparent;
   border: 0;
-  border-radius: 0;
+  border-radius: 12px;
   transition: background-color 150ms ease, box-shadow 150ms ease;
-}
-
-.team-person-card + .team-person-card {
-  border-top: 1px solid var(--ops-line);
 }
 
 .team-person-card:hover {
@@ -2038,15 +2040,15 @@ select:focus-visible {
 
 .team-person-card:focus-within {
   background: var(--ops-teal-soft);
-  box-shadow: inset 3px 0 0 var(--ops-teal);
+  box-shadow: inset 0 0 0 1px var(--ops-teal);
 }
 
 .team-person-card__portrait {
   position: relative;
   display: block;
-  width: 56px;
-  height: 56px;
-  min-height: 56px;
+  width: 116px;
+  height: 116px;
+  min-height: 116px;
   overflow: hidden;
   background: #e9edf2;
   border: 1px solid var(--ops-line);
@@ -2060,23 +2062,22 @@ select:focus-visible {
   object-fit: cover;
 }
 
-.team-person-card__identity,
-.team-person-card__details {
+.team-person-card__identity {
+  width: 100%;
   min-width: 0;
 }
 
-.team-person-card__project-role {
-  margin: 0;
-  color: #335b62;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.4;
+.team-person-card__details {
+  width: 100%;
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--ops-line);
 }
 
-.team-person-card h2 {
+.team-person-card h3 {
   margin: 0;
   color: var(--ops-ink);
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 760;
   letter-spacing: -0.015em;
   line-height: 1.25;
@@ -2085,7 +2086,7 @@ select:focus-visible {
 .team-person-card__role {
   margin: 5px 0 0;
   color: #42556c;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
   line-height: 1.45;
 }
@@ -2093,14 +2094,14 @@ select:focus-visible {
 .team-person-card__affiliation {
   margin: 4px 0 0;
   color: #69768a;
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
 .team-person-card__expertise-label {
   display: block;
   color: var(--ops-teal);
-  font-size: 9px;
+  font-size: 10.5px;
   font-weight: 850;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -2110,19 +2111,20 @@ select:focus-visible {
 .team-person-card__expertise {
   margin: 6px 0 0;
   color: var(--ops-ink-soft);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .team-person-card__profile {
   display: inline-flex;
-  width: 88px;
+  width: 100px;
   min-height: 44px;
+  margin-top: auto;
   padding: 9px 8px;
   align-items: center;
   justify-content: center;
   color: var(--ops-blue);
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -2442,64 +2444,13 @@ select:focus-visible {
     text-align: left;
   }
 
-  .team-directory {
-    overflow: visible;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .team-directory__header {
-    display: none;
-  }
-
   .team-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 24px 26px;
+    padding: 26px 18px 28px;
   }
 
   .team-person-card {
-    grid-template-areas:
-      "portrait identity"
-      "portrait project"
-      ". details"
-      ". profile";
-    grid-template-columns: 76px minmax(0, 1fr);
-    gap: 11px 14px;
-    min-height: 0;
-    padding: 16px;
-    align-items: start;
-    border: 1px solid var(--ops-line);
-    border-radius: 10px;
-  }
-
-  .team-person-card__portrait {
-    grid-area: portrait;
-    width: 76px;
-    height: 92px;
-    min-height: 0;
-    border-radius: 6px;
-  }
-
-  .team-person-card__identity {
-    grid-area: identity;
-  }
-
-  .team-person-card__project-role {
-    grid-area: project;
-  }
-
-  .team-person-card__details {
-    grid-area: details;
-    padding-top: 11px;
-    border-top: 1px solid var(--ops-line);
-  }
-
-  .team-person-card__profile {
-    grid-area: profile;
-    width: max-content;
-    min-width: 88px;
+    flex-basis: 252px;
   }
 }
 
@@ -2956,70 +2907,24 @@ select:focus-visible {
     padding: 0;
   }
 
-  .team-directory {
-    overflow: visible;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .team-directory__header {
-    display: none;
-  }
-
   .team-contact {
     grid-template-columns: 1fr;
   }
 
   .team-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 22px;
+    padding: 22px 16px 26px;
   }
 
   .team-person-card {
-    display: grid;
-    grid-template-areas:
-      "portrait identity"
-      "portrait project"
-      "portrait details"
-      ". profile";
-    grid-template-columns: 76px minmax(0, 1fr);
-    gap: 11px 14px;
-    min-height: 0;
-    padding: 16px;
-    align-items: start;
-    border: 1px solid var(--ops-line);
-    border-radius: 10px;
+    flex-basis: 100%;
+    max-width: 330px;
   }
 
   .team-person-card__portrait {
-    grid-area: portrait;
-    width: 76px;
-    height: 92px;
-    min-height: 0;
-    align-self: start;
-    border-radius: 6px;
-  }
-
-  .team-person-card__identity {
-    grid-area: identity;
-  }
-
-  .team-person-card__project-role {
-    grid-area: project;
-  }
-
-  .team-person-card__details {
-    grid-area: details;
-    padding-top: 11px;
-    border-top: 1px solid var(--ops-line);
-  }
-
-  .team-person-card__profile {
-    grid-area: profile;
-    width: max-content;
-    min-width: 88px;
+    width: 104px;
+    height: 104px;
+    min-height: 104px;
   }
 
   .team-contact__email {
@@ -3086,15 +2991,14 @@ select:focus-visible {
   }
 
   .team-person-card {
-    grid-template-columns: 72px minmax(0, 1fr);
-    gap: 10px 12px;
-    padding: 14px;
+    gap: 10px;
+    padding: 12px 8px 14px;
   }
 
   .team-person-card__portrait {
-    width: 72px;
-    height: 88px;
-    min-height: 0;
+    width: 92px;
+    height: 92px;
+    min-height: 92px;
   }
 
   .team-contact {
