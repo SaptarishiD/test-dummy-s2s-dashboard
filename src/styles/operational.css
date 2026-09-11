@@ -2119,6 +2119,7 @@ select:focus-visible {
   display: inline-flex;
   width: 88px;
   min-height: 44px;
+  margin-top: auto;
   padding: 9px 8px;
   align-items: center;
   justify-content: center;
