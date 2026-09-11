@@ -2,7 +2,6 @@ const CONTACT_EMAIL = "s2s.scdlds@ashoka.edu.in";
 
 interface TeamMember {
   name: string;
-  projectRole: string;
   professionalTitle: string;
   affiliation: string;
   expertise: string;
@@ -11,19 +10,15 @@ interface TeamMember {
   profile: string;
 }
 
-const SCIENTIFIC_TEAM: TeamMember[] = [
-  {
-    name: "Ayush Raj",
-    projectRole: "Lead Researcher",
-    professionalTitle: "MS Thesis Researcher · AI weather research",
-    affiliation: "IISER Pune · SCDLDS",
-    expertise: "AI for weather and climate prediction, with a focus on improving regional S2S forecasts.",
-    image: "./team/ayush-raj.webp",
-    profile: "https://in.linkedin.com/in/ayush-raj-7608a424a",
-  },
+interface TeamGroup {
+  id: string;
+  label: string;
+  members: TeamMember[];
+}
+
+const FACULTY: TeamMember[] = [
   {
     name: "Manmeet Singh",
-    projectRole: "Lead Scientist",
     professionalTitle: "Assistant Professor",
     affiliation: "Western Kentucky University · SCDLDS",
     expertise: "AI for climate and disaster science, weather prediction, and Earth system modelling.",
@@ -32,18 +27,7 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     profile: "https://www.wku.edu/eeas/staff/manmeet_singh",
   },
   {
-    name: "Parthasarathi Mukhopadhyay",
-    projectRole: "Senior Scientist",
-    professionalTitle: "Visiting Faculty · Earth & Environmental Sciences",
-    affiliation: "IISER Berhampur · FASc · SCDLDS",
-    expertise: "Numerical weather prediction, monsoon modelling, clouds, and convection.",
-    image: "./team/parthasarathi-mukhopadhyay.jpg",
-    imagePosition: "center 18%",
-    profile: "https://www.iiserbpr.ac.in/people/profile/parthasarathym",
-  },
-  {
     name: "Sandeep Juneja",
-    projectRole: "Principal Investigator",
     professionalTitle: "Professor of Computer Science · Centre Director",
     affiliation: "Ashoka University · SCDLDS",
     expertise: "Applied probability, machine learning, and monsoon weather modelling.",
@@ -51,15 +35,39 @@ const SCIENTIFIC_TEAM: TeamMember[] = [
     profile: "https://www.ashoka.edu.in/profile/sandeep-juneja/",
   },
   {
+    name: "Parthasarathi Mukhopadhyay",
+    professionalTitle: "Visiting Faculty · Earth & Environmental Sciences",
+    affiliation: "IISER Berhampur · FASc · SCDLDS",
+    expertise: "Numerical weather prediction, monsoon modelling, clouds, and convection.",
+    image: "./team/parthasarathi-mukhopadhyay.jpg",
+    imagePosition: "center 18%",
+    profile: "https://www.iiserbpr.ac.in/people/profile/parthasarathym",
+  },
+];
+
+const RESEARCHERS: TeamMember[] = [
+  {
+    name: "Ayush Raj",
+    professionalTitle: "MS Thesis Researcher · AI weather research",
+    affiliation: "IISER Pune · SCDLDS",
+    expertise: "AI for weather and climate prediction, with a focus on improving regional S2S forecasts.",
+    image: "./team/ayush-raj.webp",
+    profile: "https://in.linkedin.com/in/ayush-raj-7608a424a",
+  },
+  {
     name: "Saptarishi Dhanuka",
-    projectRole: "Researcher",
     professionalTitle: "Pre-doctoral Fellow · AI weather research",
     affiliation: "Ashoka University · SCDLDS",
-    expertise: "Artificial intelligence for weather, climate, and data-driven forecasting.",
+    expertise: "AI x Science, Earth Systems & Climate: Radar, Finetuning, Ensembling, Monsoons, S2S, Pollutants, EO Foundational Models",
     image: "./team/saptarishi-dhanuka.jpg",
     imagePosition: "center 20%",
     profile: "https://www.linkedin.com/in/saptarishi-dhanuka/",
   },
+];
+
+const TEAM_GROUPS: TeamGroup[] = [
+  { id: "faculty", label: "Faculty", members: FACULTY },
+  { id: "researchers", label: "Researchers", members: RESEARCHERS },
 ];
 
 function renderMember(member: TeamMember): string {
@@ -74,11 +82,10 @@ function renderMember(member: TeamMember): string {
         <img src="${member.image}" alt="Portrait of ${member.name}" loading="lazy" decoding="async"${imageStyle} />
       </div>
       <div class="team-person-card__identity">
-        <h2 id="${memberId}">${member.name}</h2>
+        <h3 id="${memberId}">${member.name}</h3>
         <p class="team-person-card__role">${member.professionalTitle}</p>
         <p class="team-person-card__affiliation">${member.affiliation}</p>
       </div>
-      <p class="team-person-card__project-role">${member.projectRole}</p>
       <div class="team-person-card__details">
         <span class="team-person-card__expertise-label">Research focus</span>
         <p class="team-person-card__expertise">${member.expertise}</p>
@@ -91,6 +98,19 @@ function renderMember(member: TeamMember): string {
         aria-label="Open ${member.name}'s public profile in a new tab"
       >Profile <span aria-hidden="true">↗</span></a>
     </article>
+  `;
+}
+
+function renderGroup(group: TeamGroup): string {
+  const headingId = `team-group-${group.id}`;
+
+  return `
+    <div class="team-directory">
+      <h2 class="team-directory__header" id="${headingId}">${group.label}</h2>
+      <div class="team-grid" role="list" aria-labelledby="${headingId}">
+        ${group.members.map(renderMember).join("")}
+      </div>
+    </div>
   `;
 }
 
@@ -107,19 +127,9 @@ export function renderTeamPage(container: HTMLElement): void {
 
       <section class="team-roster" aria-label="Research contributors" aria-describedby="team-order-note">
         <p class="team-roster__note" id="team-order-note">
-          Listed alphabetically by first name.
+          Grouped by role: faculty first, then researchers.
         </p>
-        <div class="team-directory">
-          <div class="team-directory__header" aria-hidden="true">
-            <span>Researcher</span>
-            <span>Project role</span>
-            <span>Research focus</span>
-            <span>Profile</span>
-          </div>
-          <div class="team-grid" role="list">
-            ${SCIENTIFIC_TEAM.map(renderMember).join("")}
-          </div>
-        </div>
+        ${TEAM_GROUPS.map(renderGroup).join("")}
       </section>
 
       <section class="team-contact" aria-labelledby="team-contact-title">

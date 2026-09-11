@@ -133,44 +133,48 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
 
-def test_team_navigation_lists_research_contributors_by_first_name() -> None:
+def test_team_navigation_groups_faculty_then_researchers() -> None:
     shell = read("src/main.ts")
     team = read("src/pages/team.ts")
     assert 'href="./#briefing" data-route="briefing"' in shell
     assert 'href="./#team" data-route="team"' in shell
-    names_by_first_name = (
-        "Ayush Raj",
+    faculty_in_order = (
         "Manmeet Singh",
-        "Parthasarathi Mukhopadhyay",
         "Sandeep Juneja",
-        "Saptarishi Dhanuka",
+        "Parthasarathi Mukhopadhyay",
     )
-    for name in names_by_first_name:
-        assert name in team
-    assert [team.index(name) for name in names_by_first_name] == sorted(
-        team.index(name) for name in names_by_first_name
+    researchers_in_order = ("Ayush Raj", "Saptarishi Dhanuka")
+    faculty_at = team.index("const FACULTY: TeamMember[]")
+    researchers_at = team.index("const RESEARCHERS: TeamMember[]")
+    groups_at = team.index("const TEAM_GROUPS: TeamGroup[]")
+    assert faculty_at < researchers_at < groups_at
+
+    # Each person is declared inside their own group, in the published order.
+    for name in faculty_in_order:
+        assert faculty_at < team.index(name) < researchers_at
+    for name in researchers_in_order:
+        assert researchers_at < team.index(name) < groups_at
+    assert [team.index(name) for name in faculty_in_order] == sorted(
+        team.index(name) for name in faculty_in_order
     )
+    assert [team.index(name) for name in researchers_in_order] == sorted(
+        team.index(name) for name in researchers_in_order
+    )
+    assert team.index('label: "Faculty"') < team.index('label: "Researchers"')
+
     for designation in (
         "Assistant Professor",
-        "MS Thesis Researcher · AI weather research",
-        "Professor of Computer Science · Centre Director",
-        "Visiting Faculty · Earth & Environmental Sciences",
-        "Pre-doctoral Fellow · AI weather research",
+        "MS Thesis Researcher \u00b7 AI weather research",
+        "Professor of Computer Science \u00b7 Centre Director",
+        "Visiting Faculty \u00b7 Earth & Environmental Sciences",
+        "Pre-doctoral Fellow \u00b7 AI weather research",
     ):
         assert designation in team
-    for project_role in (
-        "Lead Researcher",
-        "Lead Scientist",
-        "Senior Scientist",
-        "Principal Investigator",
-        "Researcher",
-    ):
-        assert project_role in team
-    assert "projectRole" in team
     assert "People behind the forecast" not in team
     assert "alphabetically by surname" not in team
+    assert "alphabetically by first name" not in team
     assert 'id="team-title">Research contributors</h1>' in team
-    assert "Listed alphabetically by first name" in team
+    assert "Grouped by role: faculty first, then researchers." in team
     assert "s2s.scdlds@ashoka.edu.in" in team
     assert 'id="team-contact-title">Talk to the research team</h2>' in team
     assert 'href="mailto:${CONTACT_EMAIL}"' in team
@@ -178,6 +182,37 @@ def test_team_navigation_lists_research_contributors_by_first_name() -> None:
     assert "not an operational weather" in team
     assert "publication workflow" not in team.casefold()
     assert "website maintenance" not in team.casefold()
+
+
+def test_team_page_no_longer_publishes_internal_project_roles() -> None:
+    team = read("src/pages/team.ts")
+    style = read("src/styles/operational.css")
+    assert "projectRole" not in team
+    assert "team-person-card__project-role" not in team
+    assert "team-person-card__project-role" not in style
+    assert "<span>Project role</span>" not in team
+    for retired_role in (
+        "Principal Investigator",
+        "Lead Scientist",
+        "Senior Scientist",
+        "Lead Researcher",
+    ):
+        assert retired_role not in team
+
+
+def test_saptarishi_research_focus_lists_the_ai_x_science_areas() -> None:
+    team = read("src/pages/team.ts")
+    focus = (
+        "AI x Science, Earth Systems & Climate: Radar, Finetuning, "
+        "Ensembling, Monsoons, S2S, Pollutants, EO Foundational Models"
+    )
+    assert focus in team
+    assert (
+        team.index('name: "Saptarishi Dhanuka"')
+        < team.index(focus)
+        < team.index('image: "./team/saptarishi-dhanuka.jpg"')
+    )
+    assert "Artificial intelligence for weather, climate" not in team
 
 
 def test_briefing_is_report_only_and_keeps_the_complete_pdf() -> None:

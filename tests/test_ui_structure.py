@@ -12,6 +12,13 @@ def read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
+def rule_body(style: str, selector: str) -> str:
+    """Return the declarations of the first rule matching ``selector``."""
+
+    start = style.index(selector) + len(selector)
+    return style[start : style.index("}", start)]
+
+
 def test_forecast_map_places_coordinate_labels_outside_the_plot() -> None:
     forecast_map = read("src/components/ForecastMap.ts")
     assert "const AXIS_LEFT" in forecast_map
@@ -160,7 +167,6 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     assert 'class="team-directory"' in team
     assert 'class="team-directory__header"' in team
     assert 'class="team-grid"' in team
-    assert 'class="team-person-card__project-role"' in team
     assert 'aria-label="Research contributors"' in team
     assert 'aria-describedby="team-order-note"' in team
     assert 'class="team-grid" role="list"' in team
@@ -169,6 +175,38 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     assert 'aria-labelledby="team-contact-title"' in team
     assert ".team-contact__email" in read("src/styles/operational.css")
     assert 'class="briefing-team"' not in briefing
+
+
+def test_team_roster_renders_labelled_groups_of_centred_cards() -> None:
+    team = read("src/pages/team.ts")
+    style = read("src/styles/operational.css")
+
+    # One labelled directory block per group, each one its own list.
+    assert "function renderGroup(group: TeamGroup): string" in team
+    assert "${TEAM_GROUPS.map(renderGroup).join(\"\")}" in team
+    assert '<h2 class="team-directory__header" id="${headingId}">' in team
+    assert 'class="team-grid" role="list" aria-labelledby="${headingId}"' in team
+    # The group label is the h2, so each person drops to an h3.
+    assert '<h3 id="${memberId}">${member.name}</h3>' in team
+    assert ".team-person-card h3 {" in style
+    assert ".team-person-card h2 {" not in style
+
+    grid = rule_body(style, ".team-grid {")
+    assert "display: flex" in grid
+    assert "flex-wrap: wrap" in grid
+    assert "justify-content: center" in grid
+
+    card = rule_body(style, ".team-person-card {")
+    assert "flex-direction: column" in card
+    assert "text-align: center" in card
+
+    portrait = rule_body(style, ".team-person-card__portrait {")
+    assert "border-radius: 50%" in portrait
+
+    # The retired table layout must not linger in any breakpoint.
+    assert '"portrait identity"' not in style
+    assert "grid-area: portrait" not in style
+    assert ".team-directory__header span:first-child" not in style
 
 
 def test_forecast_explains_initial_condition_sources_accessibly() -> None:
