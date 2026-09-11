@@ -128,7 +128,7 @@ def test_featured_report_link_targets_a_valid_public_pdf() -> None:
     assert 'type="application/pdf"' in briefing
     assert 'href="${FEATURED_REPORT.href}" download type="application/pdf"' in briefing
     assert 'aria-describedby="briefing-report-fallback"' in briefing
-    assert "9 September 2026 (PDF, 2.5 MB)" in report_metadata
+    assert "9 September 2026 (PDF, 2.3 MB)" in report_metadata
     assert report.read_bytes().startswith(b"%PDF-")
     assert cover.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
 
