@@ -23,9 +23,7 @@
       "id": "era5"
     },
     "downloads": {
-      "compact_json": "data/forecasts/era5/20260721.json",
-      "india_pdf": "downloads/era5/20260721/S2S_Research_India_Weeks1-4_ERA5_20260721.pdf",
-      "india_pdf_sha256": "1dde216a36c29bb9690ce0f2a6421fd17342196a51943fde8f36bfbabd6c207c"
+      "compact_json": "data/forecasts/era5/20260721.json"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0720",
