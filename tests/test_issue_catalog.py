@@ -10,7 +10,12 @@ from pathlib import Path
 
 import jsonschema
 
-from science.catalog import build_catalog, enrich_issue, next_expected_update
+from science.catalog import (
+    CADENCE_WEEKDAYS,
+    build_catalog,
+    enrich_issue,
+    next_expected_update,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
@@ -21,12 +26,20 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_current_is_latest_complete_production_ifs_issue() -> None:
+def on_cadence(issues: list[dict]) -> list[dict]:
+    return [
+        item
+        for item in issues
+        if datetime.strptime(item["id"], "%Y%m%d").weekday() in CADENCE_WEEKDAYS
+    ]
+
+
+def test_current_is_latest_complete_on_cadence_production_ifs_issue() -> None:
     index = load(DATA / "index.json")
     ifs = next(
         source for source in index["initial_condition_sources"] if source["id"] == "ifs"
     )
-    production = [item for item in ifs["issues"] if item["members"] == 100]
+    production = on_cadence([item for item in ifs["issues"] if item["members"] == 100])
     assert index["default_source"] == "ifs"
     assert index["current"]["source_id"] == "ifs"
     assert index["current"]["members"] == 100
@@ -66,14 +79,14 @@ def test_catalog_assets_are_checksum_versioned_and_capability_scoped() -> None:
             assert issue["archive"]["metadata"] == "indefinite"
 
 
-def test_catalog_rebuild_keeps_current_pointer_on_latest_complete_ifs_issue() -> None:
+def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() -> None:
     index = load(DATA / "index.json")
     ifs_source = next(
         source for source in index["initial_condition_sources"] if source["id"] == "ifs"
     )
     expected_issue = max(
         item["id"]
-        for item in ifs_source["issues"]
+        for item in on_cadence(ifs_source["issues"])
         if item["members"] == 100
     )
     rebuilt = build_catalog(

@@ -274,9 +274,19 @@ def build_catalog(
 
     if not complete_by_source.get(PRIMARY_SOURCE_ID):
         raise ValueError("no complete 100-member IFS issue; Current is unchanged")
-    current_issue = max(
-        complete_by_source[PRIMARY_SOURCE_ID], key=lambda item: item["id"]
-    )
+    # Current guidance must sit on the published Wednesday/Saturday cadence, so an
+    # ad-hoc off-cadence run never becomes the pointer that publication validation
+    # then rejects.
+    on_cadence = [
+        item
+        for item in complete_by_source[PRIMARY_SOURCE_ID]
+        if parse_datetime(str(item["initialization"])).weekday() in CADENCE_WEEKDAYS
+    ]
+    if not on_cadence:
+        raise ValueError(
+            "no complete 100-member Wednesday/Saturday IFS issue; Current is unchanged"
+        )
+    current_issue = max(on_cadence, key=lambda item: item["id"])
     current_issue["presentation"] = {
         "section": "current",
         "label": "Current guidance",
