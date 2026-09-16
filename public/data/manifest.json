@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-16T20:58:12.369384+00:00",
+  "generated_at": "2026-09-16T21:01:58.255667+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -173,6 +173,11 @@
       "path": "data/forecasts/era5/20260902.json",
       "size_bytes": 866534,
       "sha256": "a8b6c681321414271e6d5d78f544febeb17b0d9dacafff20e5f231bf7e3550b7"
+    },
+    {
+      "path": "data/forecasts/era5/20260905.json",
+      "size_bytes": 866513,
+      "sha256": "24af8380c5553bc9bf18c5e8f6e8999d9a88e2f14b55dc836f682966d7101500"
     },
     {
       "path": "data/forecasts/era5/20260909.json",
@@ -456,8 +461,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 88025,
-      "sha256": "a7615e06be8c1f6d71ad57384a9e01e5c797910b8dc9cfb33255d06c80af92a4"
+      "size_bytes": 89747,
+      "sha256": "903b17bb071aef01b82c3999a84f56e8ec1a60cac06cec54167baae75dbe8b9f"
     },
     {
       "path": "data/india-admin.json",
@@ -528,6 +533,11 @@
       "path": "data/regional/era5/20260902.json",
       "size_bytes": 448331,
       "sha256": "0e58675a72d2ab0786cf9132331cff58921371ac01a68073082cbb33a921a4f4"
+    },
+    {
+      "path": "data/regional/era5/20260905.json",
+      "size_bytes": 448591,
+      "sha256": "e9709d073b32d84d102469e5a1316528b0d1baf2cc139c83bf2a3bb6679c2406"
     },
     {
       "path": "data/regional/era5/20260909.json",
@@ -733,6 +743,11 @@
       "path": "downloads/era5/20260902/S2S_Research_India_Weeks1-4_ERA5_20260902.pdf",
       "size_bytes": 4340069,
       "sha256": "c52aad7f1ebc01978e3935bba4d015e19176ceef1af67b7b9506455380ffcfb7"
+    },
+    {
+      "path": "downloads/era5/20260905/S2S_Research_India_Weeks1-4_ERA5_20260905.pdf",
+      "size_bytes": 4336607,
+      "sha256": "11c3a62323d062acd0d613408fff532ca69de616a60f3b40b5ae85d0d54c9dd7"
     },
     {
       "path": "downloads/era5/20260909/S2S_Research_India_Weeks1-4_ERA5_20260909.pdf",
