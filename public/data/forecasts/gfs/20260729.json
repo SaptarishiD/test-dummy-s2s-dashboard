@@ -23,9 +23,7 @@
       "id": "gfs"
     },
     "downloads": {
-      "compact_json": "data/forecasts/gfs/20260729.json",
-      "india_pdf": "downloads/gfs/20260729/S2S_Research_India_Weeks1-4_GFS_20260729.pdf",
-      "india_pdf_sha256": "7f53977384daa7926c0df7d8fcb6277eee95fede1dfe32723811f2168c900da7"
+      "compact_json": "data/forecasts/gfs/20260729.json"
     },
     "climatology_alignment": {
       "target_model_state_calendar_day": "0728",
