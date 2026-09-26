@@ -1,6 +1,12 @@
 {
   "available_issues": [
     {
+      "forecast": "forecasts/gfs/20260926.json",
+      "id": "20260926",
+      "initialization": "2026-09-26T00:00:00Z",
+      "status": "warning"
+    },
+    {
       "forecast": "forecasts/gfs/20260923.json",
       "id": "20260923",
       "initialization": "2026-09-23T00:00:00Z",
@@ -197,7 +203,7 @@
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-09-26T04:33:02Z",
+  "generated_at": "2026-09-26T04:52:55Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -224,10 +230,55 @@
   "initial_condition_sources": [
     {
       "category": "operational_proxy",
-      "default_issue": "20260923",
+      "default_issue": "20260926",
       "description": "Near-real-time operational inputs for twice-weekly experimental guidance. No matched GFS-initialized hindcast calibration is currently available.",
       "id": "gfs",
       "issues": [
+        {
+          "forecast": "forecasts/gfs/20260926.json",
+          "id": "20260926",
+          "initialization": "2026-09-26T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/gfs/20260926.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Archived guidance",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "a7cd505a3e80ff4c92bc08fdfac32d56b7cd45ada671156f2df300e7eb745b46",
+            "regional_sha256": "1b7b7cfa7e1bea266186b53cee507e088cc99230a650da99112efa5c577062e9",
+            "pdf_sha256": "0bfe97639e10aa57e7360bdc46310674ff9f52ee1705dfe481471221494972cd"
+          },
+          "valid_through": "2026-11-06",
+          "published_at": "2026-09-26T04:52:47.288376+00:00",
+          "pdf": "downloads/gfs/20260926/S2S_Research_India_Weeks1-4_GFS_20260926.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-26T00:00:00Z",
+            "pdf_until": "2026-11-21T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
         {
           "archive": {
             "interactive_available": true,
@@ -1393,13 +1444,13 @@
       "id": "era5",
       "issues": [
         {
-          "forecast": "forecasts/era5/20260919.json",
-          "id": "20260919",
-          "initialization": "2026-09-19T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/era5/20260919.json",
-          "role": "reference",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-19T00:00:00Z",
+            "pdf_until": "2026-11-14T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -1416,26 +1467,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "archive",
-            "label": "Delayed ERA5 reference",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "c959ffd7315da212cf9033695cea74d6864dd94354a32bfea5784e00c48158da",
             "regional_sha256": "23989bb9a647ae713bfadcb15bbb081c643c5102db8ec6e3b5ec74036063fe5a",
             "pdf_sha256": "a3f177969b3a4c25a75ec90a3a5e9d9f577d9c2e4f135e57c4ff1650700cab97"
           },
-          "valid_through": "2026-10-30",
-          "published_at": "2026-09-26T04:32:55.049695+00:00",
+          "forecast": "forecasts/era5/20260919.json",
+          "id": "20260919",
+          "initialization": "2026-09-19T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/era5/20260919/S2S_Research_India_Weeks1-4_ERA5_20260919.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-09-19T00:00:00Z",
-            "pdf_until": "2026-11-14T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "published_at": "2026-09-26T04:32:55.049695+00:00",
+          "regional_outlook": "regional/era5/20260919.json",
+          "role": "reference",
+          "status": "warning",
+          "valid_through": "2026-10-30"
         },
         {
           "archive": {
