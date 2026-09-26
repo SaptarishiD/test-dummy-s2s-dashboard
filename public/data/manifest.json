@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-26T04:52:59.955627+00:00",
+  "generated_at": "2026-09-26T04:54:34.146836+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -410,6 +410,11 @@
       "sha256": "b3d1125be1cbc9f1fc70ccbb6b8e707ba8880fbccba8de1b177d3bb9103959f3"
     },
     {
+      "path": "data/forecasts/ifs/20260926.json",
+      "size_bytes": 866539,
+      "sha256": "b45473d8c440bf8b2a05c63b5624e82d01ec5f4c96908fe0aa17e5b80778fcbc"
+    },
+    {
       "path": "data/formulas.json",
       "size_bytes": 3123,
       "sha256": "f1a188e9f4626deed103fc4d317bf5972d3636b8aa0e3a2690ec2282d8c9c4b7"
@@ -531,8 +536,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 107571,
-      "sha256": "9fd402e4f1d7c38d1d10f777ab32b71aac5ece5cf200f8d56eee460d3f425a9f"
+      "size_bytes": 109299,
+      "sha256": "25078ceeebf0d8056bc8d555cb768957f5831fd28cd676a03a5a7c8f8f6d79fa"
     },
     {
       "path": "data/india-admin.json",
@@ -790,6 +795,11 @@
       "sha256": "7561929aa01ed5e1791b85e9224592f867800287405186e8fd831c224f5e5b25"
     },
     {
+      "path": "data/regional/ifs/20260926.json",
+      "size_bytes": 448767,
+      "sha256": "bbab856d5ff01c2240ca91a5f01a43f002f4f845801b516864d5132a0d8c06ed"
+    },
+    {
       "path": "data/sources.json",
       "size_bytes": 2397,
       "sha256": "dee2d6cfe5852ff9d3d5aad80eb39f155be862bd32f55cc84d2822992c312126"
@@ -1023,6 +1033,11 @@
       "path": "downloads/ifs/20260923/S2S_Research_India_Weeks1-4_IFS_20260923.pdf",
       "size_bytes": 4341922,
       "sha256": "89ae14aadb028d06fe1dc84d46de65a56af57cb5d5a4fc466e343cb747190fbf"
+    },
+    {
+      "path": "downloads/ifs/20260926/S2S_Research_India_Weeks1-4_IFS_20260926.pdf",
+      "size_bytes": 4340493,
+      "sha256": "7675f779cd4a3abb2deb9e256791e32813e197064b6126e4622272dae86e1248"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
