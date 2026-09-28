@@ -3,14 +3,14 @@
 This directory contains the scheduler layer for the existing FuXi operational
 driver. It is intentionally independent by source:
 
-- GFS issues are considered only on Wednesday and Saturday. The controller
+- GFS issues are considered only on Wednesday and Sunday. The controller
   polls every 15 minutes from 00:15 through 12:00 UTC and submits once all 16
   inputs are present.
-- IFS uses an independent Wednesday/Saturday rolling poll and state record.
+- IFS uses an independent Wednesday/Sunday rolling poll and state record.
   Its window and interval are configurable separately and default to the same
   00:15–12:00 UTC, 15-minute policy as GFS.
 - ERA5 is a delayed reference. A daily watcher revisits pending Wednesday and
-  Saturday dates and submits only after all 768 ARCO objects are present.
+  Sunday dates and submits only after all 768 ARCO objects are present.
 - One source never waits for the other. A delayed ERA5 issue can be published
   later, and a missing IFS issue does not block GFS or ERA5 publication.
 
@@ -99,7 +99,7 @@ The controller itself uses only the Python standard library.
 
 The production host uses `Asia/Kolkata` and Debian cron does not honor a
 per-user `CRON_TZ`. The tracked cron example therefore runs lightweight GFS and
-IFS heartbeats every 15 minutes and leaves Wednesday/Saturday UTC-window
+IFS heartbeats every 15 minutes and leaves Wednesday/Sunday UTC-window
 eligibility to the controller. IFS is offset seven minutes from GFS. ERA5 runs
 at 18:35 IST (13:05 UTC), while reconcile runs every ten minutes at a two-minute
 offset so none of the periodic commands intentionally contend for the private
@@ -145,7 +145,7 @@ files:
   --dry-run --now 2026-08-08T00:15:00Z gfs-poll
 ```
 
-Use `--date YYYYMMDD` only for a deliberate Wednesday/Saturday recovery. An
+Use `--date YYYYMMDD` only for a deliberate Wednesday/Sunday recovery. An
 explicit date bypasses the GFS or IFS clock window but not the cadence or
 configured start boundary. The former `ifs-pilot --date` command remains as a
 backward-compatible alias; new automation should use `ifs-poll`.

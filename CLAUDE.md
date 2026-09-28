@@ -72,7 +72,7 @@ Three layers, strictly one-directional:
   plausibility → publication safety.
 - `catalog.py` — builds `public/data/index.json`: per-source issue lists, `current`
   and `latest_reference` pointers, per-issue capabilities, cadence, retention.
-  `PRIMARY_SOURCE_ID = "ifs"`; cadence is Wednesday/Saturday.
+  `PRIMARY_SOURCE_ID = "ifs"`; cadence is Wednesday/Sunday.
 
 ### Public data contract (`public/data/`)
 

@@ -21,7 +21,7 @@ UTC = timezone.utc
 PRODUCTION_MEMBERS = 100
 RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
-CADENCE_WEEKDAYS = (2, 5)  # Wednesday and Saturday, datetime.weekday().
+CADENCE_WEEKDAYS = (2, 6)  # Wednesday and Sunday, datetime.weekday().
 TARGET_HOUR_UTC = 12
 PRIMARY_SOURCE_ID = "ifs"
 
@@ -54,7 +54,7 @@ def iso_z(value: datetime) -> str:
 
 
 def next_expected_update(now: datetime) -> datetime:
-    """Return the next Wednesday/Saturday publication target at 12:00 UTC."""
+    """Return the next Wednesday/Sunday publication target at 12:00 UTC."""
 
     normalized = now.astimezone(UTC)
     for offset in range(8):
@@ -274,7 +274,7 @@ def build_catalog(
 
     if not complete_by_source.get(PRIMARY_SOURCE_ID):
         raise ValueError("no complete 100-member IFS issue; Current is unchanged")
-    # Current guidance must sit on the published Wednesday/Saturday cadence, so an
+    # Current guidance must sit on the published Wednesday/Sunday cadence, so an
     # ad-hoc off-cadence run never becomes the pointer that publication validation
     # then rejects.
     on_cadence = [
@@ -284,7 +284,7 @@ def build_catalog(
     ]
     if not on_cadence:
         raise ValueError(
-            "no complete 100-member Wednesday/Saturday IFS issue; Current is unchanged"
+            "no complete 100-member Wednesday/Sunday IFS issue; Current is unchanged"
         )
     current_issue = max(on_cadence, key=lambda item: item["id"])
     current_issue["presentation"] = {
@@ -316,7 +316,7 @@ def build_catalog(
             "current": current,
             "latest_reference": reference,
             "publication": {
-                "cadence_days_utc": ["Wednesday", "Saturday"],
+                "cadence_days_utc": ["Wednesday", "Sunday"],
                 "target_time_utc": "12:00",
                 "last_successful_at": last_successful_at,
                 "next_expected_at": iso_z(next_expected),

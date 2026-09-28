@@ -225,7 +225,7 @@ function shell(): string {
       </div>
       <div class="site-footer__section" id="schedule">
         <strong>Update schedule</strong>
-        <p>Main IFS-initialized guidance is targeted every Wednesday and Saturday after source-data checks. GFS is retained as a secondary proxy, and ERA5 is a delayed reference.</p>
+        <p>Main IFS-initialized guidance is targeted every Wednesday and Sunday after source-data checks. GFS is retained as a secondary proxy, and ERA5 is a delayed reference.</p>
       </div>
       <div class="site-footer__section" id="limitations">
         <strong>Limitations & contact</strong>

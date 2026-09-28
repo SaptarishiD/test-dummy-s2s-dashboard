@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Idempotent Wednesday/Saturday scheduler for operational FuXi forecasts.
+"""Idempotent Wednesday/Sunday scheduler for operational FuXi forecasts.
 
 This controller probes availability, asks the existing ``fuxi_operational.py``
 driver to create each source/date config, and submits the existing Slurm stage
@@ -41,7 +41,7 @@ ISSUE_STAGES = (
     "failed",
 )
 PROGRESS_STAGES = ISSUE_STAGES[:-1]
-SCHEDULED_WEEKDAYS = (2, 5)  # Wednesday and Saturday, datetime convention.
+SCHEDULED_WEEKDAYS = (2, 6)  # Wednesday and Sunday, datetime convention.
 DATE_PATTERN = re.compile(r"^\d{8}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40,64}$")
 
@@ -601,7 +601,7 @@ class Controller:
         date = requested_date or now.date()
         label = source.upper()
         if date.weekday() not in SCHEDULED_WEEKDAYS:
-            return [self._skip(source, date, "not a Wednesday/Saturday issue")]
+            return [self._skip(source, date, "not a Wednesday/Sunday issue")]
         if date > now.date():
             return [self._skip(source, date, "future issue dates are not eligible")]
         if date < self.settings.start_date:
@@ -672,7 +672,7 @@ class Controller:
         probed = 0
         for date in candidates:
             if date.weekday() not in SCHEDULED_WEEKDAYS:
-                results.append(self._skip("era5", date, "not a Wednesday/Saturday issue"))
+                results.append(self._skip("era5", date, "not a Wednesday/Sunday issue"))
                 continue
             if date > now.date():
                 results.append(self._skip("era5", date, "future issue dates are not eligible"))

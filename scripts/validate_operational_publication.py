@@ -668,8 +668,8 @@ def choose_scope(
         raise ValueError("latest GFS issue must be a 100-member publication")
     if records[("era5", era5_id)].record.get("members") != 100:
         raise ValueError("latest ERA5 reference must be a 100-member publication")
-    if dt.datetime.strptime(primary_id, "%Y%m%d").weekday() not in {2, 5}:
-        raise ValueError("current pointer is not a Wednesday/Saturday issue")
+    if dt.datetime.strptime(primary_id, "%Y%m%d").weekday() not in {2, 6}:
+        raise ValueError("current pointer is not a Wednesday/Sunday issue")
     if args.expected_gfs_issue and args.expected_gfs_issue != gfs_id:
         raise ValueError(
             f"expected GFS {args.expected_gfs_issue}, catalog points to {gfs_id}"
@@ -721,8 +721,8 @@ def validate_v3_contract(
     if not isinstance(publication, dict) or not isinstance(operations, dict):
         raise ValueError("schema-v3 publication and operations metadata are required")
     cadence = " ".join(str(value).lower() for value in publication.get("cadence_days_utc", []))
-    if "wed" not in cadence or "sat" not in cadence:
-        raise ValueError("publication cadence must name Wednesday and Saturday UTC")
+    if "wed" not in cadence or "sun" not in cadence:
+        raise ValueError("publication cadence must name Wednesday and Sunday UTC")
     if not publication.get("target_time_utc"):
         raise ValueError("schema-v3 publication target_time_utc is required")
     for field in ("last_successful_at", "next_expected_at"):

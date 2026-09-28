@@ -3,7 +3,7 @@
 S2S_LAUNCHER=/home/raj.ayush/.local/share/s2s-fuxi/publisher/fuxi-s2s-dashboard/automation/run_scheduler.py
 
 # The lightweight heartbeat runs every 15 minutes. The controller itself gates
-# network probes to Wednesday/Saturday 00:15-12:00 UTC, so cron timezone and DST
+# network probes to Wednesday/Sunday 00:15-12:00 UTC, so cron timezone and DST
 # cannot shift the scientific issue window.
 */15 * * * * /usr/bin/python3 $S2S_LAUNCHER gfs-poll 2>&1 | /usr/bin/logger -t s2s-fuxi-gfs
 

@@ -291,11 +291,11 @@ export function issuePdfAvailable(issue: CatalogIssue): boolean {
     Boolean(issue.pdf);
 }
 
-export function nextWednesdayOrSaturday(initialization: string): Date {
+export function nextWednesdayOrSunday(initialization: string): Date {
   const next = new Date(initialization);
   next.setUTCHours(0, 0, 0, 0);
   do {
     next.setUTCDate(next.getUTCDate() + 1);
-  } while (next.getUTCDay() !== 3 && next.getUTCDay() !== 6);
+  } while (next.getUTCDay() !== 3 && next.getUTCDay() !== 0);
   return next;
 }

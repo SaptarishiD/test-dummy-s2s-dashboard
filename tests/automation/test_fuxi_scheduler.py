@@ -184,15 +184,15 @@ def timeout(command: str = "probe") -> CommandFailure:
     )
 
 
-def test_schedule_is_only_wednesday_and_saturday() -> None:
+def test_schedule_is_only_wednesday_and_sunday() -> None:
     assert scheduled_issue_dates(
         dt.date(2026, 8, 12),
         start_date=dt.date(2026, 8, 1),
         lookback_days=20,
     ) == [
-        dt.date(2026, 8, 1),
+        dt.date(2026, 8, 2),
         dt.date(2026, 8, 5),
-        dt.date(2026, 8, 8),
+        dt.date(2026, 8, 9),
         dt.date(2026, 8, 12),
     ]
 
@@ -224,7 +224,7 @@ def test_gfs_ignores_wrong_day_and_outside_window(tmp_path: Path) -> None:
     monday = controller.gfs_poll(utc("2026-08-03T00:15:00Z"))
     too_early = controller.gfs_poll(utc("2026-08-05T00:00:00Z"))
 
-    assert "Wednesday/Saturday" in monday[0]["reason"]
+    assert "Wednesday/Sunday" in monday[0]["reason"]
     assert "before the configured" in too_early[0]["reason"]
     assert runner.commands == []
 
@@ -242,7 +242,7 @@ def test_ifs_poll_waits_then_submits_exactly_once(tmp_path: Path) -> None:
     submitted = controller.ifs_poll(utc("2026-08-05T00:30:00Z"))
     duplicate = controller.ifs_poll(utc("2026-08-05T00:45:00Z"))
 
-    assert "Wednesday/Saturday" in off_cadence[0]["reason"]
+    assert "Wednesday/Sunday" in off_cadence[0]["reason"]
     assert waiting[0]["outcome"] == "waiting"
     assert submitted[0]["stage"] == "submitted"
     assert duplicate[0]["outcome"] == "skipped"
@@ -288,17 +288,17 @@ def test_gfs_failure_does_not_block_ready_ifs_issue(tmp_path: Path) -> None:
 def test_era5_watcher_backfills_ready_dates_independently(tmp_path: Path) -> None:
     config = settings(tmp_path, era5_max_probes_per_run=3)
     runner = FakeRunner(config.generated_config_root)
-    runner.availability("era5", "20260801", False)
+    runner.availability("era5", "20260802", False)
     runner.availability("era5", "20260805", True)
-    runner.availability("era5", "20260808", False)
+    runner.availability("era5", "20260809", False)
     controller = Controller(config, runner=runner)
 
     results = controller.era5_watch(utc("2026-08-10T13:00:00Z"))
 
     by_date = {result["issue_date"]: result for result in results}
-    assert by_date["20260801"]["outcome"] == "waiting"
+    assert by_date["20260802"]["outcome"] == "waiting"
     assert by_date["20260805"]["stage"] == "submitted"
-    assert by_date["20260808"]["outcome"] == "waiting"
+    assert by_date["20260809"]["outcome"] == "waiting"
     submit_commands = [command for command in runner.commands if command[2] == "submit"]
     assert len(submit_commands) == 1
     assert "fuxi_era5_20260805_ens100.json" in submit_commands[0][-1]

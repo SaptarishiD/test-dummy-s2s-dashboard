@@ -113,15 +113,15 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
     assert newer_limited["presentation"]["label"] == "Limited experiment"
 
 
-def test_next_update_uses_wednesday_saturday_utc_cadence() -> None:
+def test_next_update_uses_wednesday_sunday_utc_cadence() -> None:
     assert next_expected_update(
         datetime(2026, 8, 5, 13, tzinfo=timezone.utc)
-    ) == datetime(2026, 8, 8, 12, tzinfo=timezone.utc)
+    ) == datetime(2026, 8, 9, 12, tzinfo=timezone.utc)
     assert next_expected_update(
-        datetime(2026, 8, 8, 11, 59, tzinfo=timezone.utc)
-    ) == datetime(2026, 8, 8, 12, tzinfo=timezone.utc)
+        datetime(2026, 8, 9, 11, 59, tzinfo=timezone.utc)
+    ) == datetime(2026, 8, 9, 12, tzinfo=timezone.utc)
     assert next_expected_update(
-        datetime(2026, 8, 8, 12, tzinfo=timezone.utc)
+        datetime(2026, 8, 9, 12, tzinfo=timezone.utc)
     ) == datetime(2026, 8, 12, 12, tzinfo=timezone.utc)
 
 

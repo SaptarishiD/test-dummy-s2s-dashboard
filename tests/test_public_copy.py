@@ -36,7 +36,7 @@ def test_shared_footer_has_mail_and_institutional_links() -> None:
     shell = read("src/main.ts")
     assert f'href="mailto:{PUBLIC_EMAIL}"' in shell
     assert "https://scdlds.ashoka.edu.in/" in shell
-    assert "Wednesday and Saturday" in shell
+    assert "Wednesday and Sunday" in shell
     assert "Limitations & contact" in shell
 
 
