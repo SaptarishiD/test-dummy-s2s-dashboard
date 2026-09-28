@@ -95,6 +95,40 @@ Run locally with:
 npm run dev
 ```
 
+### Probabilistic summary package
+
+For a validated 100-member issue with a compatible model climatology, generate
+the compact map and selected-location summaries with:
+
+```bash
+python scripts/build_regional_outlook.py \
+  --forecast /private/path/to/completed-forecast.nc \
+  --public-forecast public/data/forecasts/ifs/YYYYMMDD.json \
+  --climatology /private/path/to/fuxi_s2s_jjas_model_climatology_2002_2021_loyo.nc \
+  --minimum-valid-members 100 \
+  --output public/data/regional/ifs/YYYYMMDD.json
+npm run dev
+```
+
+The exporter aggregates each member into a complete seven-day week before it
+calculates the mean, P10, P25, median, P75, P90, P90 - P10, valid-member count,
+and tercile fractions. A partial member-week remains missing. The default
+completeness threshold requires all 100 expected members and is configurable by
+CLI for explicitly reviewed degraded-data workflows.
+
+The tercile thresholds are lead-matched 1/3 and 2/3 quantiles from 20 equally
+weighted yearly native-model ensemble means (2002-2021), using the existing
+calendar-alignment pipeline. The probabilities are raw fractions of valid
+forecast members, not calibrated event frequencies. Boundaries are mutually
+exclusive: below is `X < q33`, near is `q33 <= X <= q67`, and above is
+`X > q67`. Cells with repeated/non-increasing thresholds are published as
+unavailable rather than forced into three categories.
+
+Regional schema v2 carries only compact member-derived summaries; full spatial
+member fields and reforecasts remain private. Older schema-v1 packages continue
+to show their real tercile probabilities, while quantiles and spread display an
+explicit unavailable state until that issue is regenerated.
+
 ## Data contract
 
 The global contract stores little-endian `uint16` binary arrays in lead-day,

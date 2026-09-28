@@ -11,6 +11,7 @@ from science.formulas import (
     calendar_interpolation,
     climatology_spread,
     climatology_terciles,
+    ensemble_quantile_summary,
     ensemble_mean,
     forecast_spread,
     geopotential_to_height_dam,
@@ -21,6 +22,7 @@ from science.formulas import (
     probability_near_normal,
     tp_mm_hour_to_mm_day,
     top_net_thermal_to_olr,
+    valid_member_tercile_probabilities,
     verification_metrics,
     weekly_mean,
     weekly_mean_rainfall,
@@ -99,6 +101,68 @@ def test_tercile_probabilities_use_strict_member_counts() -> None:
         + probability_near_normal(members, 1.0, 2.0)
         + probability_above_normal(members, 2.0)
     ) == 100.0
+
+
+def test_quantile_summary_uses_valid_members_and_orders_intervals() -> None:
+    members = np.asarray([0.0, 1.0, 2.0, 3.0, np.nan])
+    summary = ensemble_quantile_summary(members, minimum_valid_members=4)
+    assert summary["valid_member_count"] == 4
+    assert summary["mean"] == pytest.approx(1.5)
+    assert summary["p10"] == pytest.approx(0.3)
+    assert summary["p50"] == pytest.approx(1.5)
+    assert summary["p90"] == pytest.approx(2.7)
+    assert summary["p90_minus_p10"] == pytest.approx(2.4)
+    assert summary["p10"] <= summary["p25"] <= summary["p50"]
+    assert summary["p50"] <= summary["p75"] <= summary["p90"]
+
+
+def test_valid_member_probabilities_use_actual_denominator_and_boundaries() -> None:
+    members = np.asarray([0.0, 1.0, 2.0, 3.0, np.nan])
+    probabilities, valid_count, available = valid_member_tercile_probabilities(
+        members,
+        1.0,
+        2.0,
+        minimum_valid_members=4,
+    )
+    assert valid_count == 4
+    assert bool(available)
+    assert probabilities["below_normal"] == 25.0
+    assert probabilities["near_normal"] == 50.0
+    assert probabilities["above_normal"] == 25.0
+    assert sum(probabilities.values()) == 100.0
+
+
+def test_incomplete_member_sample_is_masked_at_configured_threshold() -> None:
+    members = np.asarray([0.0, 1.0, np.nan])
+    summary = ensemble_quantile_summary(members, minimum_valid_members=3)
+    assert summary["valid_member_count"] == 2
+    assert np.isnan(summary["mean"])
+    probabilities, valid_count, available = valid_member_tercile_probabilities(
+        members,
+        0.5,
+        1.5,
+        minimum_valid_members=3,
+    )
+    assert valid_count == 2
+    assert not bool(available)
+    assert all(np.isnan(value) for value in probabilities.values())
+
+
+def test_degenerate_terciles_are_unavailable_not_zero_probability() -> None:
+    probabilities, _, available = valid_member_tercile_probabilities(
+        np.asarray([0.0, 0.0, 1.0, 2.0]),
+        0.0,
+        0.0,
+        minimum_valid_members=4,
+    )
+    assert not bool(available)
+    assert all(np.isnan(value) for value in probabilities.values())
+
+
+def test_weekly_mean_does_not_turn_partial_week_into_a_low_value() -> None:
+    days = np.ones(7)
+    days[3] = np.nan
+    assert np.isnan(weekly_mean(days)[0])
 
 
 def test_area_weights_are_positive_and_normalized() -> None:

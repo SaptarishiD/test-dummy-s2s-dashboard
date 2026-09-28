@@ -2425,7 +2425,7 @@
           },
           "checksums": {
             "forecast_sha256": "e6eea1736ec36907beceeb7a9fd8884e83e88dcd802ca9a412aa4c8e5fd87d42",
-            "regional_sha256": "8bebc91eb57b4313ad577ef6eb54019d119a5f8189cf1bf8a4971014508c529f",
+            "regional_sha256": "073c9c0251f8b6f1e68c8c751da34757224336ff9b6343a3b59b105a4120c192",
             "pdf_sha256": "b42936140ea06311b08eda21c9b1b2b0e92b45a3cd003aace53c08feb62a9c97"
           },
           "valid_through": "2026-11-07",

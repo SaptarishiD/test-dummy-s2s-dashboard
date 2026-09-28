@@ -169,7 +169,7 @@ export class TercileProbabilityMap {
     ): number => {
       const safeRow = Math.max(0, Math.min(latitude.length - 1, row));
       const safeColumn = Math.max(0, Math.min(longitude.length - 1, column));
-      return fields[category][safeRow * longitude.length + safeColumn];
+      return fields[category][safeRow * longitude.length + safeColumn] ?? Number.NaN;
     };
 
     const interpolate = (
@@ -266,9 +266,9 @@ export class TercileProbabilityMap {
       }
       const index = latIndex * longitude.length + lonIndex;
       const probabilities: Record<TercileCategory, number> = {
-        below_normal: fields.below_normal[index],
-        near_normal: fields.near_normal[index],
-        above_normal: fields.above_normal[index],
+        below_normal: fields.below_normal[index] ?? Number.NaN,
+        near_normal: fields.near_normal[index] ?? Number.NaN,
+        above_normal: fields.above_normal[index] ?? Number.NaN,
       };
       const category = dominantCategory(probabilities);
       const lat = latitude[latIndex];

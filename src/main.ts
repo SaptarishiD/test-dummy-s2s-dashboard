@@ -1,5 +1,6 @@
 import "./styles/main.css";
 import "./styles/operational.css";
+import "./styles/probabilistic.css";
 import type {
   AppData,
   ForecastData,

@@ -217,6 +217,42 @@ export type TercileCategory =
   | "near_normal"
   | "above_normal";
 
+export type ProbabilityMapProduct =
+  | "most_likely"
+  | "category_margin"
+  | TercileCategory;
+
+export type DistributionMapProduct = "spread" | "p10" | "p50" | "p90";
+
+export type ProbabilisticVariable = "rainfall" | "temperature";
+
+export interface ForecastGridSelection {
+  latitude_index: number;
+  longitude_index: number;
+  latitude: number;
+  longitude: number;
+  week: number;
+}
+
+export type NullableGrid = Array<number | null>;
+
+export interface EnsembleGridSummary {
+  units: "mm day⁻¹" | "°C";
+  mean: NullableGrid;
+  p10: NullableGrid;
+  p25: NullableGrid;
+  p50: NullableGrid;
+  p75: NullableGrid;
+  p90: NullableGrid;
+  p90_minus_p10: NullableGrid;
+  valid_member_count: number[];
+  climatology_median: NullableGrid;
+  lower_tercile: NullableGrid;
+  upper_tercile: NullableGrid;
+  tercile_available: boolean[];
+  leading_category: Array<TercileCategory | "mixed" | null>;
+}
+
 export interface TercileProbabilityRecord {
   below_normal: number;
   near_normal: number;
@@ -232,6 +268,11 @@ export interface RegionalVariableSummary {
   weekly_mean_deg_c?: number;
   anomaly_deg_c?: number;
   ensemble_spread_deg_c?: number;
+  ensemble_median?: number;
+  p10?: number;
+  p90?: number;
+  p90_minus_p10?: number;
+  valid_member_count?: number;
   tercile_probability_percent: TercileProbabilityRecord;
 }
 
@@ -240,9 +281,10 @@ export interface RegionalOutlookWeek {
   valid_start: string;
   valid_end: string;
   probability_fields: Record<
-    "rainfall" | "temperature",
-    Record<TercileCategory, number[]>
+    ProbabilisticVariable,
+    Record<TercileCategory, NullableGrid>
   >;
+  summary_fields?: Record<ProbabilisticVariable, EnsembleGridSummary>;
   regions: Array<{
     id: string;
     label: string;
@@ -253,19 +295,22 @@ export interface RegionalOutlookWeek {
 }
 
 export interface RegionalOutlookData {
-  schema_version: 1;
+  schema_version: 1 | 2;
   generated_at: string;
   issue: {
     initialization: string;
     source_id: InitialConditionSourceId;
     source_label: string;
-    members: 100;
+    members: number;
+    expected_members?: number;
+    minimum_valid_members?: number;
     lead_days: 42;
     status: "experimental";
     probability_type: "raw_ensemble_tercile_probability";
     calibration:
       | "uncalibrated_gfs_proxy"
-      | "raw_ensemble_reanalysis_reference";
+      | "raw_ensemble_reanalysis_reference"
+      | "raw_model_climatology";
     forecast_sha256: string;
     climatology_sha256: string;
     hindcast_years: number[];
@@ -299,6 +344,10 @@ export interface RegionalOutlookData {
     above_normal: string;
     terciles: string;
     warning: string;
+    reference_id?: string;
+    boundary_rule?: string;
+    degenerate_threshold_rule?: string;
+    member_completeness?: string;
   };
   weeks: RegionalOutlookWeek[];
 }

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -120,6 +121,93 @@ def ensemble_mean(values: ArrayLike, *, member_axis: int = 0) -> FloatArray:
     """Arithmetic mean across forecast members."""
 
     return _float_array(values).mean(axis=member_axis)
+
+
+def ensemble_quantile_summary(
+    values: ArrayLike,
+    *,
+    member_axis: int = 0,
+    minimum_valid_members: int = 1,
+) -> dict[str, FloatArray]:
+    """Return finite-member mean and quantiles, masking incomplete cells."""
+
+    members = _float_array(values)
+    axis = member_axis % members.ndim
+    expected_members = members.shape[axis]
+    if not 1 <= minimum_valid_members <= expected_members:
+        raise ValueError("minimum_valid_members must lie within the ensemble size")
+    finite = np.isfinite(members)
+    valid_count = finite.sum(axis=axis)
+    mean = np.divide(
+        np.where(finite, members, 0.0).sum(axis=axis),
+        valid_count,
+        out=np.full(valid_count.shape, np.nan, dtype=np.float64),
+        where=valid_count > 0,
+    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="All-NaN slice encountered")
+        quantiles = np.nanquantile(
+            np.where(finite, members, np.nan),
+            [0.10, 0.25, 0.50, 0.75, 0.90],
+            axis=axis,
+            method="linear",
+        )
+    available = valid_count >= minimum_valid_members
+    result: dict[str, FloatArray] = {
+        "mean": np.where(available, mean, np.nan),
+        "p10": np.where(available, quantiles[0], np.nan),
+        "p25": np.where(available, quantiles[1], np.nan),
+        "p50": np.where(available, quantiles[2], np.nan),
+        "p75": np.where(available, quantiles[3], np.nan),
+        "p90": np.where(available, quantiles[4], np.nan),
+        "valid_member_count": valid_count.astype(np.float64),
+    }
+    result["p90_minus_p10"] = result["p90"] - result["p10"]
+    return result
+
+
+def valid_member_tercile_probabilities(
+    members: ArrayLike,
+    lower_tercile: ArrayLike,
+    upper_tercile: ArrayLike,
+    *,
+    member_axis: int = 0,
+    minimum_valid_members: int = 1,
+) -> tuple[dict[str, FloatArray], FloatArray, NDArray[np.bool_]]:
+    """Return raw tercile percentages using each cell's finite-member count."""
+
+    values = _float_array(members)
+    axis = member_axis % values.ndim
+    expected_members = values.shape[axis]
+    if not 1 <= minimum_valid_members <= expected_members:
+        raise ValueError("minimum_valid_members must lie within the ensemble size")
+    lower = _float_array(lower_tercile)
+    upper = _float_array(upper_tercile)
+    finite = np.isfinite(values)
+    valid_count = finite.sum(axis=axis)
+    available = (
+        (valid_count >= minimum_valid_members)
+        & np.isfinite(lower)
+        & np.isfinite(upper)
+        & (lower < upper)
+    )
+
+    def percentage(event: NDArray[np.bool_]) -> FloatArray:
+        count = np.count_nonzero(event & finite, axis=axis)
+        probability = np.divide(
+            count * 100.0,
+            valid_count,
+            out=np.full(valid_count.shape, np.nan, dtype=np.float64),
+            where=valid_count > 0,
+        )
+        return np.where(available, probability, np.nan)
+
+    probabilities = {
+        "below_normal": percentage(values < lower),
+        "near_normal": percentage((values >= lower) & (values <= upper)),
+        "above_normal": percentage(values > upper),
+    }
+    return probabilities, valid_count.astype(np.float64), available
 
 
 def forecast_spread(values: ArrayLike, *, member_axis: int = 0) -> FloatArray:

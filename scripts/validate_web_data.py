@@ -321,30 +321,100 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                         raise ValueError("regional week order is incorrect")
                     if [item["id"] for item in regional_week["regions"]] != expected_regions:
                         raise ValueError("regional identities or order are incorrect")
+                    schema_version = regional.get("schema_version", 1)
                     for variable in ("rainfall", "temperature"):
                         probability = regional_week["probability_fields"][variable]
-                        arrays = [
-                            np.asarray(probability[category], dtype=np.float64)
+                        raw_arrays = [
+                            probability[category]
                             for category in (
                                 "below_normal",
                                 "near_normal",
                                 "above_normal",
                             )
                         ]
-                        if any(array.shape != (729,) for array in arrays):
+                        if any(len(array) != 729 for array in raw_arrays):
                             raise ValueError("regional probability field shape is invalid")
+                        arrays = [
+                            np.asarray(
+                                [np.nan if value is None else value for value in array],
+                                dtype=np.float64,
+                            )
+                            for array in raw_arrays
+                        ]
+                        missing = [np.isnan(array) for array in arrays]
+                        if not all(np.array_equal(missing[0], item) for item in missing[1:]):
+                            raise ValueError("regional probability masks are inconsistent")
+                        available = ~missing[0]
                         if any(
-                            not np.isfinite(array).all()
-                            or np.any((array < 0.0) | (array > 100.0))
+                            np.any((array[available] < 0.0) | (array[available] > 100.0))
                             for array in arrays
                         ):
                             raise ValueError("regional probability field is invalid")
                         np.testing.assert_allclose(
-                            arrays[0] + arrays[1] + arrays[2],
+                            arrays[0][available]
+                            + arrays[1][available]
+                            + arrays[2][available],
                             100.0,
                             rtol=0.0,
-                            atol=0.0,
+                            atol=0.02 if schema_version >= 2 else 0.0,
                         )
+
+                        if schema_version >= 2:
+                            summary = regional_week["summary_fields"][variable]
+                            numeric_fields = (
+                                "mean",
+                                "p10",
+                                "p25",
+                                "p50",
+                                "p75",
+                                "p90",
+                                "p90_minus_p10",
+                                "climatology_median",
+                                "lower_tercile",
+                                "upper_tercile",
+                            )
+                            if any(len(summary[field]) != 729 for field in numeric_fields):
+                                raise ValueError("ensemble summary field shape is invalid")
+                            if len(summary["valid_member_count"]) != 729:
+                                raise ValueError("valid-member field shape is invalid")
+                            expected_members = regional["issue"]["expected_members"]
+                            minimum_members = regional["issue"]["minimum_valid_members"]
+                            counts = np.asarray(summary["valid_member_count"], dtype=np.int64)
+                            if np.any((counts < 0) | (counts > expected_members)):
+                                raise ValueError("valid-member count is outside its range")
+                            quantiles = [
+                                np.asarray(
+                                    [
+                                        np.nan if value is None else value
+                                        for value in summary[field]
+                                    ],
+                                    dtype=np.float64,
+                                )
+                                for field in ("p10", "p25", "p50", "p75", "p90")
+                            ]
+                            complete = counts >= minimum_members
+                            if any(np.any(np.isnan(item[complete])) for item in quantiles):
+                                raise ValueError("complete cells lack ensemble quantiles")
+                            if any(np.any(~np.isnan(item[~complete])) for item in quantiles):
+                                raise ValueError("incomplete cells expose ensemble quantiles")
+                            if any(
+                                np.any(left[complete] > right[complete])
+                                for left, right in zip(quantiles, quantiles[1:])
+                            ):
+                                raise ValueError("ensemble quantiles are out of order")
+                            spread = np.asarray(
+                                [
+                                    np.nan if value is None else value
+                                    for value in summary["p90_minus_p10"]
+                                ],
+                                dtype=np.float64,
+                            )
+                            np.testing.assert_allclose(
+                                spread[complete],
+                                quantiles[-1][complete] - quantiles[0][complete],
+                                rtol=0.0,
+                                atol=0.02,
+                            )
                     for region in regional_week["regions"]:
                         for variable in ("rainfall", "temperature"):
                             probability = region[variable][

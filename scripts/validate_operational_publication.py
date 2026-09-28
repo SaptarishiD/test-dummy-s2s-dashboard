@@ -324,6 +324,9 @@ def grid_size(payload: dict[str, Any], label: str) -> int:
 
 def validate_regional_payload(path: Path, ref: IssueRef) -> None:
     regional = load_json(path)
+    schema_version = regional.get("schema_version", 1)
+    if schema_version not in (1, 2):
+        raise ValueError(f"unsupported regional schema: {schema_version}")
     issue = regional.get("issue", {})
     if (
         issue.get("source_id") != ref.source_id
@@ -332,14 +335,32 @@ def validate_regional_payload(path: Path, ref: IssueRef) -> None:
         or issue.get("members") != 100
     ):
         raise ValueError(f"regional identity mismatch: {ref.source_id}/{ref.issue_id}")
+    expected_members = int(issue.get("expected_members", issue.get("members", 0)))
+    minimum_valid = int(issue.get("minimum_valid_members", expected_members))
+    if not 1 <= minimum_valid <= expected_members:
+        raise ValueError(f"regional member-completeness contract is invalid: {ref.issue_id}")
+
     expected_values = grid_size(regional, "regional outlook")
     weeks = regional.get("weeks")
     if not isinstance(weeks, list) or len(weeks) != 6:
         raise ValueError(f"regional outlook must contain six weeks: {ref.issue_id}")
+    numeric_summary_fields = (
+        "mean",
+        "p10",
+        "p25",
+        "p50",
+        "p75",
+        "p90",
+        "p90_minus_p10",
+        "climatology_median",
+        "lower_tercile",
+        "upper_tercile",
+    )
     for expected_week, week in enumerate(weeks, start=1):
         if week.get("week") != expected_week:
             raise ValueError(f"regional week order mismatch: {ref.issue_id}")
         fields = week.get("probability_fields", {})
+        summaries = week.get("summary_fields", {})
         for variable in ("rainfall", "temperature"):
             categories = fields.get(variable, {})
             arrays = []
@@ -351,23 +372,112 @@ def validate_regional_payload(path: Path, ref: IssueRef) -> None:
                         f"{ref.source_id}/{ref.issue_id}/{variable}/{category}"
                     )
                 if any(
-                    not isinstance(value, (int, float)) or value < 0 or value > 100
+                    value is not None
+                    and (
+                        isinstance(value, bool)
+                        or not isinstance(value, (int, float))
+                        or value < 0
+                        or value > 100
+                    )
                     for value in values
                 ):
                     raise ValueError(
                         f"regional probability outside 0..100: "
                         f"{ref.source_id}/{ref.issue_id}/{variable}/{category}"
                     )
+                if schema_version == 1 and any(value is None for value in values):
+                    raise ValueError("schema-v1 regional probability contains null")
                 arrays.append(values)
-            # ``/usr/bin/python3`` on the production publisher is Python 3.8,
-            # where ``zip(strict=...)`` is not available.  Array lengths are
-            # already checked against the grid size above, so plain ``zip``
-            # keeps the same validation contract on every supported host.
-            if any(abs(sum(values) - 100.0) > 0.2 for values in zip(*arrays)):
-                raise ValueError(
-                    f"regional probabilities do not sum to 100: "
-                    f"{ref.source_id}/{ref.issue_id}/{variable}"
+
+            for cell_probabilities in zip(*arrays):
+                if any(value is None for value in cell_probabilities):
+                    if schema_version != 2 or not all(
+                        value is None for value in cell_probabilities
+                    ):
+                        raise ValueError("regional probability missingness is inconsistent")
+                elif abs(sum(cell_probabilities) - 100.0) > 0.2:
+                    raise ValueError(
+                        f"regional probabilities do not sum to 100: "
+                        f"{ref.source_id}/{ref.issue_id}/{variable}"
+                    )
+
+            if schema_version == 1:
+                continue
+            summary = summaries.get(variable)
+            if not isinstance(summary, dict):
+                raise ValueError(f"schema-v2 summary is missing: {variable}")
+            for name in numeric_summary_fields:
+                values = summary.get(name)
+                if not isinstance(values, list) or len(values) != expected_values:
+                    raise ValueError(f"schema-v2 summary field has wrong size: {variable}/{name}")
+                if any(
+                    value is not None
+                    and (isinstance(value, bool) or not isinstance(value, (int, float)))
+                    for value in values
+                ):
+                    raise ValueError(f"schema-v2 summary field is invalid: {variable}/{name}")
+            valid_counts = summary.get("valid_member_count")
+            available = summary.get("tercile_available")
+            leaders = summary.get("leading_category")
+            if (
+                not isinstance(valid_counts, list)
+                or len(valid_counts) != expected_values
+                or any(
+                    isinstance(value, bool)
+                    or not isinstance(value, int)
+                    or not 0 <= value <= expected_members
+                    for value in valid_counts
                 )
+            ):
+                raise ValueError(f"schema-v2 valid-member counts are invalid: {variable}")
+            if (
+                not isinstance(available, list)
+                or len(available) != expected_values
+                or any(not isinstance(value, bool) for value in available)
+            ):
+                raise ValueError(f"schema-v2 tercile availability is invalid: {variable}")
+            if (
+                not isinstance(leaders, list)
+                or len(leaders) != expected_values
+                or any(
+                    value not in (
+                        None,
+                        "below_normal",
+                        "near_normal",
+                        "above_normal",
+                        "mixed",
+                    )
+                    for value in leaders
+                )
+            ):
+                raise ValueError(f"schema-v2 leading category is invalid: {variable}")
+
+            for index, count in enumerate(valid_counts):
+                quantiles = [
+                    summary[name][index]
+                    for name in ("p10", "p25", "p50", "p75", "p90")
+                ]
+                if count < minimum_valid:
+                    if any(value is not None for value in quantiles):
+                        raise ValueError("incomplete cell exposes ensemble quantiles")
+                elif any(value is None for value in quantiles):
+                    raise ValueError("complete cell is missing ensemble quantiles")
+                elif quantiles != sorted(quantiles):
+                    raise ValueError("schema-v2 quantiles are not ordered")
+                spread = summary["p90_minus_p10"][index]
+                if (
+                    spread is not None
+                    and quantiles[-1] is not None
+                    and abs(spread - (quantiles[-1] - quantiles[0])) > 0.02
+                ):
+                    raise ValueError("schema-v2 P90-P10 is inconsistent")
+                probabilities_missing = any(
+                    values[index] is None for values in arrays
+                )
+                if probabilities_missing == available[index]:
+                    raise ValueError("tercile availability disagrees with probabilities")
+                if available[index] and leaders[index] is None:
+                    raise ValueError("available tercile cell has no leading category")
 
 
 def validate_forecast(

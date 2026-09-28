@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-27T14:48:35.764772+00:00",
+  "generated_at": "2026-09-28T14:09:45.413584+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -542,7 +542,7 @@
     {
       "path": "data/index.json",
       "size_bytes": 110665,
-      "sha256": "ddc8184a9d70cf96e666d939848d88e76584850163503a126a657c700ecb395f"
+      "sha256": "46a3d5632d0ca9ef06b2815ac4878980fbbc27265009be34aa0853d71b9192cd"
     },
     {
       "path": "data/india-admin.json",
@@ -806,8 +806,8 @@
     },
     {
       "path": "data/regional/ifs/20260927.json",
-      "size_bytes": 448792,
-      "sha256": "8bebc91eb57b4313ad577ef6eb54019d119a5f8189cf1bf8a4971014508c529f"
+      "size_bytes": 2676223,
+      "sha256": "073c9c0251f8b6f1e68c8c751da34757224336ff9b6343a3b59b105a4120c192"
     },
     {
       "path": "data/sources.json",

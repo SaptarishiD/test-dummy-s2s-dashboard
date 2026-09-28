@@ -79,7 +79,7 @@ def test_wind_streamlines_are_default_with_an_arrow_alternative() -> None:
     assert "const vectors = week.vectors?.[productKey]" in forecast_map
     assert 'data-wind-mode="streamlines" class="is-active"' in forecast_page
     assert 'data-wind-mode="arrows"' in forecast_page
-    assert 'windModeControl.hidden = !isWindProduct(selectedProduct)' in forecast_page
+    assert 'selectedView !== "mean" || !isWindProduct(selectedProduct)' in forecast_page
     assert 'product === "wind850_mean" || product === "wind850_anomaly"' in forecast_page
     assert "map.render(selectedProduct, week, product, windRenderingMode)" in forecast_page
 
@@ -385,3 +385,107 @@ def test_shared_header_uses_the_page_rail_and_purpose_labeled_navigation() -> No
     assert "Latest run ·" in main
     assert "Latest briefing · ${FEATURED_REPORT.date}" in main
     assert "Catalogue through ·" in main
+
+
+def test_forecast_integrates_three_uncertainty_views_without_replacing_mean() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert 'data-forecast-view="mean" class="is-active"' in forecast
+    assert 'data-forecast-view="probability"' in forecast
+    assert 'data-forecast-view="spread"' in forecast
+    assert 'let selectedView: ForecastView = "mean"' in forecast
+    assert 'const meanCandidates: ProductKey[]' in forecast
+    assert 'if (matchingMeanProduct) selectedProduct = matchingMeanProduct' in forecast
+    assert 'value="most_likely">Most likely tercile' in forecast
+    assert 'value="below_normal"' in forecast
+    assert 'value="near_normal"' in forecast
+    assert 'value="above_normal"' in forecast
+    assert "selectedLocation" in forecast
+    assert "rangeStart" in forecast
+    assert "selectedProbabilityVariable" in forecast
+    assert "map.render(selectedProduct, week, product, windRenderingMode)" in forecast
+
+
+def test_probabilistic_data_is_lazy_versioned_and_stale_safe() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert "async function loadRegionalOutlook()" in forecast
+    assert 'issueChecksum(catalogIssue!, "regional_outlook")' in forecast
+    assert "checksumVersionedPath(" in forecast
+    assert "const requestController = new AbortController()" in forecast
+    assert "generation !== requestGeneration" in forecast
+    assert "requestController.abort()" in forecast
+    assert "No distribution has been reconstructed from the ensemble mean" in forecast
+
+
+def test_probability_map_distinguishes_ties_missing_data_and_spread() -> None:
+    probability_map = read("src/components/ProbabilisticForecastMap.ts")
+    assert '"most_likely"' in probability_map
+    assert 'options.product === "spread"' in probability_map
+    assert '"No unique leading category"' in probability_map
+    assert 'kind: "tie" | "missing"' in probability_map
+    assert "p90_minus_p10" in probability_map
+    assert "const SPREAD_STOPS" in probability_map
+    assert "const SPREAD_COLORS" in probability_map
+    assert "spreadColor(" in probability_map
+    assert "valid_member_count" in probability_map
+    assert "Raw ensemble probability" in probability_map
+    assert "ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space" in probability_map
+    assert 'extent: "india" | "regional"' in probability_map
+    assert 'options.extent === "regional"' in probability_map
+    assert 'options.extent === "india"' in probability_map
+
+
+def test_spread_view_can_reveal_the_available_regional_grid() -> None:
+    forecast = read("src/pages/forecast.ts")
+    stylesheet = read("src/styles/probabilistic.css")
+    assert 'id="india-probability-extent" hidden' in forecast
+    assert 'value="regional">Regional grid (60–99°E)' in forecast
+    assert 'selectedProbabilityExtent: "india" | "regional" = "regional"' in forecast
+    assert 'probabilityExtentControl.hidden = selectedView === "mean"' in forecast
+    assert "extent: selectedProbabilityExtent" in forecast
+    assert "but not all of Thailand or Indonesia" in forecast
+    assert ".india-product-tabs[hidden]" in stylesheet
+    assert ".india-probability-extent[hidden]" in stylesheet
+
+
+def test_location_panel_labels_grid_support_and_ensemble_intervals_honestly() -> None:
+    panel = read("src/components/LocationForecastPanel.ts")
+    stylesheet = read("src/styles/probabilistic.css")
+    assert "not a district or regional average" in panel
+    assert "80% ensemble interval" in panel
+    assert "not a confidence interval or a skill estimate" in panel
+    assert "P25–P75" in panel
+    assert "P10–P90" in panel
+    assert "they are not smoothed or forced to widen" in panel
+    assert "Raw ensemble probability" in panel
+    assert "weeklyTercileEvolution(" in panel
+    assert "selectedWeekRangeStrip(" in panel
+    assert "forecastFingerprint(" in panel
+    assert "Six-week forecast fingerprint" in panel
+    assert "P10–P90 range" in panel
+    assert "Tercile evolution across forecast weeks" in panel
+    assert "Threshold-exceedance curve unavailable" in panel
+    assert "Member histogram unavailable" in panel
+    assert "Weekly transition probabilities unavailable" in panel
+    assert "Probabilistic verification pending observations" in panel
+    assert ".probability-weekly-terciles" in stylesheet
+    assert ".probability-range-strip" in stylesheet
+    assert ".probability-fingerprint" in stylesheet
+    assert ".probability-location-host" in stylesheet
+    assert "position: fixed" in stylesheet
+    assert "@media (prefers-reduced-motion: reduce)" in stylesheet
+
+
+def test_member_derived_percentiles_and_category_margin_are_exposed() -> None:
+    forecast = read("src/pages/forecast.ts")
+    probability_map = read("src/components/ProbabilisticForecastMap.ts")
+    types = read("src/types.ts")
+    assert 'value="category_margin">Leading-category margin' in forecast
+    assert 'value="p10">P10 lower outcome' in forecast
+    assert 'value="p50">Median outcome' in forecast
+    assert 'value="p90">P90 upper outcome' in forecast
+    assert "Threshold exceedance probability" in forecast
+    assert 'DistributionMapProduct = "spread" | "p10" | "p50" | "p90"' in types
+    assert "const PERCENTILE_STOPS" in probability_map
+    assert "const CATEGORY_MARGIN_STOPS" in probability_map
+    assert "categoryMargin(" in probability_map
+    assert "Not confidence or forecast skill" in probability_map

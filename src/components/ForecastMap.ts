@@ -1,6 +1,7 @@
 import { colorFor, formatValue } from "../lib/color";
 import type {
   ForecastData,
+  ForecastGridSelection,
   ForecastWeek,
   IndiaMapGeographyData,
   ProductDefinition,
@@ -304,15 +305,21 @@ export class ForecastMap {
   private readonly latitudeMaximum: number;
   private readonly mapHeight: number;
   private readonly instanceId: number;
+  private readonly onSelect?: (selection: ForecastGridSelection) => void;
+  private readonly selected?: ForecastGridSelection;
 
   constructor(
     container: HTMLElement,
     forecast: ForecastData,
     geography: IndiaMapGeographyData,
+    onSelect?: (selection: ForecastGridSelection) => void,
+    selected?: ForecastGridSelection,
   ) {
     this.container = container;
     this.forecast = forecast;
     this.geography = geography;
+    this.onSelect = onSelect;
+    this.selected = selected;
     const { latitude, longitude, spacing_degrees: spacing } = forecast.grid;
     this.longitudeMinimum = longitude[0] - spacing / 2;
     this.longitudeMaximum = longitude.at(-1)! + spacing / 2;
@@ -669,7 +676,7 @@ export class ForecastMap {
     svg.setAttribute("aria-describedby", this.tooltip.id);
     svg.setAttribute(
       "aria-keyshortcuts",
-      "ArrowUp ArrowDown ArrowLeft ArrowRight",
+      "ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space",
     );
     svg.classList.add("forecast-map--interactive");
     const interactionSurface = svgElement("rect");
@@ -696,8 +703,21 @@ export class ForecastMap {
     marker.append(markerRing, markerDot);
     svg.append(marker);
 
-    let latIndex = Math.floor(latitude.length / 2);
-    let lonIndex = Math.floor(longitude.length / 2);
+    const selectedMarker = svgElement("g");
+    selectedMarker.setAttribute("class", "map-location-marker");
+    selectedMarker.setAttribute("aria-hidden", "true");
+    selectedMarker.setAttribute("visibility", "hidden");
+    const selectedRing = svgElement("circle");
+    selectedRing.setAttribute("r", "10");
+    selectedRing.setAttribute("class", "map-sample-marker__ring");
+    const selectedDot = svgElement("circle");
+    selectedDot.setAttribute("r", "2.75");
+    selectedDot.setAttribute("class", "map-sample-marker__dot");
+    selectedMarker.append(selectedRing, selectedDot);
+    svg.append(selectedMarker);
+
+    let latIndex = this.selected?.latitude_index ?? Math.floor(latitude.length / 2);
+    let lonIndex = this.selected?.longitude_index ?? Math.floor(longitude.length / 2);
     let pinnedSelection = false;
     let tapCandidate:
       | { pointerId: number; x: number; y: number }
@@ -739,6 +759,17 @@ export class ForecastMap {
       this.tooltip.style.top = `${Math.max(edge, Math.min(maximumTop, preferredTop))}px`;
     };
 
+    const positionSelectedMarker = (): void => {
+      const lat = latitude[latIndex];
+      const lon = longitude[lonIndex];
+      selectedMarker.setAttribute(
+        "transform",
+        `translate(${AXIS_LEFT + this.mapX(lon)} ${this.mapY(lat)})`,
+      );
+      selectedMarker.setAttribute("visibility", "visible");
+    };
+    if (this.selected) positionSelectedMarker();
+
     const show = (): void => {
       const lat = latitude[latIndex];
       const lon = longitude[lonIndex];
@@ -775,7 +806,22 @@ export class ForecastMap {
       );
     };
 
-    const selectFromPointer = (event: PointerEvent): void => {
+    const commitSelection = (): void => {
+      const index = latIndex * longitude.length + lonIndex;
+      const supportMask = this.forecast.grid.india_mask ??
+        this.forecast.grid.support_mask ?? [];
+      if (!(supportMask[index] ?? true)) return;
+      positionSelectedMarker();
+      this.onSelect?.({
+        latitude_index: latIndex,
+        longitude_index: lonIndex,
+        latitude: latitude[latIndex],
+        longitude: longitude[lonIndex],
+        week: week.week,
+      });
+    };
+
+    const selectFromPointer = (event: Pick<PointerEvent, "clientX" | "clientY">): void => {
       const bounds = interactionSurface.getBoundingClientRect();
       const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
       const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
@@ -840,6 +886,11 @@ export class ForecastMap {
       selectFromPointer(event);
       svg.focus({ preventScroll: true });
     });
+    interactionSurface.addEventListener("click", (event) => {
+      pinnedSelection = true;
+      selectFromPointer(event);
+      commitSelection();
+    });
     interactionSurface.addEventListener("pointercancel", () => {
       tapCandidate = undefined;
       pinnedSelection = false;
@@ -857,12 +908,20 @@ export class ForecastMap {
         ArrowRight: [0, 1],
       };
       const delta = movement[event.key];
-      if (!delta) return;
-      event.preventDefault();
-      pinnedSelection = false;
-      latIndex = Math.max(0, Math.min(latitude.length - 1, latIndex + delta[0]));
-      lonIndex = Math.max(0, Math.min(longitude.length - 1, lonIndex + delta[1]));
-      show();
+      if (delta) {
+        event.preventDefault();
+        pinnedSelection = false;
+        latIndex = Math.max(0, Math.min(latitude.length - 1, latIndex + delta[0]));
+        lonIndex = Math.max(0, Math.min(longitude.length - 1, lonIndex + delta[1]));
+        show();
+        return;
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        pinnedSelection = true;
+        show();
+        commitSelection();
+      }
     });
     svg.addEventListener("blur", () => {
       tapCandidate = undefined;

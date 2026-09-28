@@ -169,18 +169,76 @@ def test_regional_outlooks_use_complete_ensembles_and_locked_terciles() -> None:
                 assert [region["id"] for region in week["regions"]] == expected_regions
                 for variable in ("rainfall", "temperature"):
                     probability = week["probability_fields"][variable]
-                    arrays = [
-                        np.asarray(probability[category])
+                    raw_arrays = [
+                        probability[category]
                         for category in (
                             "below_normal",
                             "near_normal",
                             "above_normal",
                         )
                     ]
-                    assert all(array.shape == (729,) for array in arrays)
-                    assert all(np.issubdtype(array.dtype, np.integer) for array in arrays)
-                    assert all(np.all((array >= 0) & (array <= 100)) for array in arrays)
-                    np.testing.assert_array_equal(arrays[0] + arrays[1] + arrays[2], 100)
+                    assert all(len(array) == 729 for array in raw_arrays)
+                    if outlook.get("schema_version", 1) == 1:
+                        arrays = [np.asarray(array) for array in raw_arrays]
+                        assert all(
+                            np.issubdtype(array.dtype, np.integer)
+                            for array in arrays
+                        )
+                        assert all(
+                            np.all((array >= 0) & (array <= 100))
+                            for array in arrays
+                        )
+                        np.testing.assert_array_equal(
+                            arrays[0] + arrays[1] + arrays[2], 100
+                        )
+                        continue
+
+                    arrays = [
+                        np.asarray(
+                            [np.nan if value is None else value for value in array],
+                            dtype=np.float64,
+                        )
+                        for array in raw_arrays
+                    ]
+                    missing = [np.isnan(array) for array in arrays]
+                    assert all(
+                        np.array_equal(missing[0], item) for item in missing[1:]
+                    )
+                    available = ~missing[0]
+                    assert all(
+                        np.all((array[available] >= 0) & (array[available] <= 100))
+                        for array in arrays
+                    )
+                    np.testing.assert_allclose(
+                        arrays[0][available]
+                        + arrays[1][available]
+                        + arrays[2][available],
+                        100,
+                        rtol=0,
+                        atol=0.02,
+                    )
+                    summary = week["summary_fields"][variable]
+                    assert len(summary["valid_member_count"]) == 729
+                    assert all(
+                        len(summary[name]) == 729
+                        for name in (
+                            "mean", "p10", "p25", "p50", "p75", "p90",
+                            "p90_minus_p10", "climatology_median",
+                            "lower_tercile", "upper_tercile",
+                        )
+                    )
+                    for cell_index, count in enumerate(
+                        summary["valid_member_count"]
+                    ):
+                        quantiles = [
+                            summary[name][cell_index]
+                            for name in ("p10", "p25", "p50", "p75", "p90")
+                        ]
+                        if count >= outlook["issue"]["minimum_valid_members"]:
+                            assert all(value is not None for value in quantiles)
+                            assert quantiles == sorted(quantiles)
+                        else:
+                            assert all(value is None for value in quantiles)
                 for region in week["regions"]:
                     for variable in ("rainfall", "temperature"):
                         probability = region[variable]["tercile_probability_percent"]

@@ -3,22 +3,32 @@ import {
   type WindRenderingMode,
 } from "../components/ForecastMap";
 import { createLegend } from "../components/Legend";
+import { ProbabilisticForecastMap } from "../components/ProbabilisticForecastMap";
+import { renderLocationForecastPanel } from "../components/LocationForecastPanel";
 import {
+  checksumVersionedPath,
   currentForecast,
   defaultIssueForSource,
   INITIAL_CONDITION_SOURCE_DISPLAY_ORDER,
+  issueChecksum,
+  issueHasRegionalOutlook,
   issueIsCurrent,
   productKeysForForecast,
   sourcesForDisplay,
 } from "../lib/catalog";
 import type {
   AppData,
+  DistributionMapProduct,
   ForecastWeek,
   ForecastData,
+  ForecastGridSelection,
   InitializationComparisonData,
   InitialConditionSourceId,
+  ProbabilityMapProduct,
+  ProbabilisticVariable,
   ProductDefinition,
   ProductKey,
+  RegionalOutlookData,
 } from "../types";
 
 const COMPARISON_PRODUCTS = {
@@ -574,11 +584,49 @@ export function renderForecastPage(
       ${archiveBanner}
 
       <div class="india-map-workspace">
+        <div class="india-view-selector" role="group" aria-label="Forecast view">
+          <button type="button" data-forecast-view="mean" class="is-active" aria-pressed="true">Mean</button>
+          <button type="button" data-forecast-view="probability" aria-pressed="false">Probability</button>
+          <button type="button" data-forecast-view="spread" aria-pressed="false">Ensemble spread</button>
+        </div>
         <div class="india-toolbar">
           <div class="india-toolbar__variables">
             <div class="india-product-tabs" id="india-product-tabs" role="group" aria-label="Forecast variable"></div>
+            <div class="india-probability-variable-tabs" id="india-probability-variable-tabs" role="group" aria-label="Probabilistic forecast variable" hidden>
+              <button type="button" data-probability-variable="rainfall" class="is-active" aria-pressed="true">Rainfall</button>
+              <button type="button" data-probability-variable="temperature" aria-pressed="false">Temperature</button>
+            </div>
           </div>
           <div class="india-view-controls">
+            <label class="india-probability-product" id="india-probability-product" hidden>
+              <span>Product</span>
+              <select aria-label="Probability product">
+                <option value="most_likely">Most likely tercile</option>
+                <option value="below_normal">Below-normal tercile probability</option>
+                <option value="near_normal">Near-normal tercile probability</option>
+                <option value="above_normal">Above-normal tercile probability</option>
+                <option value="category_margin">Leading-category margin</option>
+                <optgroup label="Requires additional member summaries">
+                  <option disabled>Threshold exceedance probability</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="india-distribution-product" id="india-distribution-product" hidden>
+              <span>Distribution map</span>
+              <select aria-label="Ensemble distribution map product">
+                <option value="spread">P90 − P10 spread</option>
+                <option value="p10">P10 lower outcome</option>
+                <option value="p50">Median outcome</option>
+                <option value="p90">P90 upper outcome</option>
+              </select>
+            </label>
+            <label class="india-probability-extent" id="india-probability-extent" hidden>
+              <span>Extent</span>
+              <select aria-label="Probabilistic map extent">
+                <option value="india">India</option>
+                <option value="regional">Regional grid (60–99°E)</option>
+              </select>
+            </label>
             <div class="india-wind-mode" id="india-wind-mode" role="group" aria-label="Wind direction display" hidden>
               <span>Wind display</span>
               <button type="button" data-wind-mode="streamlines" class="is-active">Streamlines</button>
@@ -597,16 +645,23 @@ export function renderForecastPage(
         <p class="ops-visually-hidden" id="india-product-status" aria-live="polite" aria-atomic="true"></p>
 
         <div class="india-visualization" id="india-visualization">
-          <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
-          <div class="india-map-key">
-            <div class="india-shared-legend" id="india-shared-legend"></div>
-            <section class="india-map-guide" aria-labelledby="india-map-guide-title">
-              <span>How to read these maps</span>
-              <h2 id="india-map-guide-title" class="india-selected-product">${PRESENTATION_PRODUCTS[defaultProduct].label}</h2>
-              <p><span id="india-product-explanation">${PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[defaultProduct]}</span> Hover, tap, or focus a map for local values.</p>
-              <p class="india-visual-note" id="india-visual-note"></p>
-            </section>
+          <div class="india-visualization__main">
+            <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
+            <div class="india-map-key">
+              <div class="india-shared-legend" id="india-shared-legend"></div>
+              <section class="india-map-guide" aria-labelledby="india-map-guide-title">
+                <span>How to read these maps</span>
+                <h2 id="india-map-guide-title" class="india-selected-product">${PRESENTATION_PRODUCTS[defaultProduct].label}</h2>
+                <p><span id="india-product-explanation">${PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[defaultProduct]}</span> Hover, tap, or focus a map for local values. Click a supported cell for all-week detail.</p>
+                <p class="india-visual-note" id="india-visual-note"></p>
+                <details class="india-probability-definition" id="india-probability-definition" hidden>
+                  <summary>How terciles are defined</summary>
+                  <p>Below normal means below the lower-tercile threshold; near normal includes both thresholds; above normal means above the upper-tercile threshold. These are not comparisons with the mean or median.</p>
+                </details>
+              </section>
+            </div>
           </div>
+          <div class="probability-location-host" id="probability-location-host" hidden></div>
         </div>
       </div>
 
@@ -686,17 +741,66 @@ export function renderForecastPage(
     </section>
   `;
 
+
+  type ForecastView = "mean" | "probability" | "spread";
   let selectedProduct: ProductKey = defaultProduct;
+  let selectedView: ForecastView = "mean";
+  let selectedProbabilityProduct: ProbabilityMapProduct = "most_likely";
+  let selectedDistributionProduct: DistributionMapProduct = "spread";
+  let selectedProbabilityVariable: ProbabilisticVariable =
+    defaultProduct.startsWith("temperature") ? "temperature" : "rainfall";
+  let selectedProbabilityExtent: "india" | "regional" = "regional";
+  let selectedLocation: ForecastGridSelection | undefined;
+  let regionalOutlook: RegionalOutlookData | undefined;
+  let regionalOutlookPromise: Promise<RegionalOutlookData> | undefined;
   let rangeStart = 0;
   let windRenderingMode: WindRenderingMode = "streamlines";
+  let requestGeneration = 0;
+  const requestController = new AbortController();
   const productTabs = container.querySelector<HTMLDivElement>("#india-product-tabs")!;
+  const probabilityVariableTabs = container.querySelector<HTMLDivElement>(
+    "#india-probability-variable-tabs",
+  )!;
   const panelGrid = container.querySelector<HTMLDivElement>("#india-panel-grid")!;
+  const panelHost = container.querySelector<HTMLDivElement>(
+    "#probability-location-host",
+  )!;
   const windModeControl = container.querySelector<HTMLDivElement>("#india-wind-mode")!;
   const rangeSelect = container.querySelector<HTMLSelectElement>("#india-range-select")!;
+  const probabilityProductControl = container.querySelector<HTMLLabelElement>(
+    "#india-probability-product",
+  )!;
+  const probabilityProductSelect = probabilityProductControl.querySelector("select")!;
+  const distributionProductControl = container.querySelector<HTMLLabelElement>(
+    "#india-distribution-product",
+  )!;
+  const distributionProductSelect = distributionProductControl.querySelector("select")!;
+  const probabilityExtentControl = container.querySelector<HTMLLabelElement>(
+    "#india-probability-extent",
+  )!;
+  const probabilityExtentSelect = probabilityExtentControl.querySelector("select")!;
+  const probabilityDefinition = container.querySelector<HTMLDetailsElement>(
+    "#india-probability-definition",
+  )!;
   const productStatus = container.querySelector<HTMLElement>("#india-product-status")!;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const probabilisticAvailable =
+    activeDomain?.id === "india" &&
+    issueHasRegionalOutlook(index, catalogIssue, forecast);
   let panelAnimationTimer: number | undefined;
   let productIndicatorFrame: number | undefined;
+
+  container.querySelectorAll<HTMLButtonElement>("[data-forecast-view]")
+    .forEach((button) => {
+      if (button.dataset.forecastView !== "mean" && !probabilisticAvailable) {
+        button.disabled = true;
+        button.title = "A complete ensemble and matched model climatology are required.";
+      }
+      button.addEventListener("click", () => {
+        const view = button.dataset.forecastView as ForecastView;
+        void selectView(view);
+      });
+    });
 
   container.querySelector<HTMLSelectElement>(".india-domain-select select")
     ?.addEventListener("change", (event) => {
@@ -717,6 +821,12 @@ export function renderForecastPage(
     button.innerHTML = `<span class="india-variable-mark">${productIcon(productKey)}</span><strong>${product.short_label}</strong>`;
     button.addEventListener("click", () => {
       selectedProduct = productKey;
+      if (productKey.startsWith("rainfall")) {
+        selectedProbabilityVariable = "rainfall";
+      }
+      if (productKey.startsWith("temperature")) {
+        selectedProbabilityVariable = "temperature";
+      }
       refreshPresentation(`Showing ${product.label}.`);
     });
     productTabs.append(button);
@@ -726,6 +836,56 @@ export function renderForecastPage(
   productIndicator.setAttribute("aria-hidden", "true");
   productTabs.append(productIndicator);
   window.addEventListener("resize", positionProductIndicator);
+
+  probabilityVariableTabs
+    .querySelectorAll<HTMLButtonElement>("[data-probability-variable]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedProbabilityVariable =
+          button.dataset.probabilityVariable as ProbabilisticVariable;
+        const preferAnomaly = selectedProduct.endsWith("_anomaly");
+        const meanCandidates: ProductKey[] = selectedProbabilityVariable === "rainfall"
+          ? preferAnomaly
+            ? ["rainfall_anomaly", "rainfall_total"]
+            : ["rainfall_total", "rainfall_anomaly"]
+          : preferAnomaly
+            ? ["temperature_anomaly", "temperature_mean"]
+            : ["temperature_mean", "temperature_anomaly"];
+        const matchingMeanProduct = meanCandidates.find((candidate) =>
+          availableProducts.includes(candidate)
+        );
+        if (matchingMeanProduct) selectedProduct = matchingMeanProduct;
+        refreshPresentation(`Showing ${selectedProbabilityVariable} ${selectedView}.`);
+      });
+    });
+
+  probabilityProductSelect.addEventListener("change", () => {
+    selectedProbabilityProduct =
+      probabilityProductSelect.value as ProbabilityMapProduct;
+    refreshPresentation("Showing selected tercile probability product.");
+  });
+
+  distributionProductSelect.addEventListener("change", () => {
+    selectedDistributionProduct =
+      distributionProductSelect.value as DistributionMapProduct;
+    refreshPresentation("Showing selected ensemble distribution product.");
+  });
+
+  probabilityExtentSelect.addEventListener("change", () => {
+    selectedProbabilityExtent = probabilityExtentSelect.value as "india" | "regional";
+    if (selectedProbabilityExtent === "india" && selectedLocation) {
+      const mask = activeForecast.grid.india_mask ??
+        activeForecast.grid.support_mask ?? [];
+      const index = selectedLocation.latitude_index * activeForecast.grid.longitude.length +
+        selectedLocation.longitude_index;
+      if (!(mask[index] ?? false)) selectedLocation = undefined;
+    }
+    refreshPresentation(
+      selectedProbabilityExtent === "regional"
+        ? `Showing the full available regional ${selectedView} grid.`
+        : `Showing ${selectedView} over India.`,
+    );
+  });
 
   rangeSelect.addEventListener("change", () => {
     rangeStart = Number(rangeSelect.value);
@@ -749,7 +909,7 @@ export function renderForecastPage(
       const activeButton = productTabs.querySelector<HTMLButtonElement>(
         "button.is-active",
       );
-      if (!activeButton) return;
+      if (!activeButton || productTabs.hidden) return;
       productTabs.style.setProperty(
         "--product-indicator-x",
         `${activeButton.offsetLeft}px`,
@@ -771,6 +931,97 @@ export function renderForecastPage(
     });
   }
 
+  async function loadRegionalOutlook(): Promise<RegionalOutlookData> {
+    if (!catalogIssue!.regional_outlook) {
+      throw new Error("No member-derived summary package is published for this issue.");
+    }
+    if (!regionalOutlookPromise) {
+      const path = checksumVersionedPath(
+        `./data/${catalogIssue!.regional_outlook}`,
+        issueChecksum(catalogIssue!, "regional_outlook"),
+      );
+      regionalOutlookPromise = fetch(path, { signal: requestController.signal })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Member-derived summary returned ${response.status}.`);
+          }
+          const outlook = await response.json() as RegionalOutlookData;
+          if (
+            outlook.issue.initialization !== activeForecast.issue.initialization ||
+            outlook.issue.source_id !== sourceId
+          ) {
+            throw new Error("Member-derived summary does not match this forecast issue.");
+          }
+          return outlook;
+        });
+    }
+    return regionalOutlookPromise;
+  }
+
+  async function selectView(view: ForecastView): Promise<void> {
+    if (view !== "mean" && !probabilisticAvailable) return;
+    selectedView = view;
+    requestGeneration += 1;
+    const generation = requestGeneration;
+    updateControls();
+    if (view === "mean") {
+      update(!reducedMotion.matches);
+      return;
+    }
+    if (!regionalOutlook) {
+      panelGrid.innerHTML = `
+        <div class="probability-loading-state" role="status">
+          <span class="probability-loading-state__spinner" aria-hidden="true"></span>
+          <strong>Loading member-derived summaries…</strong>
+        </div>
+      `;
+      try {
+        const loaded = await loadRegionalOutlook();
+        if (generation !== requestGeneration || selectedView === "mean") return;
+        regionalOutlook = loaded;
+      } catch (error) {
+        if (requestController.signal.aborted || generation !== requestGeneration) return;
+        const message = error instanceof Error ? error.message : "Unknown data error";
+        panelGrid.innerHTML = `
+          <div class="probability-unavailable-state" role="alert">
+            <strong>Probabilistic fields unavailable</strong>
+            <p>${message} The ensemble-mean maps remain available.</p>
+          </div>
+        `;
+        return;
+      }
+    }
+    update(!reducedMotion.matches);
+  }
+
+  function updateControls(): void {
+    container.querySelectorAll<HTMLButtonElement>("[data-forecast-view]")
+      .forEach((button) => {
+        const active = button.dataset.forecastView === selectedView;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    productTabs.hidden = selectedView !== "mean";
+    probabilityVariableTabs.hidden = selectedView === "mean";
+    probabilityProductControl.hidden = selectedView !== "probability";
+    distributionProductControl.hidden = selectedView !== "spread";
+    probabilityExtentControl.hidden = selectedView === "mean";
+    probabilityDefinition.hidden = selectedView !== "probability";
+    probabilityProductSelect.value = selectedProbabilityProduct;
+    distributionProductSelect.value = selectedDistributionProduct;
+    probabilityExtentSelect.value = selectedProbabilityExtent;
+    probabilityVariableTabs
+      .querySelectorAll<HTMLButtonElement>("[data-probability-variable]")
+      .forEach((button) => {
+        const active =
+          button.dataset.probabilityVariable === selectedProbabilityVariable;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    windModeControl.hidden =
+      selectedView !== "mean" || !isWindProduct(selectedProduct);
+  }
+
   function refreshPresentation(statusMessage: string): void {
     productStatus.textContent = statusMessage;
     if (!reducedMotion.matches && typeof document.startViewTransition === "function") {
@@ -780,34 +1031,75 @@ export function renderForecastPage(
     update(!reducedMotion.matches);
   }
 
-  function update(animateMaps: boolean): void {
-    const product = PRESENTATION_PRODUCTS[selectedProduct];
-    container.querySelector<HTMLElement>(".india-sheet")!.dataset.product =
-      selectedProduct;
-    container
-      .querySelectorAll<HTMLButtonElement>(".india-product-tabs button")
-      .forEach((button) => {
-        const active = button.dataset.product === selectedProduct;
-        button.classList.toggle("is-active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
-    positionProductIndicator();
-    rangeSelect.value = String(rangeStart);
-    windModeControl.hidden = !isWindProduct(selectedProduct);
-    windModeControl
-      .querySelectorAll<HTMLButtonElement>("button[data-wind-mode]")
-      .forEach((button) => {
-        const active = button.dataset.windMode === windRenderingMode;
-        button.classList.toggle("is-active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
+  function renderPanel(): void {
+    if (!selectedLocation) {
+      panelHost.hidden = true;
+      panelHost.replaceChildren();
+      return;
+    }
+    if (!regionalOutlook) {
+      panelHost.hidden = false;
+      panelHost.innerHTML = `
+        <aside class="probability-location-panel">
+          <header class="probability-location-panel__header">
+            <div><span>Selected native grid cell</span><h2>${selectedLocation.latitude.toFixed(1)}°N · ${selectedLocation.longitude.toFixed(1)}°E</h2></div>
+            <button type="button" class="probability-panel__close" aria-label="Close location details">×</button>
+          </header>
+          <div class="probability-panel__unavailable" role="note">
+            <strong>Member distribution unavailable</strong>
+            <p>This issue has no compatible member-derived summary package. No distribution has been reconstructed from the ensemble mean.</p>
+          </div>
+        </aside>
+      `;
+      panelHost.querySelector<HTMLButtonElement>(".probability-panel__close")
+        ?.addEventListener("click", closePanel);
+      return;
+    }
+    renderLocationForecastPanel(
+      panelHost,
+      regionalOutlook,
+      selectedProbabilityVariable,
+      selectedLocation,
+      closePanel,
+    );
+  }
 
-    container.querySelector(".india-selected-product")!.textContent = product.label;
-    container.querySelector("#india-product-explanation")!.textContent =
-      PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[selectedProduct];
+  function closePanel(): void {
+    selectedLocation = undefined;
+    panelHost.hidden = true;
+    update(false);
+    panelGrid.querySelector<SVGSVGElement>("svg")?.focus({ preventScroll: true });
+  }
+
+  function handleLocationSelection(selection: ForecastGridSelection): void {
+    selectedLocation = selection;
+    if (regionalOutlook) {
+      update(false);
+      return;
+    }
+    renderPanel();
+    if (!probabilisticAvailable) return;
+    const generation = ++requestGeneration;
+    void loadRegionalOutlook()
+      .then((loaded) => {
+        if (generation !== requestGeneration || !selectedLocation) return;
+        regionalOutlook = loaded;
+        update(false);
+      })
+      .catch(() => {
+        if (!requestController.signal.aborted) renderPanel();
+      });
+  }
+
+  function makeMapPanels(
+    weeks: ForecastWeek[],
+    renderMap: (
+      frame: HTMLDivElement,
+      week: ForecastWeek,
+    ) => void,
+  ): void {
     panelGrid.replaceChildren();
-    activeForecast.weeks.slice(rangeStart, rangeStart + 4).forEach((sourceWeek) => {
-      const week = displayWeek(sourceWeek, selectedProduct);
+    weeks.forEach((week) => {
       const panel = document.createElement("article");
       panel.className = "india-map-panel";
       panel.innerHTML = `
@@ -818,14 +1110,233 @@ export function renderForecastPage(
         <div class="india-map-frame"></div>
       `;
       panelGrid.append(panel);
-      const frame = panel.querySelector<HTMLDivElement>(".india-map-frame")!;
-      const map = new ForecastMap(
-        frame,
-        activeForecast,
-        activeGeography,
-      );
-      map.render(selectedProduct, week, product, windRenderingMode);
+      renderMap(panel.querySelector<HTMLDivElement>(".india-map-frame")!, week);
     });
+  }
+
+  function probabilityLegend(): string {
+    if (selectedView === "spread") {
+      if (selectedDistributionProduct !== "spread") {
+        const percentile = selectedDistributionProduct === "p10"
+          ? "P10 lower outcome"
+          : selectedDistributionProduct === "p50"
+            ? "Median outcome (P50)"
+            : "P90 upper outcome";
+        const ticks = selectedProbabilityVariable === "rainfall"
+          ? [["0", 0], ["5", 8.33], ["10", 16.67], ["20", 33.33], ["40", 66.67], ["≥60", 100]]
+          : [["10", 0], ["18", 25], ["26", 50], ["34", 75], ["≥42", 100]];
+        return `
+          <div class="probability-legend">
+            <strong>${percentile}</strong>
+            <div class="probability-legend__percentile-gradient is-${selectedProbabilityVariable}" aria-hidden="true"></div>
+            <div class="probability-legend__percentile-ticks">
+              ${ticks.map(([label, position]) => `<span style="left:${position}%">${label}</span>`).join("")}
+            </div>
+            <p>Fixed ${selectedProbabilityVariable === "rainfall" ? "mm day⁻¹" : "°C"} scale across weeks. P10/P90 are ensemble percentiles, not guaranteed real-world bounds.</p>
+            <span class="probability-legend__missing">Hatched = unavailable</span>
+          </div>
+        `;
+      }
+      const units = selectedProbabilityVariable === "rainfall" ? "mm day⁻¹" : "°C";
+      const ticks = selectedProbabilityVariable === "rainfall"
+        ? ["0", "0.5", "2", "5", "10", "20", "≥30"]
+        : ["0", "0.25", "1", "2.5", "5", "8", "≥10"];
+      return `
+        <div class="probability-legend">
+          <strong>Ensemble spread: P90 − P10</strong>
+          <div class="probability-legend__spread-gradient" aria-hidden="true"></div>
+          <div class="probability-legend__spread-ticks">
+            ${ticks.map((label) => `<span>${label}</span>`).join("")}
+          </div>
+          <p>Fixed, perceptually stretched ${units} scale across all weeks; tick labels remain physical values. Darker blue indicates a wider range across ensemble members.</p>
+          <span class="probability-legend__missing">Hatched = unavailable</span>
+        </div>
+      `;
+    }
+    if (selectedProbabilityProduct === "category_margin") {
+      return `
+        <div class="probability-legend">
+          <strong>Leading-category margin</strong>
+          <div class="probability-legend__gradient is-margin"></div>
+          <div class="probability-legend__ticks"><span>0 points</span><span>10</span><span>30</span><span>50</span><span>100</span></div>
+          <p>Difference between the largest and second-largest tercile probabilities. Larger separation is not forecast confidence, calibration, accuracy, or skill.</p>
+          <span class="probability-legend__missing">Hatched = unavailable</span>
+        </div>
+      `;
+    }
+    if (selectedProbabilityProduct !== "most_likely") {
+      return `
+        <div class="probability-legend">
+          <strong>Raw ensemble probability</strong>
+          <div class="probability-legend__gradient is-probability"></div>
+          <div class="probability-legend__ticks"><span>0%</span><span>33%</span><span>67%</span><span>100%</span></div>
+          <p>A standard tercile's climatological probability is approximately one-third where the reference supports three distinct categories.</p>
+          <span class="probability-legend__missing">Hatched = unavailable</span>
+        </div>
+      `;
+    }
+    const below = selectedProbabilityVariable === "rainfall" ? "Drier" : "Cooler";
+    const above = selectedProbabilityVariable === "rainfall" ? "Wetter" : "Warmer";
+    return `
+      <div class="probability-legend">
+        <strong>Most likely tercile</strong>
+        <div class="probability-legend__categories" data-variable="${selectedProbabilityVariable}">
+          <span class="is-below">${below}</span>
+          <span class="is-near">Near normal</span>
+          <span class="is-above">${above}</span>
+          <span class="is-tie">No unique leader</span>
+        </div>
+        <div class="probability-legend__intensity"><i></i><span>Weak preference</span><span>Stronger member fraction</span></div>
+        <p>Hue identifies the leading category; deeper colour means more members support it. A leading category is not a skill or confidence score.</p>
+        <span class="probability-legend__missing">Hatched = unavailable</span>
+      </div>
+    `;
+  }
+
+  function update(animateMaps: boolean): void {
+    updateControls();
+    rangeSelect.value = String(rangeStart);
+    windModeControl
+      .querySelectorAll<HTMLButtonElement>("button[data-wind-mode]")
+      .forEach((button) => {
+        const active = button.dataset.windMode === windRenderingMode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+    if (selectedView === "mean") {
+      const product = PRESENTATION_PRODUCTS[selectedProduct];
+      container.querySelector<HTMLElement>(".india-sheet")!.dataset.product =
+      selectedProduct;
+      container
+        .querySelectorAll<HTMLButtonElement>(".india-product-tabs button")
+        .forEach((button) => {
+          const active = button.dataset.product === selectedProduct;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      positionProductIndicator();
+      container.querySelector(".india-selected-product")!.textContent = product.label;
+      container.querySelector("#india-product-explanation")!.textContent =
+        PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[selectedProduct];
+      makeMapPanels(
+        activeForecast.weeks.slice(rangeStart, rangeStart + 4)
+          .map((week) => displayWeek(week, selectedProduct)),
+        (frame, week) => {
+          const map = new ForecastMap(
+            frame,
+            activeForecast,
+            activeGeography,
+            isWindProduct(selectedProduct) ? undefined : handleLocationSelection,
+            selectedLocation,
+          );
+          map.render(selectedProduct, week, product, windRenderingMode);
+        },
+      );
+      const legend = container.querySelector<HTMLDivElement>("#india-shared-legend")!;
+      legend.style.setProperty("--legend-under", product.legend.under);
+      legend.style.setProperty("--legend-over", product.legend.over);
+      legend.replaceChildren(createLegend(product));
+      container.querySelector("#india-visual-note")!.textContent = isWindProduct(selectedProduct)
+        ? `${product.description}. ${windRenderingMode === "streamlines" ? `Streamlines trace the interpolated ${selectedProduct === "wind850_anomaly" ? "anomaly " : ""}flow and include direction markers.` : "Arrows sample every third native grid point and use one product-specific scale across all weeks."} Shading is visually interpolated 1.5°→0.25°; hover values remain native-grid values.`
+        : `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation from the ${activeForecast.grid.spacing_degrees}° native grid; hover values remain native-grid values.`;
+      container.querySelector("#india-baseline-note")!.textContent = product.baseline
+        ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
+        : activeDomain?.id !== "india"
+          ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
+          : sourceId === "ifs"
+          ? "Main experimental IFS initialization using ECMWF Open Data; IFS skin temperature over ocean is the disclosed SST proxy."
+          : sourceId === "gfs"
+          ? "Secondary experimental initialization from operational analysis and short-range GFS proxy inputs."
+          : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
+      renderPanel();
+    } else if (regionalOutlook) {
+      const hasSummary = regionalOutlook.weeks.every(
+        (week) => Boolean(week.summary_fields?.[selectedProbabilityVariable]),
+      );
+      const spreadButton = container.querySelector<HTMLButtonElement>(
+        '[data-forecast-view="spread"]',
+      )!;
+      spreadButton.disabled = !hasSummary;
+      spreadButton.title = hasSummary
+        ? ""
+        : "This archived issue predates grid quantile summaries.";
+      if (selectedView === "spread" && !hasSummary) {
+        panelGrid.innerHTML = `
+          <div class="probability-unavailable-state" role="note">
+            <strong>Ensemble spread unavailable for this issue</strong>
+            <p>The published package contains real tercile probabilities but predates P10–P90 grid summaries. Nothing has been reconstructed from the mean.</p>
+          </div>
+        `;
+      } else {
+        const probabilisticWeeks = activeForecast.weeks.slice(
+          rangeStart,
+          rangeStart + 4,
+        );
+        makeMapPanels(probabilisticWeeks, (frame, forecastWeek) => {
+          const week = regionalOutlook!.weeks.find(
+            (candidate) => candidate.week === forecastWeek.week,
+          );
+          if (!week) return;
+          const map = new ProbabilisticForecastMap(
+            frame,
+            activeForecast,
+            regionalOutlook!,
+            activeGeography,
+            handleLocationSelection,
+          );
+          map.render({
+            variable: selectedProbabilityVariable,
+            week,
+            product: selectedView === "spread"
+              ? selectedDistributionProduct
+              : selectedProbabilityProduct,
+            extent: selectedProbabilityExtent,
+            selected: selectedLocation,
+          });
+        });
+      }
+      const productTitle = selectedView === "spread"
+        ? selectedDistributionProduct === "spread"
+          ? "Ensemble spread: P90 − P10"
+          : selectedDistributionProduct === "p10"
+            ? "P10 lower ensemble outcome"
+            : selectedDistributionProduct === "p50"
+              ? "Median ensemble outcome"
+              : "P90 upper ensemble outcome"
+        : selectedProbabilityProduct === "most_likely"
+          ? "Most likely tercile"
+          : selectedProbabilityProduct === "category_margin"
+            ? "Leading-category probability margin"
+          : `${selectedProbabilityProduct.replaceAll("_", " ")} probability`;
+      container.querySelector(".india-selected-product")!.textContent = productTitle;
+      container.querySelector("#india-product-explanation")!.textContent =
+        selectedView === "spread"
+          ? selectedDistributionProduct === "spread"
+            ? "Shows the width of the central 80% ensemble interval in the forecast quantity's physical units."
+            : "Shows a selected ensemble percentile in the forecast quantity's physical units."
+          : selectedProbabilityProduct === "category_margin"
+            ? "Shows the percentage-point separation between the leading and second-place tercile categories."
+            : "Shows raw ensemble fractions relative to lead-matched lower and upper model-climatology tercile thresholds.";
+      container.querySelector("#india-visual-note")!.textContent =
+        selectedProbabilityExtent === "regional"
+          ? selectedView === "spread"
+            ? selectedDistributionProduct === "spread"
+              ? "Regional grid shows every available forecast cell from about 60–99°E and 0–39°N. It reaches western Thailand and Sumatra, but not all of Thailand or Indonesia. Low spread does not establish that the forecast is correct."
+              : "Regional grid shows the selected member-derived percentile across every available cell from about 60–99°E and 0–39°N. Visual interpolation affects presentation only."
+            : "Regional grid uses complete lead-matched model-climatology thresholds across all available cells from about 60–99°E and 0–39°N. Visual interpolation affects presentation only."
+          : selectedView === "spread"
+            ? selectedDistributionProduct === "spread"
+              ? "Low spread does not establish that the forecast is correct. Scales are fixed across all forecast weeks."
+              : "P10 and P90 are ensemble percentiles, not confidence bounds or guarantees. Scales are fixed across all forecast weeks."
+            : "Visual interpolation affects presentation only; tooltips report native-grid probabilities and actual valid-member counts.";
+      container.querySelector<HTMLDivElement>("#india-shared-legend")!.innerHTML =
+        probabilityLegend();
+      container.querySelector("#india-baseline-note")!.textContent =
+        "Probabilities are fractions of available members, not necessarily calibrated event frequencies. The reference is the existing lead-matched 2002–2021 native model climatology.";
+      renderPanel();
+    }
+
     if (animateMaps) {
       if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
       panelGrid.classList.remove("is-refreshing");
@@ -836,23 +1347,6 @@ export function renderForecastPage(
         panelAnimationTimer = undefined;
       }, 380);
     }
-
-    const legend = container.querySelector<HTMLDivElement>("#india-shared-legend")!;
-    legend.style.setProperty("--legend-under", product.legend.under);
-    legend.style.setProperty("--legend-over", product.legend.over);
-    legend.replaceChildren(createLegend(product));
-    container.querySelector("#india-visual-note")!.textContent = isWindProduct(selectedProduct)
-      ? `${product.description}. ${windRenderingMode === "streamlines" ? `Streamlines trace the interpolated ${selectedProduct === "wind850_anomaly" ? "anomaly " : ""}flow and include direction markers.` : "Arrows sample every third native grid point and use one product-specific scale across all weeks."} Shading is visually interpolated 1.5°→0.25°; hover values remain native-grid values.`
-      : `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation from the ${activeForecast.grid.spacing_degrees}° native grid; hover values remain native-grid values.`;
-    container.querySelector("#india-baseline-note")!.textContent = product.baseline
-      ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
-      : activeDomain?.id !== "india"
-        ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
-        : sourceId === "ifs"
-        ? "Main experimental IFS initialization using ECMWF Open Data; IFS skin temperature over ocean is the disclosed SST proxy."
-        : sourceId === "gfs"
-        ? "Secondary experimental initialization from operational analysis and short-range GFS proxy inputs."
-        : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
   }
 
   update(false);
@@ -865,6 +1359,8 @@ export function renderForecastPage(
     );
   }
   return () => {
+    requestGeneration += 1;
+    requestController.abort();
     if (panelAnimationTimer !== undefined) window.clearTimeout(panelAnimationTimer);
     if (productIndicatorFrame !== undefined) {
       window.cancelAnimationFrame(productIndicatorFrame);
