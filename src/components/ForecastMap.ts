@@ -573,7 +573,7 @@ export class ForecastMap {
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas rendering is unavailable");
 
-    const sample = (row: number, column: number): number => {
+    const sample = (row: number, column: number): number | null => {
       const safeRow = Math.max(0, Math.min(latitude.length - 1, row));
       const safeColumn = Math.max(0, Math.min(longitude.length - 1, column));
       return values[safeRow * longitude.length + safeColumn];
@@ -593,14 +593,26 @@ export class ForecastMap {
         const column = (lon - longitude[0]) / this.forecast.grid.spacing_degrees;
         const column0 = Math.floor(column);
         const columnWeight = column - column0;
-        const top =
-          sample(row0, column0) * (1 - columnWeight) +
-          sample(row0, column0 + 1) * columnWeight;
-        const bottom =
-          sample(row0 + 1, column0) * (1 - columnWeight) +
-          sample(row0 + 1, column0 + 1) * columnWeight;
+        const corners = [
+          sample(row0, column0),
+          sample(row0, column0 + 1),
+          sample(row0 + 1, column0),
+          sample(row0 + 1, column0 + 1),
+        ];
+        const finite = corners.every(
+          (candidate): candidate is number =>
+            typeof candidate === "number" && Number.isFinite(candidate),
+        );
+        const top = finite
+          ? corners[0] * (1 - columnWeight) + corners[1] * columnWeight
+          : Number.NaN;
+        const bottom = finite
+          ? corners[2] * (1 - columnWeight) + corners[3] * columnWeight
+          : Number.NaN;
         const value = top * (1 - rowWeight) + bottom * rowWeight;
-        context.fillStyle = colorFor(value, product.legend);
+        context.fillStyle = Number.isFinite(value)
+          ? colorFor(value, product.legend)
+          : (x + y) % 8 < 4 ? "#c7cdd2" : "#f3f4f5";
         context.fillRect(x, y, 1, 1);
       }
     }
@@ -787,10 +799,39 @@ export class ForecastMap {
         Number.isFinite(vectorV)
         ? `<small>U ${vectorU.toFixed(1)} · V ${vectorV.toFixed(1)} m s⁻¹</small>`
         : "";
+      const formattedValue = typeof value === "number" && Number.isFinite(value)
+        ? formatValue(value, product.units)
+        : "Unavailable";
+      const isExtremeProduct = productKey.endsWith("_efi") || productKey.includes("_sot_");
+      const extremeVariable = isExtremeProduct && productKey.startsWith("rainfall_")
+        ? "rainfall"
+        : isExtremeProduct && productKey.startsWith("temperature_")
+          ? "temperature"
+          : undefined;
+      const extremeDetail = extremeVariable && this.forecast.extreme_definition
+        ? (() => {
+          const efi = week.fields[`${extremeVariable}_efi` as ProductKey]?.[vectorIndex];
+          const upper = week.fields[`${extremeVariable}_sot_upper` as ProductKey]?.[vectorIndex];
+          const lower = extremeVariable === "temperature"
+            ? week.fields.temperature_sot_lower?.[vectorIndex]
+            : undefined;
+          const display = (candidate: number | null | undefined): string =>
+            typeof candidate === "number" && Number.isFinite(candidate)
+              ? candidate.toFixed(2)
+              : "Unavailable";
+          return `
+            <small>${week.valid_start} – ${week.valid_end}</small>
+            <small>EFI ${display(efi)} · Upper SOT ${display(upper)}${extremeVariable === "temperature" ? ` · Lower SOT ${display(lower)}` : ""}</small>
+            <small>${week.extreme_samples?.forecast_valid_member_count[vectorIndex] ?? "—"} forecast members · ${week.extreme_samples?.climate_valid_sample_count[vectorIndex] ?? "—"} climate samples</small>
+            <small>Reference ${this.forecast.extreme_definition.reference_id}</small>
+          `;
+        })()
+        : "";
       this.tooltip.innerHTML = `
-        <strong>${formatValue(value, product.units)}</strong>
+        <strong>${formattedValue}</strong>
         <span>${lat.toFixed(1)}°N · ${lon.toFixed(1)}°E</span>
         ${vectorDetail}
+        ${extremeDetail}
         <small>Native ${this.forecast.grid.spacing_degrees}° grid cell</small>
       `;
       this.tooltip.hidden = false;
@@ -802,7 +843,7 @@ export class ForecastMap {
       positionTooltip(lat, lon);
       svg.setAttribute(
         "aria-label",
-        `${product.label}, Week ${week.week}; selected cell ${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formatValue(value, product.units)}. Use arrow keys to inspect nearby grid cells.`,
+        `${product.label}, Week ${week.week}; selected cell ${lat.toFixed(1)} degrees north, ${lon.toFixed(1)} degrees east: ${formattedValue}. Use arrow keys to inspect nearby grid cells.`,
       );
     };
 

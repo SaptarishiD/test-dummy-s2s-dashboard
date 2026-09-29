@@ -16,7 +16,7 @@ export const INITIAL_CONDITION_SOURCE_DISPLAY_ORDER = [
   "gfs",
 ] as const satisfies readonly InitialConditionSourceId[];
 
-const PRODUCT_KEYS: ProductKey[] = [
+const MEAN_PRODUCT_KEYS: ProductKey[] = [
   "rainfall_total",
   "rainfall_anomaly",
   "temperature_mean",
@@ -25,9 +25,24 @@ const PRODUCT_KEYS: ProductKey[] = [
   "wind850_anomaly",
 ];
 
+const EXTREME_PRODUCT_KEYS: ProductKey[] = [
+  "rainfall_efi",
+  "temperature_efi",
+  "rainfall_sot_upper",
+  "temperature_sot_upper",
+  "temperature_sot_lower",
+];
+
+const PRODUCT_KEYS: ProductKey[] = [
+  ...MEAN_PRODUCT_KEYS,
+  "rainfall_spread",
+  "temperature_spread",
+  ...EXTREME_PRODUCT_KEYS,
+];
+
 // Keep raw wind in the publication contract while limiting the interactive
 // dashboard to the climatology-relative wind product.
-const WEBSITE_PRODUCT_KEYS = PRODUCT_KEYS.filter(productIsWebsiteVisible);
+const WEBSITE_PRODUCT_KEYS = MEAN_PRODUCT_KEYS.filter(productIsWebsiteVisible);
 
 const LEGACY_PRODUCT_KEYS: ProductKey[] = [
   "rainfall_total",
@@ -205,6 +220,19 @@ export function productKeysForForecast(
 ): ProductKey[] {
   const declared = catalogProducts ?? forecast.issue.available_products;
   return WEBSITE_PRODUCT_KEYS.filter(
+    (key) =>
+      Boolean(forecast.products[key]) &&
+      Boolean(forecast.weeks[0]?.fields[key]) &&
+      (!declared || declared.includes(key)),
+  );
+}
+
+export function extremeProductKeysForForecast(
+  forecast: ForecastData,
+  catalogProducts?: AvailableProductKey[],
+): ProductKey[] {
+  const declared = catalogProducts ?? forecast.issue.available_products;
+  return EXTREME_PRODUCT_KEYS.filter(
     (key) =>
       Boolean(forecast.products[key]) &&
       Boolean(forecast.weeks[0]?.fields[key]) &&

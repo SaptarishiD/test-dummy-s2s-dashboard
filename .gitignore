@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.private-cache/
 .vite/
 .pytest_cache/
 __pycache__/

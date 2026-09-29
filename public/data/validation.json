@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-28T05:31:42.150178+00:00",
+  "generated_at": "2026-09-29T22:37:12.605846+00:00",
   "overall_status": "warning",
   "presentation_allowed": true,
   "checks": [
@@ -125,15 +125,10 @@
       "id": "legacy_builder_crosscheck",
       "label": "Independent 28 July cross-check",
       "group": "formula",
-      "status": "green",
-      "summary": "All exported fields match the established validated 28 July builder.",
+      "status": "warning",
+      "summary": "External 28 July research builder is not present in this standalone dashboard clone; checked-in formula, schema, and publication gates still ran.",
       "details": {
-        "compared_values": 17496,
-        "absolute_tolerance": 0.00015,
-        "maximum_absolute_difference": 9.431152344063776e-05,
-        "left_slot": "0725",
-        "right_slot": "0728",
-        "right_weight": 0.6666666666666666
+        "external_builder_available": false
       }
     },
     {
@@ -156,8 +151,8 @@
       "summary": "Main IFS, secondary GFS, and delayed ERA5 sources are separated with PDF-only public briefings.",
       "details": {
         "sources": 3,
-        "issues": 35,
-        "regional_outlooks": 22,
+        "issues": 67,
+        "regional_outlooks": 54,
         "matched_issue": "20260722"
       }
     },
@@ -168,14 +163,15 @@
       "status": "green",
       "summary": "Public JSON is finite and free of internal paths, credentials, and raw assets.",
       "details": {
-        "json_files_scanned": 78,
-        "bytes_scanned": 27604091
+        "json_files_scanned": 147,
+        "bytes_scanned": 89531708
       }
     }
   ],
   "warnings": [
     "Validated for this JJAS issue; full-year model climatology is not yet available.",
-    "Final V07B 2001\u20132022 baseline is validated for all 42 valid days; the audited file is seasonal."
+    "Final V07B 2001\u20132022 baseline is validated for all 42 valid days; the audited file is seasonal.",
+    "External 28 July research builder is not present in this standalone dashboard clone; checked-in formula, schema, and publication gates still ran."
   ],
   "verification_metrics": {
     "status": "withheld",

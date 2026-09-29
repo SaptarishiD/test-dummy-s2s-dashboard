@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-29T15:14:38.727572+00:00",
-  "deployed_commit": "pending-ci",
+  "generated_at": "2026-09-29T22:37:12.946633+00:00",
+  "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -431,8 +431,8 @@
     },
     {
       "path": "data/forecasts/ifs/20260926.json",
-      "size_bytes": 866539,
-      "sha256": "b45473d8c440bf8b2a05c63b5624e82d01ec5f4c96908fe0aa17e5b80778fcbc"
+      "size_bytes": 4230256,
+      "sha256": "008a351d27096ca535a4083085f8db42856dce56fe638cb4af27e025de3ff6f7"
     },
     {
       "path": "data/forecasts/ifs/20260927.json",
@@ -561,8 +561,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 117546,
-      "sha256": "47b72fb9fdd7916be4992b4137dcd0e70ab8c2815bd99528d65bd7f31e1dc48f"
+      "size_bytes": 117889,
+      "sha256": "dda34cf8898cb57e5656267e8a1b9dd9acb40def9f86d9930d6491e33e3f1622"
     },
     {
       "path": "data/india-admin.json",
@@ -841,8 +841,8 @@
     },
     {
       "path": "data/regional/ifs/20260926.json",
-      "size_bytes": 448767,
-      "sha256": "bbab856d5ff01c2240ca91a5f01a43f002f4f845801b516864d5132a0d8c06ed"
+      "size_bytes": 2713310,
+      "sha256": "bf957bcc8a5c33952995f2d08dbe81d08e45d8d2d20ada7d25a56d8c2ba9a6cb"
     },
     {
       "path": "data/regional/ifs/20260927.json",
@@ -856,8 +856,8 @@
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 5965,
-      "sha256": "efafd202d592b17bef42062e4a5f6edb48a0dd8b90b1e78c579aa25bc4774020"
+      "size_bytes": 6005,
+      "sha256": "19b00caf18976efa9122abbad1b911820d56d1b2c11e306857e528ee16c2aff4"
     },
     {
       "path": "data/world-countries.geojson",

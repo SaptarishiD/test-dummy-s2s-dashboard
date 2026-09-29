@@ -12,7 +12,10 @@ export function createLegend(product: LegendProduct): HTMLElement {
 
   const bar = document.createElement("div");
   bar.className = "legend__bar";
-  for (const color of product.legend.colors) {
+  const colors = product.legend.bin_labels
+    ? [product.legend.under, ...product.legend.colors, product.legend.over]
+    : product.legend.colors;
+  for (const color of colors) {
     const segment = document.createElement("span");
     segment.style.backgroundColor = color;
     bar.append(segment);
@@ -20,10 +23,12 @@ export function createLegend(product: LegendProduct): HTMLElement {
 
   const ticks = document.createElement("div");
   ticks.className = "legend__ticks";
-  product.legend.boundaries.forEach((boundary, index) => {
+  const labels = product.legend.bin_labels ??
+    product.legend.boundaries.map(String);
+  labels.forEach((label, index) => {
     const tick = document.createElement("span");
-    tick.textContent = String(boundary);
-    const denominator = product.legend.boundaries.length - 1;
+    tick.textContent = label;
+    const denominator = labels.length - 1;
     tick.style.left = `${(index / denominator) * 100}%`;
     ticks.append(tick);
   });

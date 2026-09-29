@@ -2633,7 +2633,14 @@
             "rainfall_anomaly",
             "temperature_anomaly",
             "wind850_mean",
-            "wind850_anomaly"
+            "wind850_anomaly",
+            "rainfall_spread",
+            "temperature_spread",
+            "rainfall_efi",
+            "temperature_efi",
+            "rainfall_sot_upper",
+            "temperature_sot_upper",
+            "temperature_sot_lower"
           ],
           "capabilities": {
             "raw_fields": true,
@@ -2641,11 +2648,14 @@
             "wind850_mean": true,
             "wind850_anomaly": true,
             "regional_probabilities": true,
-            "pdf": true
+            "pdf": true,
+            "extreme_products": true,
+            "joint_outcomes": true,
+            "ensemble_spread": true
           },
           "checksums": {
-            "forecast_sha256": "b45473d8c440bf8b2a05c63b5624e82d01ec5f4c96908fe0aa17e5b80778fcbc",
-            "regional_sha256": "bbab856d5ff01c2240ca91a5f01a43f002f4f845801b516864d5132a0d8c06ed",
+            "forecast_sha256": "008a351d27096ca535a4083085f8db42856dce56fe638cb4af27e025de3ff6f7",
+            "regional_sha256": "bf957bcc8a5c33952995f2d08dbe81d08e45d8d2d20ada7d25a56d8c2ba9a6cb",
             "pdf_sha256": "7675f779cd4a3abb2deb9e256791e32813e197064b6126e4622272dae86e1248"
           },
           "forecast": "forecasts/ifs/20260926.json",

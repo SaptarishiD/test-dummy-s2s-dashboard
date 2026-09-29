@@ -81,7 +81,7 @@ def test_primary_navigation_is_india_focused() -> None:
     assert 'data-route="briefing"' in shell
     assert 'data-route="team"' in shell
     assert 'data-route="forecast"' not in shell
-    assert 'data-route="outlook"' not in shell
+    assert 'data-route="outlook"' in shell
     assert "?view=global" not in shell
 
 

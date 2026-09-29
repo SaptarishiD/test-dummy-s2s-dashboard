@@ -158,7 +158,7 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     main = read("src/main.ts")
     briefing = read("src/pages/briefing.ts")
     team = read("src/pages/team.ts")
-    assert 'type Route = "india" | "archive" | "briefing" | "team"' in main
+    assert 'type Route = "india" | "outlook" | "archive" | "briefing" | "team"' in main
     assert 'href="./#team" data-route="team"' in main
     assert 'document.body.classList.toggle("team-route", route === "team")' in main
     assert 'await import("./pages/team")' in main
@@ -339,7 +339,7 @@ def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     archive = read("src/pages/archive.ts")
     types = read("src/types.ts")
 
-    product_keys_start = catalog.index("const PRODUCT_KEYS")
+    product_keys_start = catalog.index("const MEAN_PRODUCT_KEYS")
     product_keys_end = catalog.index("];", product_keys_start)
     product_keys = catalog[product_keys_start:product_keys_end]
     assert '"wind850_mean"' in product_keys
@@ -377,7 +377,7 @@ def test_shared_header_uses_the_page_rail_and_purpose_labeled_navigation() -> No
     assert "People &amp; methods" in main
     assert "briefing-nav-link__icon" not in main
     assert "width: min(calc(100% - 48px), 1180px)" in stylesheet
-    assert "grid-template-columns: repeat(4, minmax(0, 1fr))" in stylesheet
+    assert "grid-template-columns: repeat(5, minmax(0, 1fr))" in stylesheet
     assert ".site-nav a[aria-current=\"page\"]::after" in stylesheet
     assert ".site-nav a:focus-visible" in stylesheet
     assert ".site-nav a::after," in stylesheet
@@ -387,11 +387,12 @@ def test_shared_header_uses_the_page_rail_and_purpose_labeled_navigation() -> No
     assert "Catalogue through ·" in main
 
 
-def test_forecast_integrates_three_uncertainty_views_without_replacing_mean() -> None:
+def test_forecast_integrates_uncertainty_and_extreme_views_without_replacing_mean() -> None:
     forecast = read("src/pages/forecast.ts")
     assert 'data-forecast-view="mean" class="is-active"' in forecast
     assert 'data-forecast-view="probability"' in forecast
     assert 'data-forecast-view="spread"' in forecast
+    assert 'data-forecast-view="extremes"' in forecast
     assert 'let selectedView: ForecastView = "mean"' in forecast
     assert 'const meanCandidates: ProductKey[]' in forecast
     assert 'if (matchingMeanProduct) selectedProduct = matchingMeanProduct' in forecast
@@ -440,7 +441,7 @@ def test_spread_view_can_reveal_the_available_regional_grid() -> None:
     assert 'id="india-probability-extent" hidden' in forecast
     assert 'value="regional">Regional grid (60–99°E)' in forecast
     assert 'selectedProbabilityExtent: "india" | "regional" = "regional"' in forecast
-    assert 'probabilityExtentControl.hidden = selectedView === "mean"' in forecast
+    assert 'probabilityExtentControl.hidden = selectedView === "mean" || selectedView === "extremes"' in forecast
     assert "extent: selectedProbabilityExtent" in forecast
     assert "but not all of Thailand or Indonesia" in forecast
     assert ".india-product-tabs[hidden]" in stylesheet

@@ -129,6 +129,35 @@ member fields and reforecasts remain private. Older schema-v1 packages continue
 to show their real tercile probabilities, while quantiles and spread display an
 explicit unavailable state until that issue is regenerated.
 
+### Extreme forecast products
+
+IFS 26 September 2026 is the first schema-v3 extreme package. EFI and Shift of
+Tails compare each complete weekly 100-member forecast distribution with the
+native 2002–2021 FuXi model climate at the 22, 26, and 29 September start dates:
+3,060 reference samples per grid cell and lead week. Rainfall is accumulated as
+a seven-day total before comparison; temperature is averaged over the same
+complete week. Only derived fields and seven compact forecast/model-climate
+quantiles are public—member arrays remain private.
+
+Rebuild the regional v2 base and then layer the v3 products with:
+
+```bash
+python scripts/build_regional_outlook.py \
+  --forecast /private/path/to/20260926.nc \
+  --public-forecast public/data/forecasts/ifs/20260926.json \
+  --minimum-valid-members 100 \
+  --output public/data/regional/ifs/20260926.json
+python scripts/build_extreme_products.py \
+  --forecast /private/path/to/20260926.nc \
+  --public-forecast public/data/forecasts/ifs/20260926.json \
+  --regional public/data/regional/ifs/20260926.json
+```
+
+EFI and SOT are raw, model-relative ensemble indices. They are not event
+probabilities, warnings, calibrated skill estimates, or guarantees of impact.
+Unsupported issues display an explicit unavailable state and never substitute
+synthetic fields.
+
 ## Data contract
 
 The global contract stores little-endian `uint16` binary arrays in lead-day,

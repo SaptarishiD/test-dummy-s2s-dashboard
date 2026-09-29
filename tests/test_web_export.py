@@ -166,7 +166,10 @@ def test_regional_outlooks_use_complete_ensembles_and_locked_terciles() -> None:
             assert len(outlook["weeks"]) == 6
             for week_number, week in enumerate(outlook["weeks"], start=1):
                 assert week["week"] == week_number
-                assert [region["id"] for region in week["regions"]] == expected_regions
+                region_ids = [region["id"] for region in week["regions"]]
+                assert region_ids[:5] == expected_regions
+                if outlook.get("schema_version", 1) >= 3:
+                    assert region_ids[5:] == ["indo_gangetic_administrative_proxy"]
                 for variable in ("rainfall", "temperature"):
                     probability = week["probability_fields"][variable]
                     raw_arrays = [
@@ -239,7 +242,7 @@ def test_regional_outlooks_use_complete_ensembles_and_locked_terciles() -> None:
                             assert quantiles == sorted(quantiles)
                         else:
                             assert all(value is None for value in quantiles)
-                for region in week["regions"]:
+                for region in week["regions"][:5]:
                     for variable in ("rainfall", "temperature"):
                         probability = region[variable]["tercile_probability_percent"]
                         assert sum(
@@ -260,13 +263,16 @@ def test_regional_outlooks_use_complete_ensembles_and_locked_terciles() -> None:
     assert regional_count == expected_count
 
 
-def test_each_issue_has_one_verified_pdf_download() -> None:
+def test_each_pdf_capable_issue_has_one_verified_download() -> None:
     index = load(PUBLIC_DATA / "index.json")
     public_root = PUBLIC_DATA.parent
     for source in index["initial_condition_sources"]:
         for issue in source["issues"]:
             forecast = load(PUBLIC_DATA / issue["forecast"])
             downloads = forecast["issue"]["downloads"]
+            if not issue.get("capabilities", {}).get("pdf", bool(issue.get("pdf"))):
+                assert set(downloads) == {"compact_json"}
+                continue
             assert set(downloads) == {
                 "compact_json",
                 "india_pdf",
@@ -275,9 +281,11 @@ def test_each_issue_has_one_verified_pdf_download() -> None:
             pdf_path = public_root / downloads["india_pdf"]
             pdf_bytes = pdf_path.read_bytes()
             assert pdf_bytes.startswith(b"%PDF-")
-            assert len(re.findall(rb"/Type /Page\b", pdf_bytes)) == len(
-                forecast["products"]
-            )
+            page_count = len(re.findall(rb"/Type /Page\b", pdf_bytes))
+            if forecast.get("schema_version", 1) >= 3:
+                assert 4 <= page_count <= len(forecast["products"])
+            else:
+                assert page_count == len(forecast["products"])
             assert pdf_path.stat().st_size < 10_000_000
             assert hashlib.sha256(pdf_bytes).hexdigest() == downloads["india_pdf_sha256"]
 

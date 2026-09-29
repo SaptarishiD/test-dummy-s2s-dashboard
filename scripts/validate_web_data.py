@@ -314,6 +314,8 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                     "south_peninsula",
                     "east_northeast",
                 ]
+                if regional.get("schema_version", 1) >= 3:
+                    expected_regions.append("indo_gangetic_administrative_proxy")
                 for week_number, regional_week in enumerate(
                     regional["weeks"], start=1
                 ):
@@ -415,7 +417,7 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                                 rtol=0.0,
                                 atol=0.02,
                             )
-                    for region in regional_week["regions"]:
+                    for region in regional_week["regions"][:5]:
                         for variable in ("rainfall", "temperature"):
                             probability = region[variable][
                                 "tercile_probability_percent"
@@ -431,9 +433,49 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
                                 raise ValueError(
                                     "regional summary probabilities do not sum to 100"
                                 )
+                    if schema_version >= 3:
+                        proxy = regional_week["regions"][-1]
+                        matrix = proxy.get("joint_tercile", {})
+                        counts = np.asarray(matrix.get("counts"), dtype=np.int64)
+                        percentages = np.asarray(
+                            matrix.get("percentages"), dtype=np.float64
+                        )
+                        denominator = matrix.get("paired_member_count")
+                        if counts.shape != (3, 3) or percentages.shape != (3, 3):
+                            raise ValueError("joint outcome matrix must be 3 by 3")
+                        if denominator != int(counts.sum()) or denominator <= 0:
+                            raise ValueError("joint outcome paired denominator is invalid")
+                        if np.any(counts < 0) or not np.isfinite(percentages).all():
+                            raise ValueError("joint outcome matrix contains invalid values")
+                        np.testing.assert_allclose(
+                            percentages.sum(), 100.0, rtol=0.0, atol=1e-6
+                        )
+                if capabilities.get("extreme_products"):
+                    required_extremes = {
+                        "rainfall_efi",
+                        "temperature_efi",
+                        "rainfall_sot_upper",
+                        "temperature_sot_upper",
+                        "temperature_sot_lower",
+                    }
+                    if forecast.get("schema_version", 1) < 3:
+                        raise ValueError("extreme products require forecast schema v3")
+                    if not required_extremes.issubset(forecast["products"]):
+                        raise ValueError("extreme product capability is incomplete")
+                    if "rainfall_sot_lower" in forecast["products"]:
+                        raise ValueError("rainfall must not expose lower-tail SOT")
+                    if not capabilities.get("joint_outcomes"):
+                        raise ValueError("v3 extreme issue lacks joint outcomes")
             if issue["id"] == "20260722":
                 matched_22.add(source_id)
             downloads = forecast["issue"]["downloads"]
+            pdf_advertised = capabilities.get("pdf", bool(issue.get("pdf")))
+            if not pdf_advertised:
+                if set(downloads) != {"compact_json"}:
+                    raise ValueError(
+                        f"non-PDF issue exposes unexpected downloads: {source_id}/{issue['id']}"
+                    )
+                continue
             if set(downloads) != {
                 "compact_json",
                 "india_pdf",
@@ -448,7 +490,13 @@ def source_catalog_gate(public_data: Path) -> tuple[str, dict[str, Any]]:
             if not pdf_bytes.startswith(b"%PDF-"):
                 raise ValueError(f"invalid PDF header: {pdf_path}")
             page_count = len(re.findall(rb"/Type /Page\b", pdf_bytes))
-            if page_count != len(forecast["products"]):
+            if (
+                forecast.get("schema_version", 1) < 3
+                and page_count != len(forecast["products"])
+            ) or (
+                forecast.get("schema_version", 1) >= 3
+                and not 4 <= page_count <= len(forecast["products"])
+            ):
                 raise ValueError(
                     f"PDF page count does not match available products: {pdf_path}"
                 )
@@ -565,16 +613,27 @@ def main() -> int:
         for check in validation["checks"]
         if check["group"] == "source"
     ]
+    legacy_check = run_check(
+        "legacy_builder_crosscheck",
+        "Independent 28 July cross-check",
+        "formula",
+        lambda: independent_builder_gate(
+            args.public_data, args.forecast, args.fuxi_climatology
+        ),
+    ) if LEGACY_BUILDER.is_file() else ValidationCheck(
+        id="legacy_builder_crosscheck",
+        label="Independent 28 July cross-check",
+        group="formula",
+        status="warning",
+        summary=(
+            "External 28 July research builder is not present in this standalone "
+            "dashboard clone; checked-in formula, schema, and publication gates still ran."
+        ),
+        details={"external_builder_available": False},
+    )
     new_checks = [
         run_check("formula_tests", "Formula tests", "formula", formula_gate),
-        run_check(
-            "legacy_builder_crosscheck",
-            "Independent 28 July cross-check",
-            "formula",
-            lambda: independent_builder_gate(
-                args.public_data, args.forecast, args.fuxi_climatology
-            ),
-        ),
+        legacy_check,
         run_check(
             "web_schema",
             "Web export",

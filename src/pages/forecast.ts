@@ -5,10 +5,12 @@ import {
 import { createLegend } from "../components/Legend";
 import { ProbabilisticForecastMap } from "../components/ProbabilisticForecastMap";
 import { renderLocationForecastPanel } from "../components/LocationForecastPanel";
+import { renderExtremeForecastPanel } from "../components/ExtremeForecastPanel";
 import {
   checksumVersionedPath,
   currentForecast,
   defaultIssueForSource,
+  extremeProductKeysForForecast,
   INITIAL_CONDITION_SOURCE_DISPLAY_ORDER,
   issueChecksum,
   issueHasRegionalOutlook,
@@ -214,6 +216,23 @@ const PRESENTATION_PRODUCTS: Record<ProductKey, ProductDefinition> = {
       over: "#083653",
     },
   },
+  rainfall_spread: {
+    label: "Rainfall ensemble spread", short_label: "Rainfall spread",
+    description: "Population standard deviation across weekly-total forecast members",
+    units: "mm week⁻¹", baseline: null,
+    legend: { boundaries: [0, 5, 10, 20, 40, 70, 110], colors: ["#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#4292c6", "#08519c"], under: "#ffffff", over: "#08306b" },
+  },
+  temperature_spread: {
+    label: "Temperature ensemble spread", short_label: "Temperature spread",
+    description: "Population standard deviation across weekly-mean forecast members",
+    units: "°C", baseline: null,
+    legend: { boundaries: [0, 0.5, 1, 1.5, 2, 3, 5], colors: ["#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#e34a33", "#b30000"], under: "#ffffff", over: "#7f0000" },
+  },
+  rainfall_efi: undefined as never,
+  temperature_efi: undefined as never,
+  rainfall_sot_upper: undefined as never,
+  temperature_sot_upper: undefined as never,
+  temperature_sot_lower: undefined as never,
 };
 
 const PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS: Record<ProductKey, string> = {
@@ -223,6 +242,13 @@ const PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS: Record<ProductKey, string> = {
   temperature_anomaly: "Shows where a week may be warmer or cooler than the model usually expects for that place and time of year.",
   wind850_mean: "Shows the expected average lower-atmosphere wind speed and direction during each forecast week.",
   wind850_anomaly: "Shows where lower-atmosphere winds may be stronger, weaker or differently directed than usual.",
+  rainfall_spread: "Shows the member-to-member spread in weekly rainfall totals.",
+  temperature_spread: "Shows the member-to-member spread in weekly mean temperature.",
+  rainfall_efi: "Compares the full rainfall ensemble distribution with the matching model climate.",
+  temperature_efi: "Compares the full temperature ensemble distribution with the matching model climate.",
+  rainfall_sot_upper: "Shows displacement of the wet rainfall tail relative to the model climate.",
+  temperature_sot_upper: "Shows displacement of the warm temperature tail relative to the model climate.",
+  temperature_sot_lower: "Shows displacement of the cold temperature tail relative to the model climate.",
 };
 
 function isWindProduct(product: ProductKey): boolean {
@@ -286,7 +312,7 @@ function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
     ...week,
     fields: {
       ...week.fields,
-      rainfall_total: rainfall.map((value) => value / 7),
+      rainfall_total: rainfall.map((value) => value === null ? null : value / 7),
     },
   };
 }
@@ -457,6 +483,10 @@ export function renderForecastPage(
     forecast,
     catalogIssue.available_products,
   );
+  const availableExtremeProducts = extremeProductKeysForForecast(
+    forecast,
+    catalogIssue.available_products,
+  );
   if (availableProducts.length === 0) {
     container.innerHTML = `
       <section class="blocked-state">
@@ -588,6 +618,7 @@ export function renderForecastPage(
           <button type="button" data-forecast-view="mean" class="is-active" aria-pressed="true">Mean</button>
           <button type="button" data-forecast-view="probability" aria-pressed="false">Probability</button>
           <button type="button" data-forecast-view="spread" aria-pressed="false">Ensemble spread</button>
+          <button type="button" data-forecast-view="extremes" aria-pressed="false">Extremes</button>
         </div>
         <div class="india-toolbar">
           <div class="india-toolbar__variables">
@@ -618,6 +649,14 @@ export function renderForecastPage(
                 <option value="p10">P10 lower outcome</option>
                 <option value="p50">Median outcome</option>
                 <option value="p90">P90 upper outcome</option>
+              </select>
+            </label>
+            <label class="india-extreme-product" id="india-extreme-product" hidden>
+              <span>Extreme product</span>
+              <select aria-label="Extreme forecast product">
+                <option value="efi">Extreme Forecast Index (EFI)</option>
+                <option value="sot_upper">Upper-tail Shift of Tails</option>
+                <option value="sot_lower">Lower-tail Shift of Tails</option>
               </select>
             </label>
             <label class="india-probability-extent" id="india-probability-extent" hidden>
@@ -742,11 +781,13 @@ export function renderForecastPage(
   `;
 
 
-  type ForecastView = "mean" | "probability" | "spread";
+  type ForecastView = "mean" | "probability" | "spread" | "extremes";
+  type ExtremeProduct = "efi" | "sot_upper" | "sot_lower";
   let selectedProduct: ProductKey = defaultProduct;
   let selectedView: ForecastView = "mean";
   let selectedProbabilityProduct: ProbabilityMapProduct = "most_likely";
   let selectedDistributionProduct: DistributionMapProduct = "spread";
+  let selectedExtremeProduct: ExtremeProduct = "efi";
   let selectedProbabilityVariable: ProbabilisticVariable =
     defaultProduct.startsWith("temperature") ? "temperature" : "rainfall";
   let selectedProbabilityExtent: "india" | "regional" = "regional";
@@ -775,6 +816,10 @@ export function renderForecastPage(
     "#india-distribution-product",
   )!;
   const distributionProductSelect = distributionProductControl.querySelector("select")!;
+  const extremeProductControl = container.querySelector<HTMLLabelElement>(
+    "#india-extreme-product",
+  )!;
+  const extremeProductSelect = extremeProductControl.querySelector("select")!;
   const probabilityExtentControl = container.querySelector<HTMLLabelElement>(
     "#india-probability-extent",
   )!;
@@ -792,7 +837,11 @@ export function renderForecastPage(
 
   container.querySelectorAll<HTMLButtonElement>("[data-forecast-view]")
     .forEach((button) => {
-      if (button.dataset.forecastView !== "mean" && !probabilisticAvailable) {
+      if (
+        button.dataset.forecastView !== "mean" &&
+        button.dataset.forecastView !== "extremes" &&
+        !probabilisticAvailable
+      ) {
         button.disabled = true;
         button.title = "A complete ensemble and matched model climatology are required.";
       }
@@ -855,6 +904,12 @@ export function renderForecastPage(
           availableProducts.includes(candidate)
         );
         if (matchingMeanProduct) selectedProduct = matchingMeanProduct;
+        if (
+          selectedProbabilityVariable === "rainfall" &&
+          selectedExtremeProduct === "sot_lower"
+        ) {
+          selectedExtremeProduct = "efi";
+        }
         refreshPresentation(`Showing ${selectedProbabilityVariable} ${selectedView}.`);
       });
     });
@@ -869,6 +924,11 @@ export function renderForecastPage(
     selectedDistributionProduct =
       distributionProductSelect.value as DistributionMapProduct;
     refreshPresentation("Showing selected ensemble distribution product.");
+  });
+
+  extremeProductSelect.addEventListener("change", () => {
+    selectedExtremeProduct = extremeProductSelect.value as ExtremeProduct;
+    refreshPresentation("Showing selected extreme forecast product.");
   });
 
   probabilityExtentSelect.addEventListener("change", () => {
@@ -958,13 +1018,22 @@ export function renderForecastPage(
     return regionalOutlookPromise;
   }
 
+  function extremeProductKey(
+    variable = selectedProbabilityVariable,
+    product = selectedExtremeProduct,
+  ): ProductKey {
+    if (product === "efi") return `${variable}_efi` as ProductKey;
+    if (product === "sot_upper") return `${variable}_sot_upper` as ProductKey;
+    return "temperature_sot_lower";
+  }
+
   async function selectView(view: ForecastView): Promise<void> {
-    if (view !== "mean" && !probabilisticAvailable) return;
+    if (view !== "mean" && view !== "extremes" && !probabilisticAvailable) return;
     selectedView = view;
     requestGeneration += 1;
     const generation = requestGeneration;
     updateControls();
-    if (view === "mean") {
+    if (view === "mean" || view === "extremes") {
       update(!reducedMotion.matches);
       return;
     }
@@ -1005,10 +1074,19 @@ export function renderForecastPage(
     probabilityVariableTabs.hidden = selectedView === "mean";
     probabilityProductControl.hidden = selectedView !== "probability";
     distributionProductControl.hidden = selectedView !== "spread";
-    probabilityExtentControl.hidden = selectedView === "mean";
+    extremeProductControl.hidden = selectedView !== "extremes";
+    probabilityExtentControl.hidden = selectedView === "mean" || selectedView === "extremes";
     probabilityDefinition.hidden = selectedView !== "probability";
     probabilityProductSelect.value = selectedProbabilityProduct;
     distributionProductSelect.value = selectedDistributionProduct;
+    extremeProductSelect.value = selectedExtremeProduct;
+    const lowerTailOption = extremeProductSelect.querySelector<HTMLOptionElement>(
+      'option[value="sot_lower"]',
+    );
+    if (lowerTailOption) {
+      lowerTailOption.hidden = selectedProbabilityVariable === "rainfall";
+      lowerTailOption.disabled = selectedProbabilityVariable === "rainfall";
+    }
     probabilityExtentSelect.value = selectedProbabilityExtent;
     probabilityVariableTabs
       .querySelectorAll<HTMLButtonElement>("[data-probability-variable]")
@@ -1035,6 +1113,27 @@ export function renderForecastPage(
     if (!selectedLocation) {
       panelHost.hidden = true;
       panelHost.replaceChildren();
+      return;
+    }
+    if (selectedView === "extremes" && activeForecast.extreme_definition) {
+      renderExtremeForecastPanel(
+        panelHost,
+        activeForecast,
+        selectedProbabilityVariable,
+        selectedLocation,
+        (variable) => {
+          selectedProbabilityVariable = variable;
+          if (variable === "rainfall" && selectedExtremeProduct === "sot_lower") {
+            selectedExtremeProduct = "efi";
+          }
+          refreshPresentation(`Showing ${variable} extremes.`);
+        },
+        (week) => {
+          selectedLocation = { ...selectedLocation!, week };
+          renderPanel();
+        },
+        closePanel,
+      );
       return;
     }
     if (!regionalOutlook) {
@@ -1073,6 +1172,10 @@ export function renderForecastPage(
 
   function handleLocationSelection(selection: ForecastGridSelection): void {
     selectedLocation = selection;
+    if (selectedView === "extremes") {
+      update(false);
+      return;
+    }
     if (regionalOutlook) {
       update(false);
       return;
@@ -1250,6 +1353,63 @@ export function renderForecastPage(
           ? "Secondary experimental initialization from operational analysis and short-range GFS proxy inputs."
           : "Delayed ERA5 reference initialization; not near-real-time operational guidance.";
       renderPanel();
+    } else if (selectedView === "extremes") {
+      const key = extremeProductKey();
+      const supported = Boolean(
+        activeForecast.extreme_definition &&
+        availableExtremeProducts.includes(key) &&
+        activeForecast.weeks[0]?.fields[key],
+      );
+      if (!supported) {
+        panelGrid.innerHTML = `
+          <div class="probability-unavailable-state" role="note">
+            <strong>Extreme products are unavailable for this issue</strong>
+            <p>No synthetic or substitute data are shown. Select IFS 26 September 2026 to inspect the first supported model-relative EFI/SOT package.</p>
+          </div>
+        `;
+        container.querySelector(".india-selected-product")!.textContent =
+          "Extreme products unavailable";
+        container.querySelector("#india-product-explanation")!.textContent =
+          "This issue does not carry a matching native model-climate extreme package.";
+        container.querySelector<HTMLDivElement>("#india-shared-legend")!
+          .replaceChildren();
+        container.querySelector("#india-visual-note")!.textContent =
+          "No synthetic or substitute EFI/SOT field is displayed.";
+        container.querySelector("#india-baseline-note")!.textContent =
+          "Extreme products are published only for explicitly supported issues.";
+        panelHost.hidden = true;
+        panelHost.replaceChildren();
+      } else {
+        const product = activeForecast.products[key]!;
+        container.querySelector<HTMLElement>(".india-sheet")!.dataset.product = key;
+        container.querySelector(".india-selected-product")!.textContent = product.label;
+        container.querySelector("#india-product-explanation")!.textContent =
+          product.description;
+        makeMapPanels(
+          activeForecast.weeks.slice(rangeStart, rangeStart + 4),
+          (frame, week) => {
+            const map = new ForecastMap(
+              frame,
+              activeForecast,
+              activeGeography,
+              handleLocationSelection,
+              selectedLocation,
+            );
+            map.render(key, week, product);
+          },
+        );
+        const legend = container.querySelector<HTMLDivElement>("#india-shared-legend")!;
+        legend.style.setProperty("--legend-under", product.legend.under);
+        legend.style.setProperty("--legend-over", product.legend.over);
+        legend.replaceChildren(createLegend(product));
+        container.querySelector("#india-visual-note")!.textContent =
+          key.endsWith("efi")
+            ? "Fixed −1 to +1 scale across all weeks; reference levels are marked at −0.8, −0.5, 0, +0.5, and +0.8. Hatched cells are unavailable, not zero."
+            : "Fixed SOT bins across all weeks. Values above +2 are retained in the data and shown with the >2 legend bin; hatched cells are unavailable, not zero.";
+        container.querySelector("#india-baseline-note")!.textContent =
+          activeForecast.extreme_definition!.warning;
+        renderPanel();
+      }
     } else if (regionalOutlook) {
       const hasSummary = regionalOutlook.weeks.every(
         (week) => Boolean(week.summary_fields?.[selectedProbabilityVariable]),

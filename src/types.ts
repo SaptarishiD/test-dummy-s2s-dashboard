@@ -12,7 +12,14 @@ export type ProductKey =
   | "rainfall_anomaly"
   | "temperature_mean"
   | "temperature_anomaly"
-  | WindProductKey;
+  | WindProductKey
+  | "rainfall_spread"
+  | "temperature_spread"
+  | "rainfall_efi"
+  | "temperature_efi"
+  | "rainfall_sot_upper"
+  | "temperature_sot_upper"
+  | "temperature_sot_lower";
 
 export type AvailableProductKey =
   | ProductKey
@@ -28,6 +35,9 @@ export interface IssueCapabilities {
   regional_probabilities_eligible?: boolean;
   pdf?: boolean;
   india_pdf?: boolean;
+  ensemble_spread?: boolean;
+  extreme_products?: boolean;
+  joint_outcomes?: boolean;
 }
 
 export interface IssuePointer {
@@ -63,6 +73,7 @@ export interface LegendDefinition {
   colors: string[];
   under: string;
   over: string;
+  bin_labels?: string[];
 }
 
 export interface ProductDefinition {
@@ -84,11 +95,43 @@ export interface ForecastWeek {
   week: number;
   valid_start: string;
   valid_end: string;
-  fields: Partial<Record<ProductKey, number[]>>;
+  fields: Partial<Record<ProductKey, Array<number | null>>>;
   summary: Partial<Record<ProductKey, FieldSummary>>;
   vectors?: Partial<
     Record<WindProductKey, { u: number[]; v: number[] }>
   >;
+  extreme_samples?: {
+    forecast_valid_member_count: number[];
+    climate_valid_sample_count: number[];
+  };
+  distribution_summaries?: Partial<
+    Record<ProbabilisticVariable, ExtremeDistributionSummary>
+  >;
+}
+
+export interface ExtremeDistributionSummary {
+  probabilities: number[];
+  forecast: NullableGrid[];
+  climate: NullableGrid[];
+}
+
+export interface ExtremeDefinition {
+  status: "model_relative_raw_ensemble_indices";
+  reference_id: string;
+  years: number[];
+  initialization_dates: string[];
+  lead_days: [number, number];
+  forecast_member_count: number;
+  climate_sample_count: number;
+  source_archive: string;
+  source_archive_records_sha256: string;
+  forecast_sha256: string;
+  aggregation: { rainfall: string; temperature: string };
+  quantile_method: string;
+  efi: string;
+  sot_upper: string;
+  sot_lower: string;
+  warning: string;
 }
 
 export interface ForecastData {
@@ -168,6 +211,7 @@ export interface ForecastData {
     rainfall_weekly_mean_max_mm_day: number;
     temperature_weekly_mean_max_deg_c: number;
   };
+  extreme_definition?: ExtremeDefinition;
   weeks: ForecastWeek[];
 }
 
@@ -273,7 +317,15 @@ export interface RegionalVariableSummary {
   p90?: number;
   p90_minus_p10?: number;
   valid_member_count?: number;
-  tercile_probability_percent: TercileProbabilityRecord;
+  tercile_probability_percent?: TercileProbabilityRecord;
+}
+
+export interface JointTercileMatrix {
+  paired_member_count: number;
+  counts: [[number, number, number], [number, number, number], [number, number, number]];
+  percentages: [[number, number, number], [number, number, number], [number, number, number]];
+  rainfall_terciles_mm_week: [number, number];
+  temperature_terciles_deg_c: [number, number];
 }
 
 export interface RegionalOutlookWeek {
@@ -291,11 +343,12 @@ export interface RegionalOutlookWeek {
     short_label: string;
     rainfall: RegionalVariableSummary;
     temperature: RegionalVariableSummary;
+    joint_tercile?: JointTercileMatrix;
   }>;
 }
 
 export interface RegionalOutlookData {
-  schema_version: 1 | 2;
+  schema_version: 1 | 2 | 3;
   generated_at: string;
   issue: {
     initialization: string;
@@ -348,6 +401,15 @@ export interface RegionalOutlookData {
     boundary_rule?: string;
     degenerate_threshold_rule?: string;
     member_completeness?: string;
+  };
+  extreme_definition?: ExtremeDefinition;
+  joint_outcome_definition?: {
+    label: "Joint raw member fractions";
+    rainfall_categories: [string, string, string];
+    temperature_categories: [string, string, string];
+    aggregation: string;
+    boundary_rule: string;
+    warning: string;
   };
   weeks: RegionalOutlookWeek[];
 }

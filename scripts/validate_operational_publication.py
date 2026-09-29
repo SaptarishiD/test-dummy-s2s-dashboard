@@ -325,7 +325,7 @@ def grid_size(payload: dict[str, Any], label: str) -> int:
 def validate_regional_payload(path: Path, ref: IssueRef) -> None:
     regional = load_json(path)
     schema_version = regional.get("schema_version", 1)
-    if schema_version not in (1, 2):
+    if schema_version not in (1, 2, 3):
         raise ValueError(f"unsupported regional schema: {schema_version}")
     issue = regional.get("issue", {})
     if (
@@ -545,7 +545,16 @@ def validate_forecast(
                     f"forecast field has wrong size: "
                     f"{ref.source_id}/{ref.issue_id}/{expected_week}/{product}"
                 )
-            if any(not isinstance(value, (int, float)) for value in values):
+            nullable_extreme = product in {
+                "rainfall_sot_upper",
+                "temperature_sot_upper",
+                "temperature_sot_lower",
+            } and forecast.get("schema_version", 0) >= 3
+            if any(
+                not isinstance(value, (int, float))
+                and not (nullable_extreme and value is None)
+                for value in values
+            ):
                 raise ValueError(
                     f"forecast field is not numeric: "
                     f"{ref.source_id}/{ref.issue_id}/{expected_week}/{product}"
