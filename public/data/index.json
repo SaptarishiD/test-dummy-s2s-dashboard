@@ -203,7 +203,7 @@
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-09-29T14:34:52Z",
+  "generated_at": "2026-09-29T14:36:40Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -1532,6 +1532,51 @@
           "valid_through": "2026-10-27"
         },
         {
+          "forecast": "forecasts/era5/20260913.json",
+          "id": "20260913",
+          "initialization": "2026-09-13T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/era5/20260913.json",
+          "role": "reference",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "2abc3dfdb8e271bc5cc26448f62ccaf0ef71b94d2bdb718fca7fe588fd1c339e",
+            "regional_sha256": "086395ae03a69c7235a112731cbdc4eca76bb53407adfe26992ce4fae8e28f95",
+            "pdf_sha256": "55eaee709603cabc2a79182df256bb3cc18284e08c1b2384cfc66d321babf737"
+          },
+          "valid_through": "2026-10-24",
+          "published_at": "2026-09-29T14:36:31.301929+00:00",
+          "pdf": "downloads/era5/20260913/S2S_Research_India_Weeks1-4_ERA5_20260913.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-13T00:00:00Z",
+            "pdf_until": "2026-11-08T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
+        {
           "archive": {
             "interactive_available": true,
             "pdf_available": true,
@@ -1622,13 +1667,13 @@
           "valid_through": "2026-10-20"
         },
         {
-          "forecast": "forecasts/era5/20260906.json",
-          "id": "20260906",
-          "initialization": "2026-09-06T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/era5/20260906.json",
-          "role": "reference",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-06T00:00:00Z",
+            "pdf_until": "2026-11-01T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -1645,26 +1690,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "archive",
-            "label": "Delayed ERA5 reference",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "cbfbbbbbb46a4d420dc72f55ad8c954de15f0f132fd22916a2f71e3aeafcad72",
             "regional_sha256": "7329d217a454f567416c5e59835d27dd700d68c062a4fe0444b8e140dda3f693",
             "pdf_sha256": "dced05af54b5f27aa999d03b56482d2c43f441f35d5de34259515b435829e176"
           },
-          "valid_through": "2026-10-17",
-          "published_at": "2026-09-29T14:34:43.221384+00:00",
+          "forecast": "forecasts/era5/20260906.json",
+          "id": "20260906",
+          "initialization": "2026-09-06T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/era5/20260906/S2S_Research_India_Weeks1-4_ERA5_20260906.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-09-06T00:00:00Z",
-            "pdf_until": "2026-11-01T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "published_at": "2026-09-29T14:34:43.221384+00:00",
+          "regional_outlook": "regional/era5/20260906.json",
+          "role": "reference",
+          "status": "warning",
+          "valid_through": "2026-10-17"
         },
         {
           "archive": {
