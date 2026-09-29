@@ -203,7 +203,7 @@
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-09-28T21:16:03Z",
+  "generated_at": "2026-09-29T14:33:06Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -1712,6 +1712,51 @@
           "valid_through": "2026-10-13"
         },
         {
+          "forecast": "forecasts/era5/20260830.json",
+          "id": "20260830",
+          "initialization": "2026-08-30T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/era5/20260830.json",
+          "role": "reference",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "archive",
+            "label": "Delayed ERA5 reference",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "5e7cc8718136c2264fa20148cdb9279b4fb7d9ad095b0659eaa8b3fb9d0af5ff",
+            "regional_sha256": "cfa6053104a78fe13db716596844f0a01a17097845e379cf547a5595464e26b0",
+            "pdf_sha256": "33b80ce54cbf5b2aa7914e33618c425f48494dc6894d89d3e06b45961658bdc8"
+          },
+          "valid_through": "2026-10-10",
+          "published_at": "2026-09-29T14:32:57.011208+00:00",
+          "pdf": "downloads/era5/20260830/S2S_Research_India_Weeks1-4_ERA5_20260830.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-08-30T00:00:00Z",
+            "pdf_until": "2026-10-25T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
+        {
           "archive": {
             "interactive_available": true,
             "pdf_available": true,
@@ -2395,13 +2440,13 @@
       "id": "ifs",
       "issues": [
         {
-          "forecast": "forecasts/ifs/20260927.json",
-          "id": "20260927",
-          "initialization": "2026-09-27T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/ifs/20260927.json",
-          "role": "operational_experimental",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-09-27T00:00:00Z",
+            "pdf_until": "2026-11-22T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -2418,26 +2463,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "current",
-            "label": "Current guidance",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "e6eea1736ec36907beceeb7a9fd8884e83e88dcd802ca9a412aa4c8e5fd87d42",
             "regional_sha256": "073c9c0251f8b6f1e68c8c751da34757224336ff9b6343a3b59b105a4120c192",
             "pdf_sha256": "b42936140ea06311b08eda21c9b1b2b0e92b45a3cd003aace53c08feb62a9c97"
           },
-          "valid_through": "2026-11-07",
-          "published_at": "2026-09-27T14:48:21.921823+00:00",
+          "forecast": "forecasts/ifs/20260927.json",
+          "id": "20260927",
+          "initialization": "2026-09-27T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/ifs/20260927/S2S_Research_India_Weeks1-4_IFS_20260927.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-09-27T00:00:00Z",
-            "pdf_until": "2026-11-22T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "current",
+            "label": "Current guidance",
+            "member_class": "production"
+          },
+          "published_at": "2026-09-27T14:48:21.921823+00:00",
+          "regional_outlook": "regional/ifs/20260927.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "valid_through": "2026-11-07"
         },
         {
           "archive": {
