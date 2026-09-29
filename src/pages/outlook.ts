@@ -121,69 +121,6 @@ function headline(
   return `${strongest.label} has the strongest regional ensemble signal: ${probability.dominant_probability}% of members favour ${label}.`;
 }
 
-function jointMatrix(region: RegionalOutlookWeek["regions"][number]): string {
-  const matrix = region.joint_tercile;
-  if (!matrix) {
-    return '<p class="outlook-joint-unavailable">Joint outcomes are unavailable for this region and issue.</p>';
-  }
-  const rainfall = ["Below normal", "Near normal", "Above normal"];
-  const temperature = ["Cooler", "Near normal", "Warmer"];
-  const corners: Record<string, string> = {
-    "0:0": "Cool / dry",
-    "0:2": "Cool / wet",
-    "2:0": "Hot / dry",
-    "2:2": "Hot / wet",
-  };
-  const outcomes = matrix.percentages.flatMap((row, temperatureIndex) =>
-    row.map((percentage, rainfallIndex) => ({
-      percentage,
-      count: matrix.counts[temperatureIndex][rainfallIndex],
-      label: `${temperature[temperatureIndex]} + ${rainfall[rainfallIndex].toLowerCase()}`,
-      temperatureIndex,
-      rainfallIndex,
-    })),
-  );
-  const leading = [...outcomes]
-    .sort((left, right) => right.percentage - left.percentage)
-    .slice(0, 2);
-  const cornerCards = outcomes
-    .filter(({ temperatureIndex, rainfallIndex }) =>
-      Boolean(corners[`${temperatureIndex}:${rainfallIndex}`]),
-    )
-    .map(({ percentage, count, temperatureIndex, rainfallIndex }) => `
-      <article>
-        <span>${corners[`${temperatureIndex}:${rainfallIndex}`]}</span>
-        <strong>${percentage.toFixed(1)}%</strong>
-        <small>${count} members</small>
-      </article>
-    `).join("");
-  return `
-    <div class="outlook-joint-summary">
-      <p><strong>${region.label}</strong> · ${matrix.paired_member_count} valid paired members</p>
-      <div class="outlook-joint-corners">${cornerCards}</div>
-      <div class="outlook-joint-leading">
-        <span>Largest raw-member outcomes</span>
-        ${leading.map((outcome) => `<strong>${outcome.label}: ${outcome.percentage.toFixed(1)}%</strong>`).join("")}
-      </div>
-    </div>
-    <details class="outlook-joint-details">
-      <summary>View all nine outcomes</summary>
-      <div class="outlook-joint-table-wrap">
-        <table class="outlook-joint-table">
-          <caption>${region.label} · ${matrix.paired_member_count} valid paired members</caption>
-          <thead><tr><th scope="col">Temperature ↓ · Rainfall →</th>${rainfall.map((label) => `<th scope="col">${label}</th>`).join("")}</tr></thead>
-          <tbody>${temperature.map((label, row) => `
-            <tr><th scope="row">${label}</th>${rainfall.map((_, column) => {
-              const corner = corners[`${row}:${column}`];
-              return `<td class="${corner ? "is-corner" : ""}"><strong>${matrix.percentages[row][column].toFixed(1)}%</strong>${corner ? `<small>${corner}</small>` : ""}<span>${matrix.counts[row][column]} members</span></td>`;
-            }).join("")}</tr>
-          `).join("")}</tbody>
-        </table>
-      </div>
-    </details>
-  `;
-}
-
 function unavailablePage(container: HTMLElement, data: AppData): void {
   const { forecast, index } = data;
   if (!forecast || !index) return;
@@ -333,21 +270,6 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
         </section>
       </div>
 
-      ${regionalOutlook.joint_outcome_definition ? `
-        <section class="outlook-joint" aria-labelledby="outlook-joint-title">
-          <header>
-            <div><span>Compound outcomes</span><h2 id="outlook-joint-title">Joint raw member fractions</h2></div>
-            <label>Region
-              <select id="outlook-joint-region">
-                ${regionalOutlook.weeks[0].regions.filter((region) => region.joint_tercile).map((region) => `<option value="${region.id}" ${region.id === "indo_gangetic_administrative_proxy" ? "selected" : ""}>${region.label}</option>`).join("")}
-              </select>
-            </label>
-          </header>
-          <div id="outlook-joint-matrix"></div>
-          <p>${regionalOutlook.joint_outcome_definition.warning}</p>
-        </section>
-      ` : ""}
-
       <footer class="outlook-method-strip">
         <div><span>Forecast sample</span><strong>100 stochastic members</strong></div>
         <div><span>Reference sample</span><strong>20 yearly ensemble means · 2002–2021</strong></div>
@@ -359,9 +281,6 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
 
   let selectedVariable: OutlookVariable = "rainfall";
   let selectedWeek = 1;
-  let selectedJointRegion = regionalOutlook.weeks[0].regions.some(
-    (region) => region.id === "indo_gangetic_administrative_proxy" && region.joint_tercile,
-  ) ? "indo_gangetic_administrative_proxy" : "all_india";
   const mapFrame = container.querySelector<HTMLElement>("#outlook-map-frame")!;
   const map = new TercileProbabilityMap(
     mapFrame,
@@ -382,12 +301,6 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
       update();
     });
   });
-  container.querySelector<HTMLSelectElement>("#outlook-joint-region")
-    ?.addEventListener("change", (event) => {
-      selectedJointRegion = (event.currentTarget as HTMLSelectElement).value;
-      update();
-    });
-
   function update(): void {
     const week = regionalOutlook!.weeks[selectedWeek - 1];
     container.querySelector<HTMLElement>(".outlook-page")!.dataset.variable =
@@ -417,13 +330,6 @@ export function renderOutlookPage(container: HTMLElement, data: AppData): void {
       .filter((region) => region[selectedVariable].tercile_probability_percent)
       .map((region) => regionCard(region, selectedVariable))
       .join("");
-    const jointHost = container.querySelector<HTMLElement>("#outlook-joint-matrix");
-    if (jointHost) {
-      const selectedRegion = week.regions.find(
-        (region) => region.id === selectedJointRegion,
-      ) ?? week.regions[0];
-      jointHost.innerHTML = jointMatrix(selectedRegion);
-    }
     map.render(selectedVariable, week);
   }
 

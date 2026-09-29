@@ -416,8 +416,8 @@ def test_extreme_interface_prioritizes_efi_and_progressively_discloses_detail() 
     assert "Advanced distribution details" in panel
     assert "Forecast versus model climate" in panel
     assert "data-extreme-variable" not in panel
-    assert "Largest raw-member outcomes" in outlook
-    assert "View all nine outcomes" in outlook
+    assert "Joint raw member fractions" not in outlook
+    assert "outlook-joint" not in outlook
 
 
 def test_implementation_presentation_is_a_keyboard_operable_vite_entry() -> None:
@@ -429,7 +429,8 @@ def test_implementation_presentation_is_a_keyboard_operable_vite_entry() -> None
     assert presentation.count('class="slide') >= 12
     assert 'id="slide-12"' in presentation
     assert "Extreme Forecast Index" in presentation
-    assert "Paired regional outcomes" in presentation
+    assert "Compact distribution summary" in presentation
+    assert "Paired regional outcomes" not in presentation
     assert "Future compatible IFS issues are enriched automatically" in presentation
     assert 'data-action="fullscreen"' in presentation
     assert 'event.key === "Home"' in controller

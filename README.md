@@ -170,8 +170,8 @@ model-climate matching contract.
 ### Implementation presentation
 
 The self-contained browser presentation at `presentation.html` explains the
-data inputs, weekly aggregation, EFI/SOT definitions, regional paired-member
-matrix, schema v3, automation, privacy boundary, and validation gates. Use the
+data inputs, weekly aggregation, EFI/SOT definitions, compact distribution
+summaries, schema v3, automation, privacy boundary, and validation gates. Use the
 arrow keys or Page Up/Page Down to navigate, `F` for fullscreen, and browser
 print for a 16:9 PDF.
 
