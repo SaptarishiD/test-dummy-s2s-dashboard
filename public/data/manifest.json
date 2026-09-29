@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-29T14:36:45.865659+00:00",
+  "generated_at": "2026-09-29T15:14:38.727572+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -228,6 +228,11 @@
       "path": "data/forecasts/era5/20260919.json",
       "size_bytes": 866365,
       "sha256": "c959ffd7315da212cf9033695cea74d6864dd94354a32bfea5784e00c48158da"
+    },
+    {
+      "path": "data/forecasts/era5/20260920.json",
+      "size_bytes": 866297,
+      "sha256": "31e48a9f728ddc3d16d75bfaa50f502fc314fae8e102f2ad8fe250c75f59c95f"
     },
     {
       "path": "data/forecasts/gfs/20260720.json",
@@ -556,8 +561,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 115824,
-      "sha256": "320772cef57f823423e8b3ea829222c6b9043839077807c179eabee9f5f93136"
+      "size_bytes": 117546,
+      "sha256": "47b72fb9fdd7916be4992b4137dcd0e70ab8c2815bd99528d65bd7f31e1dc48f"
     },
     {
       "path": "data/india-admin.json",
@@ -668,6 +673,11 @@
       "path": "data/regional/era5/20260919.json",
       "size_bytes": 448647,
       "sha256": "23989bb9a647ae713bfadcb15bbb081c643c5102db8ec6e3b5ec74036063fe5a"
+    },
+    {
+      "path": "data/regional/era5/20260920.json",
+      "size_bytes": 2674656,
+      "sha256": "5d6cc58c33b36089f7cf1a8feb3b9be9c9c501f76efc2876f981f737d348206e"
     },
     {
       "path": "data/regional/gfs/20260722.json",
@@ -938,6 +948,11 @@
       "path": "downloads/era5/20260919/S2S_Research_India_Weeks1-4_ERA5_20260919.pdf",
       "size_bytes": 4331960,
       "sha256": "a3f177969b3a4c25a75ec90a3a5e9d9f577d9c2e4f135e57c4ff1650700cab97"
+    },
+    {
+      "path": "downloads/era5/20260920/S2S_Research_India_Weeks1-4_ERA5_20260920.pdf",
+      "size_bytes": 4334468,
+      "sha256": "aa3d5a727153a7a375b02ec0524f11476cb933908ef116941e26a3ab2fc0c537"
     },
     {
       "path": "downloads/gfs/20260805/S2S_Research_India_Weeks1-4_GFS_20260805.pdf",
