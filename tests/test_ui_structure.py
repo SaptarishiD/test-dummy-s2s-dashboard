@@ -437,7 +437,10 @@ def test_implementation_presentation_is_a_keyboard_operable_vite_entry() -> None
     assert 'event.key.toLowerCase() === "f"' in controller
     assert "@media print" in stylesheet
     assert 'input: ["index.html", "presentation.html"]' in vite
-    assert '"presentation": "vite --open /presentation.html"' in package
+    assert (
+        '"presentation": "npm run build && vite preview --open /presentation.html"'
+        in package
+    )
 
 
 def test_probabilistic_data_is_lazy_versioned_and_stale_safe() -> None:

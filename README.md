@@ -182,7 +182,7 @@ npm ci
 npm run presentation
 ```
 
-Then open `http://localhost:5173/presentation.html` if the browser does not open
+Then open `http://localhost:4173/presentation.html` if the browser does not open
 automatically.
 
 ## Data contract
