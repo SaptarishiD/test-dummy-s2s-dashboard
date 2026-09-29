@@ -77,7 +77,6 @@ export function renderExtremeForecastPanel(
   forecast: ForecastData,
   variable: ProbabilisticVariable,
   selection: ForecastGridSelection,
-  onVariable: (variable: ProbabilisticVariable) => void,
   onWeek: (week: number) => void,
   onClose: () => void,
 ): void {
@@ -116,10 +115,6 @@ export function renderExtremeForecastPanel(
           <p>Week ${week.week} · ${friendlyDate(week.valid_start)}–${friendlyDate(week.valid_end, true)}</p>
         </div>
         <div class="extreme-panel__actions">
-          <div class="extreme-panel__variables" role="group" aria-label="Extreme diagnostic variable">
-            <button type="button" data-extreme-variable="rainfall" class="${variable === "rainfall" ? "is-active" : ""}" aria-pressed="${variable === "rainfall"}">Rainfall</button>
-            <button type="button" data-extreme-variable="temperature" class="${variable === "temperature" ? "is-active" : ""}" aria-pressed="${variable === "temperature"}">Temperature</button>
-          </div>
           <button type="button" class="extreme-panel__close" aria-label="Close location details">×</button>
         </div>
       </header>
@@ -129,8 +124,6 @@ export function renderExtremeForecastPanel(
           <h3>Selected week</h3>
           <dl>
             <div><dt>EFI</dt><dd>${display(efi)}</dd></div>
-            <div><dt>Upper-tail SOT</dt><dd>${display(valueAt(week, upperKey, index))}</dd></div>
-            ${variable === "temperature" ? `<div><dt>Lower-tail SOT</dt><dd>${display(valueAt(week, "temperature_sot_lower", index))}</dd></div>` : ""}
           </dl>
           <p>The raw ensemble ${interpretation}. EFI compares the full distribution; SOT describes displacement of the applicable tail.</p>
         </section>
@@ -141,29 +134,38 @@ export function renderExtremeForecastPanel(
               <button type="button" data-extreme-week="${candidate.week}" class="${candidate.week === week.week ? "is-active" : ""}" aria-pressed="${candidate.week === week.week}">
                 <span>W${candidate.week}</span>
                 <strong>EFI ${display(valueAt(candidate, efiKey, index))}</strong>
-                <small>Upper ${display(valueAt(candidate, upperKey, index))}${variable === "temperature" ? ` · Lower ${display(valueAt(candidate, "temperature_sot_lower", index))}` : ""}</small>
+                <small>${friendlyDate(candidate.valid_start)}–${friendlyDate(candidate.valid_end)}</small>
               </button>
             `).join("")}
           </div>
         </section>
-        <section>
-          <h3>Forecast versus model climate</h3>
-          ${cdfChart(week, variable, index)}
-        </section>
       </div>
-      <footer>
-        <strong>${week.extreme_samples?.forecast_valid_member_count[index] ?? "—"} forecast members · ${week.extreme_samples?.climate_valid_sample_count[index] ?? "—"} climate samples</strong>
-        <span>${definition.reference_id}</span>
-        <p>${definition.warning}</p>
-      </footer>
+      <p class="extreme-panel__accuracy-note">EFI and SOT describe how unusual the raw ensemble is relative to its model climate; they do not establish forecast accuracy or guaranteed impacts.</p>
+      <details class="extreme-panel__advanced">
+        <summary>Advanced distribution details</summary>
+        <div class="extreme-panel__advanced-grid">
+          <section class="extreme-panel__summary">
+            <h3>Shift of Tails · selected week</h3>
+            <dl>
+              <div><dt>Upper-tail SOT</dt><dd>${display(valueAt(week, upperKey, index))}</dd></div>
+              ${variable === "temperature" ? `<div><dt>Lower-tail SOT</dt><dd>${display(valueAt(week, "temperature_sot_lower", index))}</dd></div>` : ""}
+            </dl>
+          </section>
+          <section>
+            <h3>Forecast versus model climate</h3>
+            ${cdfChart(week, variable, index)}
+          </section>
+        </div>
+        <footer>
+          <strong>${week.extreme_samples?.forecast_valid_member_count[index] ?? "—"} forecast members · ${week.extreme_samples?.climate_valid_sample_count[index] ?? "—"} climate samples</strong>
+          <span>${definition.reference_id}</span>
+          <p>${definition.warning}</p>
+        </footer>
+      </details>
     </aside>
   `;
   host.querySelector<HTMLButtonElement>(".extreme-panel__close")
     ?.addEventListener("click", onClose);
-  host.querySelectorAll<HTMLButtonElement>("[data-extreme-variable]")
-    .forEach((button) => button.addEventListener("click", () => {
-      onVariable(button.dataset.extremeVariable as ProbabilisticVariable);
-    }));
   host.querySelectorAll<HTMLButtonElement>("[data-extreme-week]")
     .forEach((button) => button.addEventListener("click", () => {
       onWeek(Number(button.dataset.extremeWeek));

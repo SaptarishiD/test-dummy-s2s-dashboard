@@ -40,6 +40,8 @@
 .india-probability-product select:focus-visible,
 .india-distribution-product select:focus-visible,
 .india-extreme-product select:focus-visible,
+.india-extreme-primary:focus-visible,
+.india-extreme-advanced-control summary:focus-visible,
 .india-probability-extent select:focus-visible,
 .probability-panel__close:focus-visible,
 .extreme-panel__close:focus-visible {
@@ -71,7 +73,6 @@
 
 .india-probability-product,
 .india-distribution-product,
-.india-extreme-product,
 .india-probability-extent {
   display: grid;
   gap: 4px;
@@ -80,7 +81,6 @@
 
 .india-probability-product > span,
 .india-distribution-product > span,
-.india-extreme-product > span,
 .india-probability-extent > span {
   color: var(--ops-ink-muted);
   font-size: 0.68rem;
@@ -102,6 +102,69 @@
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.india-extreme-product {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+  min-width: 300px;
+}
+
+.india-extreme-primary,
+.india-extreme-advanced-control summary {
+  min-height: 40px;
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 7px;
+  padding: 0 12px;
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.india-extreme-primary.is-active {
+  border-color: var(--ops-teal);
+  background: var(--ops-teal);
+  color: #fff;
+}
+
+.india-extreme-advanced-control {
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.india-extreme-advanced-control summary {
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
+
+.india-extreme-advanced-control summary::-webkit-details-marker { display: none; }
+
+.india-extreme-advanced-control[open] summary {
+  border-color: var(--ops-teal);
+  border-radius: 7px 7px 0 0;
+}
+
+.india-extreme-advanced-control label {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--ops-teal);
+  border-top: 0;
+  border-radius: 0 0 7px 7px;
+  background: var(--ops-surface);
+}
+
+.india-extreme-advanced-control label > span {
+  color: var(--ops-ink-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .extreme-location-panel {
@@ -144,14 +207,12 @@
   line-height: 1.5;
 }
 
-.extreme-panel__actions,
-.extreme-panel__variables {
+.extreme-panel__actions {
   display: flex;
   gap: 5px;
   align-items: center;
 }
 
-.extreme-panel__variables button,
 .extreme-panel__close {
   min-height: 34px;
   padding: 0 9px;
@@ -163,12 +224,6 @@
   font-size: 0.68rem;
   font-weight: 750;
   cursor: pointer;
-}
-
-.extreme-panel__variables button.is-active {
-  border-color: var(--ops-teal);
-  background: var(--ops-teal);
-  color: #fff;
 }
 
 .extreme-panel__close {
@@ -202,7 +257,7 @@
 
 .extreme-panel__summary dl {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 6px;
   margin: 0 0 10px;
 }
@@ -287,15 +342,58 @@
 .extreme-cdf-key .is-forecast::before { background: #c74a32; }
 .extreme-cdf-key .is-climate::before { background: #235a87; }
 
-.extreme-location-panel > footer {
+.extreme-panel__accuracy-note {
+  margin: 0 18px 14px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--ops-teal);
+  background: #edf8f7;
+  color: var(--ops-ink-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.extreme-panel__advanced {
+  margin: 0 18px 18px;
+  border: 1px solid var(--ops-line);
+  border-radius: 8px;
+  background: var(--ops-canvas);
+}
+
+.extreme-panel__advanced > summary {
+  padding: 12px;
+  color: var(--ops-ink);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.extreme-panel__advanced-grid {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.extreme-panel__advanced-grid section {
+  padding: 12px;
+  border: 1px solid var(--ops-line);
+  border-radius: 7px;
+  background: var(--ops-surface);
+}
+
+.extreme-panel__advanced-grid h3 {
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+}
+
+.extreme-panel__advanced > footer {
   display: grid;
   gap: 4px;
-  padding: 14px 18px 18px;
+  padding: 12px;
   overflow-wrap: anywhere;
   background: #f5f7f8;
 }
 
-.extreme-location-panel > footer p { margin: 4px 0 0; }
+.extreme-panel__advanced > footer p { margin: 4px 0 0; }
 
 .india-visualization {
   align-items: start;
@@ -979,6 +1077,61 @@
   text-transform: none;
 }
 
+.outlook-joint-summary > p {
+  margin: 0 0 12px;
+  color: var(--ops-ink-muted);
+  font-size: 0.76rem;
+}
+
+.outlook-joint-corners {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.outlook-joint-corners article {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border: 1px solid #d9a45a;
+  border-radius: 8px;
+  background: #fff7e7;
+}
+
+.outlook-joint-corners span,
+.outlook-joint-corners small,
+.outlook-joint-leading span {
+  color: var(--ops-ink-muted);
+  font-size: 0.68rem;
+}
+
+.outlook-joint-corners strong { font-size: 1.15rem; }
+
+.outlook-joint-leading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--ops-teal);
+  background: #edf8f7;
+  font-size: 0.76rem;
+}
+
+.outlook-joint-details {
+  margin-top: 14px;
+  border-top: 1px solid var(--ops-line);
+}
+
+.outlook-joint-details > summary {
+  padding: 12px 0;
+  color: var(--ops-ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .outlook-joint-table-wrap { overflow-x: auto; }
 
 .outlook-joint-table {
@@ -1291,7 +1444,6 @@
 
   .india-probability-product,
   .india-distribution-product,
-  .india-extreme-product,
   .india-probability-extent {
     width: 100%;
     min-width: 0;
@@ -1299,11 +1451,23 @@
 
   .india-probability-product select,
   .india-distribution-product select,
-  .india-extreme-product select,
   .india-probability-extent select {
     width: 100%;
     min-height: 44px;
   }
+
+  .india-extreme-product {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .india-extreme-primary,
+  .india-extreme-advanced-control summary,
+  .india-extreme-product select {
+    min-height: 44px;
+  }
+
+  .india-extreme-product select { width: 100%; }
 
   .probability-location-host {
     position: fixed;
@@ -1329,11 +1493,15 @@
     flex-direction: column;
   }
 
-  .extreme-panel__actions { justify-content: space-between; }
+  .extreme-panel__actions { justify-content: flex-end; }
 
   .outlook-joint > header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .outlook-joint-corners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .probability-summary-grid {

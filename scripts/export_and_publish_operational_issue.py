@@ -84,6 +84,14 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Matched 2002-2021 wind climatology; requires --wind-forecast.",
     )
+    parser.add_argument(
+        "--extreme-forecast",
+        type=Path,
+        help=(
+            "Validated TP/T2M member forecast for automatic IFS EFI/SOT. "
+            "Defaults to --wind-forecast when that file is supplied."
+        ),
+    )
     parser.add_argument("--skip-install", action="store_true")
     parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--no-push", action="store_true")
@@ -221,6 +229,66 @@ def wind_postprocess_commands(
     ]
 
 
+def extreme_forecast_input(
+    args: argparse.Namespace,
+    wind_inputs: tuple[Path, Path] | None,
+) -> Path | None:
+    """Resolve the member forecast used by the optional IFS extreme step."""
+
+    if args.source != "ifs":
+        return None
+    configured = getattr(args, "extreme_forecast", None)
+    candidate = Path(configured) if configured is not None else (
+        wind_inputs[0] if wind_inputs is not None else None
+    )
+    if candidate is None:
+        return None
+    resolved = candidate.resolve()
+    if not resolved.is_file():
+        raise ValueError(f"extreme forecast is not a file: {resolved}")
+    return resolved
+
+
+def extreme_postprocess_command(
+    args: argparse.Namespace,
+    export_dashboard: Path,
+    forecast: Path,
+) -> list[str]:
+    """Build the automatic EFI/SOT command for an exported IFS issue."""
+
+    forecast_json = (
+        export_dashboard
+        / "public/data/forecasts"
+        / args.source
+        / f"{args.issue}.json"
+    )
+    regional_json = (
+        export_dashboard
+        / "public/data/regional"
+        / args.source
+        / f"{args.issue}.json"
+    )
+    builder = export_dashboard / "scripts/build_extreme_products.py"
+    for label, path in (
+        ("published forecast JSON", forecast_json),
+        ("published regional JSON", regional_json),
+        ("extreme product builder", builder),
+    ):
+        if not path.is_file():
+            raise ValueError(f"{label} is not a file: {path}")
+    return [
+        args.operational_python,
+        str(builder),
+        "--forecast",
+        str(forecast),
+        "--public-forecast",
+        str(forecast_json),
+        "--regional",
+        str(regional_json),
+        "--skip-ineligible",
+    ]
+
+
 def wind_augmentation_available(forecast_json: Path) -> bool:
     """Return whether the base export has a supported anomaly climatology.
 
@@ -336,6 +404,7 @@ def main() -> int:
     args = parse_args()
     load_config(args.config, args.source, args.issue)
     wind_inputs = validate_wind_inputs(args)
+    extreme_forecast = extreme_forecast_input(args, wind_inputs)
     if args.timeout < 1:
         raise ValueError("timeout must be positive")
     if args.publish_clone is None:
@@ -400,6 +469,16 @@ def main() -> int:
                     "climatology; publishing the base raw-only package",
                     flush=True,
                 )
+        if extreme_forecast is not None:
+            subprocess.run(
+                extreme_postprocess_command(
+                    args, export_dashboard, extreme_forecast
+                ),
+                cwd=export_dashboard,
+                env=environment,
+                check=True,
+                timeout=args.timeout,
+            )
         subprocess.run(
             publisher_command(args, export_dashboard),
             cwd=ROOT,

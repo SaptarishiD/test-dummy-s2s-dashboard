@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-import numpy as np
 import json
 from pathlib import Path
 
+import numpy as np
+import pytest
+
+from scripts import build_extreme_products as builder
+from scripts.build_extreme_products import select_climate_slots
 from science.extremes import (
     complete_weekly_samples,
     extreme_forecast_index,
@@ -96,6 +100,28 @@ def test_missing_members_are_excluded_without_hiding_valid_distribution() -> Non
             np.asarray([[np.nan], [0.0]]),
         )[0]
     )
+
+
+def test_archive_slots_are_selected_dynamically_within_four_days(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dates = np.asarray(
+        [
+            f"{year}{slot}"
+            for year in range(2002, 2022)
+            for slot in ("0922", "0926", "0929", "1003")
+        ]
+    )
+    monkeypatch.setattr(builder, "read_array", lambda *_args: dates)
+    archive = Path("/unused/archive.zarr")
+    assert select_climate_slots(archive, "20260926") == ("0922", "0926", "0929")
+    assert select_climate_slots(archive, "20260927") == ("0926", "0929")
+    assert select_climate_slots(archive, "20260930") == ("0926", "0929", "1003")
+    for year in range(2002, 2022):
+        for slot in ("0922", "0926", "0929"):
+            (tmp_path / f"{year}{slot}.nc").touch()
+    assert select_climate_slots(archive, "20260930", tmp_path) == ("0926", "0929")
 
 
 def test_complete_week_enforcement_and_precipitation_total() -> None:

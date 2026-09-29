@@ -134,19 +134,53 @@ function jointMatrix(region: RegionalOutlookWeek["regions"][number]): string {
     "2:0": "Hot / dry",
     "2:2": "Hot / wet",
   };
+  const outcomes = matrix.percentages.flatMap((row, temperatureIndex) =>
+    row.map((percentage, rainfallIndex) => ({
+      percentage,
+      count: matrix.counts[temperatureIndex][rainfallIndex],
+      label: `${temperature[temperatureIndex]} + ${rainfall[rainfallIndex].toLowerCase()}`,
+      temperatureIndex,
+      rainfallIndex,
+    })),
+  );
+  const leading = [...outcomes]
+    .sort((left, right) => right.percentage - left.percentage)
+    .slice(0, 2);
+  const cornerCards = outcomes
+    .filter(({ temperatureIndex, rainfallIndex }) =>
+      Boolean(corners[`${temperatureIndex}:${rainfallIndex}`]),
+    )
+    .map(({ percentage, count, temperatureIndex, rainfallIndex }) => `
+      <article>
+        <span>${corners[`${temperatureIndex}:${rainfallIndex}`]}</span>
+        <strong>${percentage.toFixed(1)}%</strong>
+        <small>${count} members</small>
+      </article>
+    `).join("");
   return `
-    <div class="outlook-joint-table-wrap">
-      <table class="outlook-joint-table">
-        <caption>${region.label} · ${matrix.paired_member_count} valid paired members</caption>
-        <thead><tr><th scope="col">Temperature ↓ · Rainfall →</th>${rainfall.map((label) => `<th scope="col">${label}</th>`).join("")}</tr></thead>
-        <tbody>${temperature.map((label, row) => `
-          <tr><th scope="row">${label}</th>${rainfall.map((_, column) => {
-            const corner = corners[`${row}:${column}`];
-            return `<td class="${corner ? "is-corner" : ""}"><strong>${matrix.percentages[row][column].toFixed(1)}%</strong>${corner ? `<small>${corner}</small>` : ""}<span>${matrix.counts[row][column]} members</span></td>`;
-          }).join("")}</tr>
-        `).join("")}</tbody>
-      </table>
+    <div class="outlook-joint-summary">
+      <p><strong>${region.label}</strong> · ${matrix.paired_member_count} valid paired members</p>
+      <div class="outlook-joint-corners">${cornerCards}</div>
+      <div class="outlook-joint-leading">
+        <span>Largest raw-member outcomes</span>
+        ${leading.map((outcome) => `<strong>${outcome.label}: ${outcome.percentage.toFixed(1)}%</strong>`).join("")}
+      </div>
     </div>
+    <details class="outlook-joint-details">
+      <summary>View all nine outcomes</summary>
+      <div class="outlook-joint-table-wrap">
+        <table class="outlook-joint-table">
+          <caption>${region.label} · ${matrix.paired_member_count} valid paired members</caption>
+          <thead><tr><th scope="col">Temperature ↓ · Rainfall →</th>${rainfall.map((label) => `<th scope="col">${label}</th>`).join("")}</tr></thead>
+          <tbody>${temperature.map((label, row) => `
+            <tr><th scope="row">${label}</th>${rainfall.map((_, column) => {
+              const corner = corners[`${row}:${column}`];
+              return `<td class="${corner ? "is-corner" : ""}"><strong>${matrix.percentages[row][column].toFixed(1)}%</strong>${corner ? `<small>${corner}</small>` : ""}<span>${matrix.counts[row][column]} members</span></td>`;
+            }).join("")}</tr>
+          `).join("")}</tbody>
+        </table>
+      </div>
+    </details>
   `;
 }
 

@@ -133,11 +133,13 @@ explicit unavailable state until that issue is regenerated.
 
 IFS 26 September 2026 is the first schema-v3 extreme package. EFI and Shift of
 Tails compare each complete weekly 100-member forecast distribution with the
-native 2002–2021 FuXi model climate at the 22, 26, and 29 September start dates:
-3,060 reference samples per grid cell and lead week. Rainfall is accumulated as
-a seven-day total before comparison; temperature is averaged over the same
-complete week. Only derived fields and seven compact forecast/model-climate
-quantiles are public—member arrays remain private.
+native 2002–2021 FuXi model climate. The builder automatically selects the
+three native initialization calendar dates within ±4 days of an IFS issue; for
+26 September those are 22, 26, and 29 September, providing 3,060 reference
+samples per grid cell and lead week. Rainfall is accumulated as a seven-day
+total before comparison; temperature is averaged over the same complete week.
+Only derived fields and seven compact forecast/model-climate quantiles are
+public—member arrays remain private.
 
 Rebuild the regional v2 base and then layer the v3 products with:
 
@@ -157,6 +159,31 @@ EFI and SOT are raw, model-relative ensemble indices. They are not event
 probabilities, warnings, calibrated skill estimates, or guarantees of impact.
 Unsupported issues display an explicit unavailable state and never substitute
 synthetic fields.
+
+The clean operational export bridge runs the extreme builder automatically for
+IFS when its validated private member file is available. If the archive does
+not provide three common 2002–2021 starts inside the ±4-day window, the step
+exits successfully without changing the issue package and the unavailable state
+remains explicit. This makes publication repeatable without weakening the
+model-climate matching contract.
+
+### Implementation presentation
+
+The self-contained browser presentation at `presentation.html` explains the
+data inputs, weekly aggregation, EFI/SOT definitions, regional paired-member
+matrix, schema v3, automation, privacy boundary, and validation gates. Use the
+arrow keys or Page Up/Page Down to navigate, `F` for fullscreen, and browser
+print for a 16:9 PDF.
+
+Run it locally with:
+
+```bash
+npm ci
+npm run presentation
+```
+
+Then open `http://localhost:5173/presentation.html` if the browser does not open
+automatically.
 
 ## Data contract
 
@@ -235,8 +262,9 @@ by cloning this repository.
 
 ## Deployment
 
-The repository-root `.github/workflows/deploy-pages.yml` builds and deploys the static site on
-push to `main`. During the build it stamps the exact `GITHUB_SHA` into
+The repository-root `.github/workflows/deploy-pages.yml` builds and deploys the static site to
+`https://s2s.scdlds.com/` on push to `main`. `public/CNAME` preserves the custom
+hostname in the Pages artifact. During the build it stamps the exact `GITHUB_SHA` into
 `public/data/manifest.json`; this avoids the impossible self-referential task
 of committing a file containing its own commit hash.
 

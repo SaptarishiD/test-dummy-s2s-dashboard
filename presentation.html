@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta
+      name="description"
+      content="Presentation: how the FuXi S2S dashboard implements EFI, Shift of Tails, and paired regional compound outcomes."
+    />
+    <meta name="theme-color" content="#081a2b" />
+    <link rel="icon" href="./brand/s2s-research-mark.svg" type="image/svg+xml" />
+    <title>FuXi Extremes · Implementation Presentation</title>
+  </head>
+  <body>
+    <a class="presentation-skip" href="#slide-1">Skip to slides</a>
+    <main class="deck" aria-label="FuXi extreme forecast implementation presentation">
+      <section class="slide slide--title" id="slide-1" data-title="A model-relative view of unusual outcomes">
+        <div class="slide__brand">
+          <img src="./brand/ashoka-university.png" alt="Ashoka University" />
+          <span>Safexpress Centre for Data, Learning and Decision Sciences</span>
+        </div>
+        <div class="slide__content title-grid">
+          <div>
+            <p class="eyebrow">FuXi S2S dashboard · implementation briefing</p>
+            <h1>A model-relative view of unusual outcomes</h1>
+            <p class="lede">Extreme Forecast Index, Shift of Tails, and paired regional compound outcomes—built from the same raw ensemble members.</p>
+            <div class="title-meta"><span>India · Weeks 1–6</span><span>FuXi / IFS</span><span>Schema v3</span></div>
+          </div>
+          <div class="hero-index" aria-label="EFI scale from minus one to plus one">
+            <span>−1</span><i></i><strong>EFI</strong><i></i><span>+1</span>
+            <small>cooler / drier</small><small>warmer / wetter</small>
+          </div>
+        </div>
+        <p class="slide__footer">Experimental research dashboard · not an operational warning</p>
+      </section>
+
+      <section class="slide" id="slide-2" data-title="What the release adds">
+        <div class="slide__content">
+          <p class="eyebrow">01 · Product</p>
+          <h2>One fast signal, with technical depth on demand</h2>
+          <div class="priority-stack">
+            <article class="priority-card priority-card--primary"><span>Primary</span><h3>EFI map</h3><p>A fixed −1…+1 view of how unusual the full forecast distribution is relative to the model climate.</p></article>
+            <article><span>Decision support</span><h3>Week 1–6 timeline</h3><p>Shows persistence and change without smoothing.</p></article>
+            <article><span>Compound signal</span><h3>Regional corners</h3><p>Surfaces hot/dry, hot/wet, cool/dry, and cool/wet paired-member fractions.</p></article>
+            <article class="priority-card--advanced"><span>Advanced</span><h3>SOT + compact CDF</h3><p>Tail displacement, quantiles, sample counts, and reference identity remain available but collapsed by default.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-3" data-title="Inputs and privacy boundary">
+        <div class="slide__content">
+          <p class="eyebrow">02 · Inputs</p>
+          <h2>Member-level data stay private</h2>
+          <div class="pipeline pipeline--three">
+            <article><span class="step">01</span><h3>Forecast ensemble</h3><strong>100 members × 42 days</strong><p>Native FuXi/IFS rainfall and 2 m temperature.</p></article>
+            <div class="pipeline__arrow" aria-hidden="true">→</div>
+            <article><span class="step">02</span><h3>Model climate</h3><strong>20 years × 3 starts × 51 members</strong><p>3,060 reference samples for each cell and lead week.</p></article>
+            <div class="pipeline__arrow" aria-hidden="true">→</div>
+            <article><span class="step">03</span><h3>Public package</h3><strong>Derived grids + seven quantiles</strong><p>No forecast-member or reforecast-member arrays are published.</p></article>
+          </div>
+          <aside class="callout"><strong>Matching contract</strong><span>Lead · weekly aggregation · 1.5° grid · variable · calendar window</span></aside>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-4" data-title="Complete-week aggregation">
+        <div class="slide__content">
+          <p class="eyebrow">03 · Pre-processing</p>
+          <h2>Every member becomes a complete weekly quantity first</h2>
+          <div class="week-ribbon" aria-label="Six forecast weeks of seven days each">
+            <span>W1<i>7 days</i></span><span>W2<i>7 days</i></span><span>W3<i>7 days</i></span><span>W4<i>7 days</i></span><span>W5<i>7 days</i></span><span>W6<i>7 days</i></span>
+          </div>
+          <div class="two-column">
+            <article class="formula-card"><span>Rainfall</span><h3>Σ 7 daily totals</h3><strong>mm week⁻¹</strong><p>Native mm h⁻¹ is converted to mm day⁻¹ before weekly accumulation.</p></article>
+            <article class="formula-card"><span>Temperature</span><h3>mean of 7 days</h3><strong>°C</strong><p>Kelvin is converted to Celsius before the weekly mean.</p></article>
+          </div>
+          <p class="guardrail">If any daily value is missing, that member-week is excluded. Missing calculations never become zero.</p>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-5" data-title="Extreme Forecast Index">
+        <div class="slide__content">
+          <p class="eyebrow">04 · EFI</p>
+          <h2>The full distribution, weighted toward both tails</h2>
+          <div class="efi-layout">
+            <div class="formula-panel">
+              <p class="formula">EFI = (2/π) ∫<sub>0</sub><sup>1</sup> [p − F<sub>f</sub>(q<sub>c</sub>(p))] / √[p(1−p)] dp</p>
+              <p>Forecast-member fractions are evaluated at 101 model-climate percentiles. The tail weight makes departures near 0 and 1 matter more.</p>
+            </div>
+            <div class="scale-card">
+              <div class="efi-scale"><i></i></div>
+              <div class="scale-labels"><span>−1</span><span>−0.8</span><span>−0.5</span><span>0</span><span>+0.5</span><span>+0.8</span><span>+1</span></div>
+              <p><strong>Positive:</strong> unusually wet or warm. <strong>Negative:</strong> unusually dry or cool.</p>
+            </div>
+          </div>
+          <aside class="callout callout--warning"><strong>Interpretation limit</strong><span>EFI is not probability, calibration, skill, warning severity, or guaranteed impact.</span></aside>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-6" data-title="Shift of Tails">
+        <div class="slide__content">
+          <p class="eyebrow">05 · Advanced diagnostic</p>
+          <h2>SOT asks whether the forecast tail moves beyond the climate tail</h2>
+          <div class="two-column">
+            <article class="formula-card"><span>Upper tail</span><p class="formula formula--small">(forecast q90 − climate q99) / (climate q99 − climate q90)</p><p>Used for heavy rainfall and warm temperature.</p></article>
+            <article class="formula-card"><span>Lower tail</span><p class="formula formula--small">(forecast q10 − climate q01) / (climate q01 − climate q10)</p><p>Used only for cold temperature.</p></article>
+          </div>
+          <div class="sot-bins"><span>&lt;−1</span><span>−1–0</span><span>0–0.5</span><span>0.5–1</span><span>1–2</span><span>&gt;2</span></div>
+          <p class="guardrail">Values are not clipped. A zero or degenerate climate-tail width is published as unavailable. SOT is intentionally placed under “Advanced maps”.</p>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-7" data-title="Paired regional outcomes">
+        <div class="slide__content">
+          <p class="eyebrow">06 · Compound outcomes</p>
+          <h2>One member, two variables, one joint category</h2>
+          <div class="matrix-explainer">
+            <div class="mini-matrix" aria-label="Three by three temperature and rainfall matrix">
+              <span></span><b>Dry</b><b>Near</b><b>Wet</b>
+              <b>Cool</b><i class="corner">Cool / dry</i><i></i><i class="corner">Cool / wet</i>
+              <b>Near</b><i></i><i></i><i></i>
+              <b>Hot</b><i class="corner">Hot / dry</i><i></i><i class="corner">Hot / wet</i>
+            </div>
+            <div>
+              <ol class="numbered">
+                <li><strong>Aggregate spatially</strong><span>cos(latitude) × administrative land fraction.</span></li>
+                <li><strong>Keep pairs intact</strong><span>Rainfall and temperature come from the same member.</span></li>
+                <li><strong>Classify exclusively</strong><span>Threshold equality belongs to the near-normal bin.</span></li>
+              </ol>
+              <p class="guardrail">The matrix is never calculated by multiplying marginal probabilities or assuming independence.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-8" data-title="Indo-Gangetic proxy">
+        <div class="slide__content">
+          <p class="eyebrow">07 · Regional definition</p>
+          <h2>An explicit administrative proxy—not a basin boundary</h2>
+          <div class="region-band">
+            <span>Punjab</span><span>Haryana</span><span>Delhi</span><span>Uttar Pradesh</span><span>Bihar</span><span>West Bengal</span>
+          </div>
+          <div class="two-column two-column--wide">
+            <article><h3>Exact dashboard label</h3><p class="quote">“Indo-Gangetic administrative proxy”</p><p>The wording prevents a state union from being mistaken for a physiographic delineation.</p></article>
+            <article><h3>What users see first</h3><p>Four compound corners and the two largest outcomes. The complete nine-cell table remains available under details.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-9" data-title="Schema and traceability">
+        <div class="slide__content">
+          <p class="eyebrow">08 · Publication contract</p>
+          <h2>Schema v3 is self-describing and backward compatible</h2>
+          <div class="schema-grid">
+            <article><code>extreme_definition</code><p>Years, selected starts, leads, sample count, archive hash, aggregation, quantile method, formulas, warning.</p></article>
+            <article><code>weeks[].fields</code><p>EFI, upper SOT, optional lower SOT, spread, and nullable values for degenerate cells.</p></article>
+            <article><code>distribution_summaries</code><p>Forecast and model-climate q01, q10, q25, q50, q75, q90, q99.</p></article>
+            <article><code>joint_tercile</code><p>3×3 counts, percentages, paired denominator, and regional tercile thresholds.</p></article>
+          </div>
+          <p class="reference-example">Reference ID example<br /><code>fuxi-mclim-2002_2021-slots0922_0926_0929-leads01_42-n3060-…-src38ed04074c43</code></p>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-10" data-title="Automated publication">
+        <div class="slide__content">
+          <p class="eyebrow">09 · Automation</p>
+          <h2>Future compatible IFS issues are enriched automatically</h2>
+          <div class="automation-flow">
+            <span>Validated 100-member run</span><i>→</i><span>Base JSON + regional v2</span><i>→</i><span>Find common archive starts within ±4 days</span><i>→</i><span>Build private cache</span><i>→</i><span>EFI / SOT / joint v3</span><i>→</i><span>Validate, build, push, deploy</span>
+          </div>
+          <div class="two-column">
+            <article><h3>Eligible</h3><p>Exactly three common native starts are available across 2002–2021. Publication is deterministic and issue-scoped.</p></article>
+            <article><h3>Ineligible</h3><p>The builder exits without mutation and the UI states that extreme products are unavailable. No synthetic reference is substituted.</p></article>
+          </div>
+          <aside class="callout"><strong>Operational safety</strong><span>Disposable worktrees · allow-listed public paths · non-force push · checksum manifest · post-deploy smoke test</span></aside>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-11" data-title="Validation evidence">
+        <div class="slide__content">
+          <p class="eyebrow">10 · Evidence</p>
+          <h2>Scientific, schema, application, and deployment gates</h2>
+          <div class="evidence-grid">
+            <article><span>Science</span><strong>EFI parity</strong><p>Deterministic comparison with the public Earthkit algorithm; high/low limits, missing samples, zero-inflated rainfall, SOT degeneracy.</p></article>
+            <article><span>Regional</span><strong>Paired counts</strong><p>Known 3×3 matrices, equality boundaries, paired denominators, 100% sums.</p></article>
+            <article><span>Application</span><strong>Responsive UI</strong><p>Supported and unavailable issues, rainfall restrictions, maps, timeline, advanced details, keyboard operation.</p></article>
+            <article><span>Release</span><strong>Archive-wide audit</strong><p>Checksums, data safety, production build, desktop/mobile smoke, deployed-commit verification.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="slide-12" data-title="How to read the product">
+        <div class="slide__content">
+          <p class="eyebrow">11 · Presenter close</p>
+          <h2>Read in layers</h2>
+          <ol class="read-layers">
+            <li><span>1</span><div><strong>Start with EFI</strong><p>Where is the distribution unusual, and in which direction?</p></div></li>
+            <li><span>2</span><div><strong>Check persistence</strong><p>Does the signal continue across the six-week timeline?</p></div></li>
+            <li><span>3</span><div><strong>Check compound outcomes</strong><p>Do paired members support a meaningful hot/dry, hot/wet, cool/dry, or cool/wet corner?</p></div></li>
+            <li><span>4</span><div><strong>Open advanced details only when needed</strong><p>Use SOT and the compact CDF to interrogate the tail—not to claim accuracy.</p></div></li>
+          </ol>
+          <div class="closing-links"><a href="./?source=ifs&issue=20260926#india">Open supported forecast</a><a href="./?source=ifs&issue=20260926#outlook">Open regional outlook</a></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="deck-controls" aria-label="Presentation controls">
+      <button type="button" data-action="previous" aria-label="Previous slide">←</button>
+      <div><span id="slide-counter">1 / 12</span><i><b id="slide-progress"></b></i></div>
+      <button type="button" data-action="next" aria-label="Next slide">→</button>
+      <button type="button" data-action="fullscreen" aria-label="Toggle fullscreen">⛶</button>
+    </nav>
+    <p class="deck-help">← → navigate · Home/End jump · F fullscreen · print for PDF</p>
+    <script type="module" src="/src/presentation.ts"></script>
+  </body>
+</html>

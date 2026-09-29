@@ -55,6 +55,15 @@ without force. The persistent clone and research checkout remain clean on
 failure. The receipt advances `validated → exported → pushed`; later reconcile
 runs use the deployed-site smoke test to advance `pushed → deployed`.
 
+For IFS, the bridge then attempts schema-v3 extreme enrichment with the same
+validated private member file. It selects the three native reforecast calendar
+starts within ±4 days of the issue and publishes only derived EFI/SOT grids,
+compact quantiles, and paired regional outcomes. The model-climate cache remains
+private under `.private-cache`. If fewer than three common 2002–2021 starts are
+available, the step is an audited no-op and the dashboard retains its explicit
+unavailable state; the automation never widens the calendar window or invents a
+reference distribution.
+
 The forecast asset, checksum catalog entry, and source `default_issue` pointer
 cross the publication boundary in the same validated Git commit. Adoption of
 an existing export likewise requires its source default/latest pointer and,

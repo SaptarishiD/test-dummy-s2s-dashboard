@@ -85,6 +85,13 @@ def test_primary_navigation_is_india_focused() -> None:
     assert "?view=global" not in shell
 
 
+def test_custom_domain_and_presentation_are_published() -> None:
+    assert read("public/CNAME").strip() == "s2s.scdlds.com"
+    presentation = read("presentation.html")
+    assert "FuXi Extremes · Implementation Presentation" in presentation
+    assert 'href="./?source=ifs&issue=20260926#india"' in presentation
+
+
 def test_archive_exposes_an_exact_initialization_date_filter() -> None:
     archive = read("src/pages/archive.ts")
     assert 'id="archive-date-filter"' in archive

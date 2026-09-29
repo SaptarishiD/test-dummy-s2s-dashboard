@@ -406,6 +406,40 @@ def test_forecast_integrates_uncertainty_and_extreme_views_without_replacing_mea
     assert "map.render(selectedProduct, week, product, windRenderingMode)" in forecast
 
 
+def test_extreme_interface_prioritizes_efi_and_progressively_discloses_detail() -> None:
+    forecast = read("src/pages/forecast.ts")
+    panel = read("src/components/ExtremeForecastPanel.ts")
+    outlook = read("src/pages/outlook.ts")
+    assert 'class="india-extreme-primary is-active"' in forecast
+    assert "Advanced maps: SOT" in forecast
+    assert 'class="extreme-panel__advanced"' in panel
+    assert "Advanced distribution details" in panel
+    assert "Forecast versus model climate" in panel
+    assert "data-extreme-variable" not in panel
+    assert "Largest raw-member outcomes" in outlook
+    assert "View all nine outcomes" in outlook
+
+
+def test_implementation_presentation_is_a_keyboard_operable_vite_entry() -> None:
+    presentation = read("presentation.html")
+    controller = read("src/presentation.ts")
+    stylesheet = read("src/styles/presentation.css")
+    vite = read("vite.config.ts")
+    package = read("package.json")
+    assert presentation.count('class="slide') >= 12
+    assert 'id="slide-12"' in presentation
+    assert "Extreme Forecast Index" in presentation
+    assert "Paired regional outcomes" in presentation
+    assert "Future compatible IFS issues are enriched automatically" in presentation
+    assert 'data-action="fullscreen"' in presentation
+    assert 'event.key === "Home"' in controller
+    assert 'event.key === "End"' in controller
+    assert 'event.key.toLowerCase() === "f"' in controller
+    assert "@media print" in stylesheet
+    assert 'input: ["index.html", "presentation.html"]' in vite
+    assert '"presentation": "vite --open /presentation.html"' in package
+
+
 def test_probabilistic_data_is_lazy_versioned_and_stale_safe() -> None:
     forecast = read("src/pages/forecast.ts")
     assert "async function loadRegionalOutlook()" in forecast

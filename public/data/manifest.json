@@ -1,9 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-29T22:37:12.946633+00:00",
+  "generated_at": "2026-09-29T23:11:12.578870+00:00",
   "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
+    {
+      "path": "CNAME",
+      "size_bytes": 15,
+      "sha256": "7e21487b1f8bf71331c035d520362e919723385d5da822ed97d826e626366a23"
+    },
     {
       "path": "brand/ashoka-university.png",
       "size_bytes": 215250,
@@ -857,7 +862,7 @@
     {
       "path": "data/validation.json",
       "size_bytes": 6005,
-      "sha256": "19b00caf18976efa9122abbad1b911820d56d1b2c11e306857e528ee16c2aff4"
+      "sha256": "662b1cee08a63c3940410c7894036932fab02465dcff5b520f84af3401ad7970"
     },
     {
       "path": "data/world-countries.geojson",

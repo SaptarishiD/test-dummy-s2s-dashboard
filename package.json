@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "presentation": "vite --open /presentation.html",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test:science": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q",

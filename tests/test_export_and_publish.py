@@ -10,6 +10,8 @@ import pytest
 
 from scripts import export_and_publish_operational_issue as bridge
 from scripts.export_and_publish_operational_issue import (
+    extreme_forecast_input,
+    extreme_postprocess_command,
     load_config,
     publisher_command,
     validate_wind_inputs,
@@ -136,6 +138,51 @@ def test_wind_inputs_are_optional_but_required_together_and_must_exist(
             wind_climatology=climatology,
         )
     ) == (forecast.resolve(), climatology.resolve())
+
+
+def test_extreme_forecast_uses_validated_ifs_member_file(
+    tmp_path: Path,
+) -> None:
+    forecast = tmp_path / "forecast.nc"
+    climatology = tmp_path / "climatology.nc"
+    forecast.touch()
+    climatology.touch()
+    wind_inputs = (forecast.resolve(), climatology.resolve())
+    assert extreme_forecast_input(
+        argparse.Namespace(source="ifs", extreme_forecast=None), wind_inputs
+    ) == forecast.resolve()
+    assert extreme_forecast_input(
+        argparse.Namespace(source="gfs", extreme_forecast=forecast), wind_inputs
+    ) is None
+
+
+def test_extreme_postprocess_is_issue_scoped_and_skips_ineligible_dates(
+    tmp_path: Path,
+) -> None:
+    dashboard = tmp_path / "dashboard"
+    forecast_json = dashboard / "public/data/forecasts/ifs/20260930.json"
+    regional_json = dashboard / "public/data/regional/ifs/20260930.json"
+    builder_script = dashboard / "scripts/build_extreme_products.py"
+    for path in (forecast_json, regional_json, builder_script):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    private_forecast = tmp_path / "20260930.nc"
+    private_forecast.touch()
+    command = extreme_postprocess_command(
+        argparse.Namespace(
+            source="ifs",
+            issue="20260930",
+            operational_python="/opt/s2s/python",
+        ),
+        dashboard,
+        private_forecast,
+    )
+    assert command[0] == "/opt/s2s/python"
+    assert command[1] == str(builder_script)
+    assert command[command.index("--forecast") + 1] == str(private_forecast)
+    assert command[command.index("--public-forecast") + 1] == str(forecast_json)
+    assert command[command.index("--regional") + 1] == str(regional_json)
+    assert "--skip-ineligible" in command
 
 
 def test_wind_postprocessing_requires_the_generated_issue_json(

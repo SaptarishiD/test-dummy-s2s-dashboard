@@ -651,14 +651,19 @@ export function renderForecastPage(
                 <option value="p90">P90 upper outcome</option>
               </select>
             </label>
-            <label class="india-extreme-product" id="india-extreme-product" hidden>
-              <span>Extreme product</span>
-              <select aria-label="Extreme forecast product">
-                <option value="efi">Extreme Forecast Index (EFI)</option>
-                <option value="sot_upper">Upper-tail Shift of Tails</option>
-                <option value="sot_lower">Lower-tail Shift of Tails</option>
-              </select>
-            </label>
+            <div class="india-extreme-product" id="india-extreme-product" hidden>
+              <button type="button" class="india-extreme-primary is-active" aria-pressed="true">EFI map</button>
+              <details class="india-extreme-advanced-control">
+                <summary>Advanced maps: SOT</summary>
+                <label>
+                  <span>Tail diagnostic</span>
+                  <select aria-label="Advanced Shift of Tails map">
+                    <option value="sot_upper">Upper-tail Shift of Tails</option>
+                    <option value="sot_lower">Lower-tail Shift of Tails</option>
+                  </select>
+                </label>
+              </details>
+            </div>
             <label class="india-probability-extent" id="india-probability-extent" hidden>
               <span>Extent</span>
               <select aria-label="Probabilistic map extent">
@@ -816,10 +821,16 @@ export function renderForecastPage(
     "#india-distribution-product",
   )!;
   const distributionProductSelect = distributionProductControl.querySelector("select")!;
-  const extremeProductControl = container.querySelector<HTMLLabelElement>(
+  const extremeProductControl = container.querySelector<HTMLElement>(
     "#india-extreme-product",
   )!;
   const extremeProductSelect = extremeProductControl.querySelector("select")!;
+  const extremePrimaryButton = extremeProductControl.querySelector<HTMLButtonElement>(
+    ".india-extreme-primary",
+  )!;
+  const extremeAdvancedControl = extremeProductControl.querySelector<HTMLDetailsElement>(
+    ".india-extreme-advanced-control",
+  )!;
   const probabilityExtentControl = container.querySelector<HTMLLabelElement>(
     "#india-probability-extent",
   )!;
@@ -929,6 +940,12 @@ export function renderForecastPage(
   extremeProductSelect.addEventListener("change", () => {
     selectedExtremeProduct = extremeProductSelect.value as ExtremeProduct;
     refreshPresentation("Showing selected extreme forecast product.");
+  });
+
+  extremePrimaryButton.addEventListener("click", () => {
+    selectedExtremeProduct = "efi";
+    extremeAdvancedControl.open = false;
+    refreshPresentation("Showing Extreme Forecast Index.");
   });
 
   probabilityExtentSelect.addEventListener("change", () => {
@@ -1079,7 +1096,13 @@ export function renderForecastPage(
     probabilityDefinition.hidden = selectedView !== "probability";
     probabilityProductSelect.value = selectedProbabilityProduct;
     distributionProductSelect.value = selectedDistributionProduct;
-    extremeProductSelect.value = selectedExtremeProduct;
+    if (selectedExtremeProduct !== "efi") {
+      extremeProductSelect.value = selectedExtremeProduct;
+    }
+    const efiSelected = selectedExtremeProduct === "efi";
+    extremePrimaryButton.classList.toggle("is-active", efiSelected);
+    extremePrimaryButton.setAttribute("aria-pressed", String(efiSelected));
+    if (!efiSelected) extremeAdvancedControl.open = true;
     const lowerTailOption = extremeProductSelect.querySelector<HTMLOptionElement>(
       'option[value="sot_lower"]',
     );
@@ -1121,13 +1144,6 @@ export function renderForecastPage(
         activeForecast,
         selectedProbabilityVariable,
         selectedLocation,
-        (variable) => {
-          selectedProbabilityVariable = variable;
-          if (variable === "rainfall" && selectedExtremeProduct === "sot_lower") {
-            selectedExtremeProduct = "efi";
-          }
-          refreshPresentation(`Showing ${variable} extremes.`);
-        },
         (week) => {
           selectedLocation = { ...selectedLocation!, week };
           renderPanel();

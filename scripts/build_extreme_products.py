@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import sys
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -35,9 +36,9 @@ from scripts.build_regional_outlook import (  # noqa: E402
 )
 
 
-SUPPORTED_ISSUE = "20260926"
 CLIMATE_YEARS = tuple(range(2002, 2022))
-CLIMATE_SLOTS = ("0922", "0926", "0929")
+REQUIRED_CLIMATE_STARTS = 3
+MAX_CALENDAR_OFFSET_DAYS = 4
 INDO_GANGETIC_PROXY_ID = "indo_gangetic_administrative_proxy"
 INDO_GANGETIC_PROXY_LABEL = "Indo-Gangetic administrative proxy"
 INDO_GANGETIC_STATES = (
@@ -101,17 +102,18 @@ def parse_args() -> argparse.Namespace:
         ),
         help="Lossless India subsets used to avoid a full global chunk scan.",
     )
-    parser.add_argument(
-        "--cache",
-        type=Path,
-        default=ROOT / ".private-cache/fuxi-mclimate-0922-0926-0929.npz",
-    )
+    parser.add_argument("--cache", type=Path)
     parser.add_argument(
         "--india-admin",
         type=Path,
         default=ROOT / "public/data/india-admin.json",
     )
     parser.add_argument("--catalog", type=Path, default=ROOT / "public/data/index.json")
+    parser.add_argument(
+        "--skip-ineligible",
+        action="store_true",
+        help="Exit successfully without mutation when fewer than three native starts lie within ±4 days.",
+    )
     return parser.parse_args()
 
 
@@ -136,7 +138,56 @@ def finite_or_none(values: np.ndarray, digits: int = 4) -> list[float | None]:
     return [round(float(value), digits) if np.isfinite(value) else None for value in flattened]
 
 
-def climate_reference(zarr_path: Path) -> tuple[str, dict[str, Any]]:
+def calendar_offset_days(issue_id: str, slot: str) -> int:
+    """Return the shortest signed calendar-day offset from an issue to MMDD."""
+
+    issue = datetime.strptime(issue_id, "%Y%m%d").date()
+    anchor = date(2000, issue.month, issue.day)
+    month, day = int(slot[:2]), int(slot[2:])
+    candidates = []
+    for year in (1999, 2000, 2001):
+        try:
+            candidates.append(date(year, month, day))
+        except ValueError:
+            # February 29 only exists in the leap-year anchor.
+            continue
+    return min(((candidate - anchor).days for candidate in candidates), key=abs)
+
+
+def select_climate_slots(
+    zarr_path: Path,
+    issue_id: str,
+    shard_root: Path | None = None,
+) -> tuple[str, ...]:
+    """Select up to three archive calendar starts within ±4 days of the issue."""
+
+    dates = {str(value) for value in read_array(zarr_path, "init_yyyymmdd")}
+    slots_by_year = {
+        year: {value[4:] for value in dates if value.startswith(str(year))}
+        for year in CLIMATE_YEARS
+    }
+    common_slots = set.intersection(*(slots_by_year[year] for year in CLIMATE_YEARS))
+    if shard_root is not None:
+        common_slots = {
+            slot
+            for slot in common_slots
+            if all((shard_root / f"{year}{slot}.nc").is_file() for year in CLIMATE_YEARS)
+        }
+    candidates = []
+    for slot in common_slots:
+        offset = calendar_offset_days(issue_id, slot)
+        if abs(offset) <= MAX_CALENDAR_OFFSET_DAYS:
+            candidates.append((offset, slot))
+    selected = sorted(candidates, key=lambda item: (abs(item[0]), item[0]))[
+        :REQUIRED_CLIMATE_STARTS
+    ]
+    return tuple(slot for _, slot in sorted(selected))
+
+
+def climate_reference(
+    zarr_path: Path,
+    slots: tuple[str, ...],
+) -> tuple[str, dict[str, Any]]:
     attrs = read_attrs(zarr_path)
     if attrs.get("status") != "complete":
         raise ValueError("native global reforecast archive is not marked complete")
@@ -146,24 +197,35 @@ def climate_reference(zarr_path: Path) -> tuple[str, dict[str, Any]]:
     if years != "2002-2021" or members != 51 or leads != 42:
         raise ValueError("native global reforecast archive contract does not match")
     dates = {str(value) for value in read_array(zarr_path, "init_yyyymmdd")}
-    expected_dates = {f"{year}{slot}" for year in CLIMATE_YEARS for slot in CLIMATE_SLOTS}
+    expected_dates = {f"{year}{slot}" for year in CLIMATE_YEARS for slot in slots}
     if not expected_dates.issubset(dates):
         raise ValueError("native global archive lacks one or more selected initialization dates")
     archive_hash = str(attrs["archive_records_sha256"])
+    sample_count = len(CLIMATE_YEARS) * len(slots) * members
+    slot_id = "_".join(slots)
     reference_id = (
-        "fuxi-mclim-2002_2021-slots0922_0926_0929-leads01_42-"
-        f"n3060-tp_sum7d-t2m_mean7d-qlinear-src{archive_hash[:12]}"
+        f"fuxi-mclim-2002_2021-slots{slot_id}-leads01_42-"
+        f"n{sample_count}-tp_sum7d-t2m_mean7d-qlinear-src{archive_hash[:12]}"
     )
     return reference_id, attrs
 
 
-def build_cache(args: argparse.Namespace) -> dict[str, Any]:
-    reference_id, archive_attrs = climate_reference(args.reforecast_zarr)
-    if args.cache.exists():
-        cached = np.load(args.cache, allow_pickle=False)
+def build_cache(args: argparse.Namespace, slots: tuple[str, ...]) -> dict[str, Any]:
+    reference_id, archive_attrs = climate_reference(args.reforecast_zarr, slots)
+    cache_path = args.cache or (
+        ROOT / ".private-cache" / f"fuxi-mclimate-{'-'.join(slots)}.npz"
+    )
+    if cache_path.exists():
+        cached = np.load(cache_path, allow_pickle=False)
         cached_reference = str(cached["reference_id"].item())
         if cached_reference != reference_id:
             raise ValueError("private model-climate cache reference does not match archive")
+        expected_shape = (len(CLIMATE_YEARS) * len(slots) * 51, 6, 27, 27)
+        if (
+            cached["rainfall"].shape != expected_shape
+            or cached["temperature"].shape != expected_shape
+        ):
+            raise ValueError("private model-climate cache has an unexpected shape")
         return {
             "reference_id": reference_id,
             "rainfall": cached["rainfall"],
@@ -178,7 +240,7 @@ def build_cache(args: argparse.Namespace) -> dict[str, Any]:
     latitude: np.ndarray | None = None
     longitude: np.ndarray | None = None
     for year in CLIMATE_YEARS:
-        for slot in CLIMATE_SLOTS:
+        for slot in slots:
             path = args.reforecast_shards / f"{year}{slot}.nc"
             with xr.open_dataset(path) as dataset:
                 required = {"member": 51, "lead_day": 42, "latitude": 27, "longitude": 27}
@@ -212,11 +274,12 @@ def build_cache(args: argparse.Namespace) -> dict[str, Any]:
 
     cache_rainfall = np.concatenate(rainfall, axis=0)
     cache_temperature = np.concatenate(temperature, axis=0)
-    if cache_rainfall.shape != (3060, 6, 27, 27):
+    sample_count = len(CLIMATE_YEARS) * len(slots) * 51
+    if cache_rainfall.shape != (sample_count, 6, 27, 27):
         raise ValueError(f"unexpected model-climate shape: {cache_rainfall.shape}")
-    args.cache.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
-        args.cache,
+        cache_path,
         reference_id=np.asarray(reference_id),
         rainfall=cache_rainfall,
         temperature=cache_temperature,
@@ -285,6 +348,7 @@ def add_forecast_products(
     temperature: np.ndarray,
     climate: dict[str, Any],
     forecast_sha: str,
+    slots: tuple[str, ...],
 ) -> None:
     climate_rainfall = np.asarray(climate["rainfall"])
     climate_temperature = np.asarray(climate["temperature"])
@@ -293,10 +357,10 @@ def add_forecast_products(
         "status": "model_relative_raw_ensemble_indices",
         "reference_id": climate["reference_id"],
         "years": list(CLIMATE_YEARS),
-        "initialization_dates": list(CLIMATE_SLOTS),
+        "initialization_dates": list(slots),
         "lead_days": [1, 42],
         "forecast_member_count": 100,
-        "climate_sample_count": 3060,
+        "climate_sample_count": int(climate_rainfall.shape[0]),
         "source_archive": "native_reforecast_global_2002_2021.zarr",
         "source_archive_records_sha256": climate["archive_attrs"]["archive_records_sha256"],
         "forecast_sha256": forecast_sha,
@@ -472,10 +536,15 @@ def add_regional_products(
                 )
 
 
-def update_catalog(path: Path, forecast_path: Path, regional_path: Path) -> None:
+def update_catalog(
+    path: Path,
+    issue_id: str,
+    forecast_path: Path,
+    regional_path: Path,
+) -> None:
     catalog = load_json(path)
     source = next(item for item in catalog["initial_condition_sources"] if item["id"] == "ifs")
-    issue = next(item for item in source["issues"] if item["id"] == SUPPORTED_ISSUE)
+    issue = next(item for item in source["issues"] if item["id"] == issue_id)
     public = load_json(forecast_path)
     available = public["issue"].get("available_products", list(public["products"]))
     issue["available_products"] = available
@@ -493,26 +562,44 @@ def update_catalog(path: Path, forecast_path: Path, regional_path: Path) -> None
             "regional_sha256": sha256(regional_path),
         }
     )
-    # Preserve the operational current/default pointers. IFS 20260927 remains
-    # the newest published forecast, while 20260926 is the newest issue whose
-    # native model-climate window meets this product's three-start contract.
+    # Preserve the operational current/default pointers; the base publisher is
+    # authoritative for issue selection and this step only adds capabilities.
     write_json(path, catalog)
 
 
-def build(args: argparse.Namespace) -> None:
+def build(args: argparse.Namespace) -> bool:
     public_forecast = load_json(args.public_forecast)
     issue_id = public_forecast["issue"]["initialization"][:10].replace("-", "")
     source_id = public_forecast["issue"]["initial_condition_source"]["id"]
-    if issue_id != SUPPORTED_ISSUE or source_id != "ifs":
-        raise ValueError(f"extreme products are initially supported only for IFS {SUPPORTED_ISSUE}")
-    climate = build_cache(args)
+    if source_id != "ifs":
+        raise ValueError("extreme products are supported only for IFS issues")
+    slots = select_climate_slots(
+        args.reforecast_zarr,
+        issue_id,
+        args.reforecast_shards,
+    )
+    if len(slots) != REQUIRED_CLIMATE_STARTS:
+        message = (
+            f"IFS {issue_id} has {len(slots)} native model-climate starts within "
+            f"±{MAX_CALENDAR_OFFSET_DAYS} days; {REQUIRED_CLIMATE_STARTS} are required"
+        )
+        if args.skip_ineligible:
+            print(f"skipped extreme products: {message}")
+            return False
+        raise ValueError(message)
+    climate = build_cache(args, slots)
     rainfall, temperature, latitude, longitude = load_forecast(args.forecast)
     np.testing.assert_array_equal(latitude, climate["latitude"])
     np.testing.assert_array_equal(longitude, climate["longitude"])
     np.testing.assert_array_equal(latitude, np.asarray(public_forecast["grid"]["latitude"]))
     np.testing.assert_array_equal(longitude, np.asarray(public_forecast["grid"]["longitude"]))
     add_forecast_products(
-        public_forecast, rainfall, temperature, climate, sha256(args.forecast)
+        public_forecast,
+        rainfall,
+        temperature,
+        climate,
+        sha256(args.forecast),
+        slots,
     )
     write_json(args.public_forecast, public_forecast)
 
@@ -521,11 +608,12 @@ def build(args: argparse.Namespace) -> None:
         regional, public_forecast, rainfall, temperature, climate, args.india_admin
     )
     write_json(args.regional, regional)
-    update_catalog(args.catalog, args.public_forecast, args.regional)
+    update_catalog(args.catalog, issue_id, args.public_forecast, args.regional)
     print(
-        f"wrote EFI/SOT and joint outcomes for IFS {SUPPORTED_ISSUE}; "
+        f"wrote EFI/SOT and joint outcomes for IFS {issue_id}; "
         f"reference={climate['reference_id']}"
     )
+    return True
 
 
 def main() -> int:

@@ -57,7 +57,7 @@
       "/usr/bin/python3",
       "/home/raj.ayush/.local/share/s2s-fuxi/publisher/fuxi-s2s-dashboard/scripts/postdeploy_smoke.py",
       "--base-url",
-      "https://artamta.github.io/fuxi-s2s-dashboard/",
+      "https://s2s.scdlds.com/",
       "--expected-commit",
       "{commit_sha}",
       "--expected-source",
