@@ -158,7 +158,7 @@ def test_scientific_team_has_a_dedicated_route() -> None:
     main = read("src/main.ts")
     briefing = read("src/pages/briefing.ts")
     team = read("src/pages/team.ts")
-    assert 'type Route = "india" | "outlook" | "archive" | "briefing" | "team"' in main
+    assert 'type Route = "india" | "archive" | "briefing" | "team"' in main
     assert 'href="./#team" data-route="team"' in main
     assert 'document.body.classList.toggle("team-route", route === "team")' in main
     assert 'await import("./pages/team")' in main

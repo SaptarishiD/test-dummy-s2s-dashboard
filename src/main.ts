@@ -9,7 +9,6 @@ import type {
   InitializationComparisonData,
   InitialConditionSourceId,
   IssueIndexData,
-  RegionalOutlookData,
   ValidationData,
 } from "./types";
 import {
@@ -20,11 +19,10 @@ import {
 } from "./lib/catalog";
 import { FEATURED_REPORT } from "./lib/reports";
 
-type Route = "india" | "outlook" | "archive" | "briefing" | "team";
+type Route = "india" | "archive" | "briefing" | "team";
 
 const ROUTES = new Set<Route>([
   "india",
-  "outlook",
   "archive",
   "briefing",
   "team",
@@ -129,7 +127,6 @@ async function loadData(): Promise<AppData> {
   const comparedSourceIds =
     forecast.issue.initialization_comparison?.compared_source_ids;
   let initializationComparison: InitializationComparisonData | undefined;
-  let regionalOutlook: RegionalOutlookData | undefined;
   let comparisonForecasts:
     | Partial<Record<InitialConditionSourceId, ForecastData>>
     | undefined;
@@ -151,14 +148,6 @@ async function loadData(): Promise<AppData> {
       Record<InitialConditionSourceId, ForecastData>
     >;
   }
-  if (route === "outlook" && issue.regional_outlook) {
-    regionalOutlook = await fetchJson(
-      checksumVersionedPath(
-        `./data/${issue.regional_outlook}`,
-        issueChecksum(issue, "regional_outlook"),
-      ),
-    );
-  }
   return {
     index,
     forecast,
@@ -166,7 +155,6 @@ async function loadData(): Promise<AppData> {
     indiaGeography,
     initializationComparison,
     comparisonForecasts,
-    regionalOutlook,
     domainCatalog,
     activeDomain,
   };
@@ -206,10 +194,6 @@ function shell(): string {
           <a href="./#briefing" data-route="briefing">
             <strong>Briefing</strong>
             <small>Weekly analysis</small>
-          </a>
-          <a href="./#outlook" data-route="outlook">
-            <strong>Regional Outlook</strong>
-            <small>Compound outcomes</small>
           </a>
           <a href="./#archive" data-route="archive">
             <strong>Archive</strong>
@@ -263,7 +247,6 @@ async function renderRoute(data: AppData): Promise<void> {
   }
   const content = document.querySelector<HTMLElement>("#content")!;
   document.body.classList.toggle("india-route", route === "india");
-  document.body.classList.toggle("outlook-route", route === "outlook");
   document.body.classList.toggle("archive-route", route === "archive");
   document.body.classList.toggle("briefing-route", route === "briefing");
   document.body.classList.toggle("team-route", route === "team");
@@ -288,7 +271,7 @@ async function renderRoute(data: AppData): Promise<void> {
   const headerUtility = document.querySelector<HTMLElement>(".header-utility")!;
   const headerStatus = document.querySelector<HTMLElement>(".header-status")!;
   headerUtility.hidden = route === "team";
-  headerStatus.dataset.state = route === "india" || route === "outlook" || route === "archive"
+  headerStatus.dataset.state = route === "india" || route === "archive"
     ? "validated"
     : "context";
   document.querySelector<HTMLElement>(".header-status__label")!.textContent = statusLabel;
@@ -306,10 +289,6 @@ async function renderRoute(data: AppData): Promise<void> {
   if (route === "india") {
     const { renderForecastPage } = await import("./pages/forecast");
     routeCleanup = renderForecastPage(content, data);
-  }
-  if (route === "outlook") {
-    const { renderOutlookPage } = await import("./pages/outlook");
-    renderOutlookPage(content, data);
   }
   if (route === "archive") {
     const { renderArchivePage } = await import("./pages/archive");
@@ -369,11 +348,6 @@ async function start(): Promise<void> {
     const data = await loadData();
     await renderRoute(data);
     window.addEventListener("hashchange", () => {
-      if (currentRoute() === "outlook") {
-        rememberRouteFocus();
-        window.location.reload();
-        return;
-      }
       if (currentRoute() === "india" && !data.forecast) {
         rememberRouteFocus();
         window.location.reload();
