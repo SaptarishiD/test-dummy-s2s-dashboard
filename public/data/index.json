@@ -191,26 +191,41 @@
     "initialization": "2026-10-04T00:00:00Z",
     "members": 100,
     "forecast": "forecasts/ifs/20261004.json",
-    "forecast_sha256": "f36c48a75ff781f662debc916f4e119b18419af9e5d9bbac11733e3f250c1729",
+    "forecast_sha256": "f7fa41188c9612e721b6719dfa63c5b989b6c0b486262aa927942b92d2db0dec",
     "valid_through": "2026-11-14",
-    "published_at": "2026-10-04T15:37:24.851573+00:00",
+    "published_at": "2026-10-04T17:43:03.704499+00:00",
     "available_products": [
       "rainfall_total",
-      "temperature_mean"
+      "temperature_mean",
+      "rainfall_anomaly",
+      "temperature_anomaly",
+      "wind850_mean",
+      "wind850_anomaly",
+      "rainfall_spread",
+      "temperature_spread",
+      "rainfall_efi",
+      "temperature_efi",
+      "rainfall_sot_upper",
+      "temperature_sot_upper",
+      "temperature_sot_lower"
     ],
     "capabilities": {
       "raw_fields": true,
-      "anomalies": false,
-      "wind850_mean": false,
-      "wind850_anomaly": false,
-      "regional_probabilities": false,
-      "pdf": true
+      "anomalies": true,
+      "wind850_mean": true,
+      "wind850_anomaly": true,
+      "regional_probabilities": true,
+      "pdf": true,
+      "extreme_products": true,
+      "joint_outcomes": true,
+      "ensemble_spread": true
     },
+    "regional_outlook": "regional/ifs/20261004.json",
     "pdf": "downloads/ifs/20261004/S2S_Research_India_Weeks1-4_IFS_20261004.pdf"
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-10-04T17:28:06Z",
+  "generated_at": "2026-10-04T17:43:15Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -242,13 +257,13 @@
       "id": "gfs",
       "issues": [
         {
-          "forecast": "forecasts/gfs/20261004.json",
-          "id": "20261004",
-          "initialization": "2026-10-04T00:00:00Z",
-          "members": 100,
-          "regional_outlook": "regional/gfs/20261004.json",
-          "role": "operational_experimental",
-          "status": "warning",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-10-04T00:00:00Z",
+            "pdf_until": "2026-11-29T00:00:00Z",
+            "metadata": "indefinite"
+          },
           "available_products": [
             "rainfall_total",
             "temperature_mean",
@@ -265,26 +280,26 @@
             "regional_probabilities": true,
             "pdf": true
           },
-          "presentation": {
-            "section": "archive",
-            "label": "Archived guidance",
-            "member_class": "production"
-          },
           "checksums": {
             "forecast_sha256": "b31fb46bbfd38544c063fbc13fc673614a5e87bda6e667a463282bfe51114407",
             "regional_sha256": "b546700b3dba82cb69bf3c34a30f68d23265e0dac0ee8e84e15b037f56ba3bee",
             "pdf_sha256": "c45b6fe2d75a2cf2e5512534f45d240f64c7a7ac29fd4c3054be7e010afff806"
           },
-          "valid_through": "2026-11-14",
-          "published_at": "2026-10-04T17:27:54.522467+00:00",
+          "forecast": "forecasts/gfs/20261004.json",
+          "id": "20261004",
+          "initialization": "2026-10-04T00:00:00Z",
+          "members": 100,
           "pdf": "downloads/gfs/20261004/S2S_Research_India_Weeks1-4_GFS_20261004.pdf",
-          "archive": {
-            "interactive_available": true,
-            "pdf_available": true,
-            "interactive_until": "2027-10-04T00:00:00Z",
-            "pdf_until": "2026-11-29T00:00:00Z",
-            "metadata": "indefinite"
-          }
+          "presentation": {
+            "section": "archive",
+            "label": "Archived guidance",
+            "member_class": "production"
+          },
+          "published_at": "2026-10-04T17:27:54.522467+00:00",
+          "regional_outlook": "regional/gfs/20261004.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "valid_through": "2026-11-14"
         },
         {
           "archive": {
@@ -2752,43 +2767,59 @@
       "id": "ifs",
       "issues": [
         {
+          "forecast": "forecasts/ifs/20261004.json",
+          "id": "20261004",
+          "initialization": "2026-10-04T00:00:00Z",
+          "members": 100,
+          "regional_outlook": "regional/ifs/20261004.json",
+          "role": "operational_experimental",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly",
+            "rainfall_spread",
+            "temperature_spread",
+            "rainfall_efi",
+            "temperature_efi",
+            "rainfall_sot_upper",
+            "temperature_sot_upper",
+            "temperature_sot_lower"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": true,
+            "pdf": true,
+            "extreme_products": true,
+            "joint_outcomes": true,
+            "ensemble_spread": true
+          },
+          "presentation": {
+            "section": "current",
+            "label": "Current guidance",
+            "member_class": "production"
+          },
+          "checksums": {
+            "forecast_sha256": "f7fa41188c9612e721b6719dfa63c5b989b6c0b486262aa927942b92d2db0dec",
+            "regional_sha256": "7166de841b82e3d0a9ca9ec49472d97dd701a0e2d8597a738fef9f64d1d81698",
+            "pdf_sha256": "67c5eed150fa6cdd7685869442fb3272f22020a7b27a7e4987727716249723bf"
+          },
+          "valid_through": "2026-11-14",
+          "published_at": "2026-10-04T17:43:03.704499+00:00",
+          "pdf": "downloads/ifs/20261004/S2S_Research_India_Weeks1-4_IFS_20261004.pdf",
           "archive": {
             "interactive_available": true,
             "pdf_available": true,
             "interactive_until": "2027-10-04T00:00:00Z",
             "pdf_until": "2026-11-29T00:00:00Z",
             "metadata": "indefinite"
-          },
-          "available_products": [
-            "rainfall_total",
-            "temperature_mean"
-          ],
-          "capabilities": {
-            "raw_fields": true,
-            "anomalies": false,
-            "wind850_mean": false,
-            "wind850_anomaly": false,
-            "regional_probabilities": false,
-            "pdf": true
-          },
-          "checksums": {
-            "forecast_sha256": "f36c48a75ff781f662debc916f4e119b18419af9e5d9bbac11733e3f250c1729",
-            "pdf_sha256": "e14ea7d95ab5672f244e1c342446a795886696a216db309ef22b7fada38fa970"
-          },
-          "forecast": "forecasts/ifs/20261004.json",
-          "id": "20261004",
-          "initialization": "2026-10-04T00:00:00Z",
-          "members": 100,
-          "pdf": "downloads/ifs/20261004/S2S_Research_India_Weeks1-4_IFS_20261004.pdf",
-          "presentation": {
-            "section": "current",
-            "label": "Current guidance",
-            "member_class": "production"
-          },
-          "published_at": "2026-10-04T15:37:24.851573+00:00",
-          "role": "operational_experimental",
-          "status": "warning",
-          "valid_through": "2026-11-14"
+          }
         },
         {
           "archive": {
@@ -3462,7 +3493,7 @@
   "latest_successful_issue": "20261004",
   "operations": {
     "status": "on_schedule",
-    "last_successful_at": "2026-10-04T15:37:24.851573+00:00",
+    "last_successful_at": "2026-10-04T17:43:03.704499+00:00",
     "next_expected_at": "2026-10-07T12:00:00Z",
     "stale_after": "2026-10-08T00:00:00Z"
   },
@@ -3472,7 +3503,7 @@
       "Sunday"
     ],
     "target_time_utc": "12:00",
-    "last_successful_at": "2026-10-04T15:37:24.851573+00:00",
+    "last_successful_at": "2026-10-04T17:43:03.704499+00:00",
     "next_expected_at": "2026-10-07T12:00:00Z"
   },
   "retention": {
