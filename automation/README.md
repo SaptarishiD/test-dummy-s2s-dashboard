@@ -42,11 +42,12 @@ auditable hand-off:
 The example configuration consumes that action automatically during the next
 `reconcile`. New compact operational forecasts retain U850/V850 alongside
 TP/T2M; the publication command binds the validated private forecast and the
-all-slot JJAS 2002–2021 wind climatology so raw and anomalous wind products are
-part of the same publication gate. When the base export reports that its
-model-state date is outside the validated JJAS climatology, the bridge withholds
-wind augmentation and publishes the documented raw rainfall/temperature
-fallback instead. Legacy two-field forecasts require an explicit validated wind
+full-year 2002–2021 rainfall/temperature and wind climatologies so raw and
+anomalous wind products are part of the same publication gate. The publication
+command explicitly selects these baselines with `--model-climatology` and
+`--wind-climatology`. If a legacy seasonal baseline is selected and the
+model-state date falls outside its coverage, the bridge preserves its raw
+rainfall/temperature fallback. Legacy two-field forecasts require a validated wind
 sidecar. `export_and_publish_operational_issue.py` creates a disposable
 worktree from the dedicated publishing clone, points the existing exporter at
 that isolated dashboard, and then hands its public package to the allow-listed
@@ -57,12 +58,14 @@ runs use the deployed-site smoke test to advance `pushed → deployed`.
 
 For IFS, the bridge then attempts schema-v3 extreme enrichment with the same
 validated private member file. It selects the three native reforecast calendar
-starts within ±4 days of the issue and publishes only derived EFI/SOT grids,
+starts within the documented ±7-day maximum of the issue and publishes only derived EFI/SOT grids,
 compact quantiles, and paired regional outcomes. The model-climate cache remains
 private under `.private-cache`. If fewer than three common 2002–2021 starts are
 available, the step is an audited no-op and the dashboard retains its explicit
-unavailable state; the automation never widens the calendar window or invents a
-reference distribution.
+unavailable state; the automation does not extend that maximum or invent a
+reference distribution. The full-year native archive supplies the reference
+across January–December; leap-year last-February starts are aligned with the
+corresponding end-of-February starts in ordinary years.
 
 The forecast asset, checksum catalog entry, and source `default_issue` pointer
 cross the publication boundary in the same validated Git commit. Adoption of

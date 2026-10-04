@@ -103,7 +103,7 @@ def test_missing_members_are_excluded_without_hiding_valid_distribution() -> Non
     )
 
 
-def test_archive_slots_are_selected_dynamically_within_four_days(
+def test_archive_slots_are_selected_dynamically_within_seven_days(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -117,12 +117,27 @@ def test_archive_slots_are_selected_dynamically_within_four_days(
     monkeypatch.setattr(builder, "read_array", lambda *_args: dates)
     archive = Path("/unused/archive.zarr")
     assert select_climate_slots(archive, "20260926") == ("0922", "0926", "0929")
-    assert select_climate_slots(archive, "20260927") == ("0926", "0929")
+    assert select_climate_slots(archive, "20260927") == ("0922", "0926", "0929")
     assert select_climate_slots(archive, "20260930") == ("0926", "0929", "1003")
     for year in range(2002, 2022):
         for slot in ("0922", "0926", "0929"):
             (tmp_path / f"{year}{slot}.nc").touch()
     assert select_climate_slots(archive, "20260930", tmp_path) == ("0926", "0929")
+
+
+def test_full_year_reference_always_has_three_actual_native_starts(monkeypatch):
+    from datetime import date, timedelta
+    from science.calendar import native_initialization
+    slots = [(date(2002, 1, 3) + timedelta(days=(i // 2) * 7 + (3 if i % 2 else 0))).strftime('%m%d') for i in range(104)]
+    dates = np.asarray([native_initialization(year, slot) for year in range(2002, 2022) for slot in slots])
+    monkeypatch.setattr(builder, 'read_array', lambda *_args: dates)
+    for year in (2026, 2028):
+        day = date(year, 1, 1)
+        while day.year == year:
+            selected = select_climate_slots(Path('/unused'), day.strftime('%Y%m%d'))
+            assert len(selected) == 3, (day, selected)
+            assert max(abs(builder.calendar_offset_days(day.strftime('%Y%m%d'), slot)) for slot in selected) <= 7
+            day += timedelta(days=1)
 
 
 def test_complete_week_enforcement_and_precipitation_total() -> None:
@@ -133,6 +148,19 @@ def test_complete_week_enforcement_and_precipitation_total() -> None:
     assert np.isnan(weekly[0, 0, 0])
     with np.testing.assert_raises(ValueError):
         complete_weekly_samples(np.ones((2, 41)), aggregation="mean")
+
+
+def test_february_reference_keeps_all_twenty_native_years(tmp_path, monkeypatch):
+    from science.calendar import native_initialization
+    slots = ('0224', '0228', '0303')
+    dates = np.asarray([
+        native_initialization(year, slot)
+        for year in range(2002, 2022) for slot in slots
+    ])
+    monkeypatch.setattr(builder, 'read_array', lambda *_args: dates)
+    for stamp in dates:
+        (tmp_path / f'{stamp}.nc').touch()
+    assert select_climate_slots(Path('/unused'), '20260228', tmp_path) == slots
 
 
 def test_ineligible_october_issue_skips_without_regional_file(

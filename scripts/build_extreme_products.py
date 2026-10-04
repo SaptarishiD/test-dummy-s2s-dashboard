@@ -7,7 +7,7 @@ import argparse
 import hashlib
 import json
 import sys
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +26,7 @@ from science.extremes import (  # noqa: E402
     shift_of_tails,
 )
 from science.zarr_v2 import read_array, read_attrs  # noqa: E402
+from science.calendar import native_slot, native_initialization  # noqa: E402
 from scripts.build_regional_outlook import (  # noqa: E402
     REGION_ORDER,
     area_weights,
@@ -38,7 +39,7 @@ from scripts.build_regional_outlook import (  # noqa: E402
 
 CLIMATE_YEARS = tuple(range(2002, 2022))
 REQUIRED_CLIMATE_STARTS = 3
-MAX_CALENDAR_OFFSET_DAYS = 4
+MAX_CALENDAR_OFFSET_DAYS = 7
 INDO_GANGETIC_PROXY_ID = "indo_gangetic_administrative_proxy"
 INDO_GANGETIC_PROXY_LABEL = "Indo-Gangetic administrative proxy"
 INDO_GANGETIC_STATES = (
@@ -98,7 +99,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path(
             "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/"
-            "native_reforecast_jjas_2002_2021/shards"
+            "native_reforecast_full_year_2002_2021/shards"
         ),
         help="Lossless India subsets used to avoid a full global chunk scan.",
     )
@@ -112,7 +113,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-ineligible",
         action="store_true",
-        help="Exit successfully without mutation when fewer than three native starts lie within ±4 days.",
+        help="Exit successfully without mutation when fewer than three native starts lie within ±7 days.",
     )
     return parser.parse_args()
 
@@ -142,16 +143,14 @@ def calendar_offset_days(issue_id: str, slot: str) -> int:
     """Return the shortest signed calendar-day offset from an issue to MMDD."""
 
     issue = datetime.strptime(issue_id, "%Y%m%d").date()
-    anchor = date(2000, issue.month, issue.day)
-    month, day = int(slot[:2]), int(slot[2:])
     candidates = []
-    for year in (1999, 2000, 2001):
+    for year in (issue.year - 1, issue.year, issue.year + 1):
         try:
-            candidates.append(date(year, month, day))
+            candidates.append(datetime.strptime(native_initialization(year, slot), '%Y%m%d').date())
         except ValueError:
-            # February 29 only exists in the leap-year anchor.
+            # A literal February 29 slot only exists in leap years.
             continue
-    return min(((candidate - anchor).days for candidate in candidates), key=abs)
+    return min(((candidate - issue).days for candidate in candidates), key=abs)
 
 
 def select_climate_slots(
@@ -159,11 +158,15 @@ def select_climate_slots(
     issue_id: str,
     shard_root: Path | None = None,
 ) -> tuple[str, ...]:
-    """Select up to three archive calendar starts within ±4 days of the issue."""
+    """Select the three nearest common starts within ±7 days of the issue.
+
+    Native starts occur every three or four days. A seven-day bound supplies
+    the three-date reference through the whole calendar, including year wrap.
+    """
 
     dates = {str(value) for value in read_array(zarr_path, "init_yyyymmdd")}
     slots_by_year = {
-        year: {value[4:] for value in dates if value.startswith(str(year))}
+        year: {native_slot(value) for value in dates if value.startswith(str(year))}
         for year in CLIMATE_YEARS
     }
     common_slots = set.intersection(*(slots_by_year[year] for year in CLIMATE_YEARS))
@@ -171,7 +174,7 @@ def select_climate_slots(
         common_slots = {
             slot
             for slot in common_slots
-            if all((shard_root / f"{year}{slot}.nc").is_file() for year in CLIMATE_YEARS)
+            if all((shard_root / f"{native_initialization(year, slot)}.nc").is_file() for year in CLIMATE_YEARS)
         }
     candidates = []
     for slot in common_slots:
@@ -197,7 +200,7 @@ def climate_reference(
     if years != "2002-2021" or members != 51 or leads != 42:
         raise ValueError("native global reforecast archive contract does not match")
     dates = {str(value) for value in read_array(zarr_path, "init_yyyymmdd")}
-    expected_dates = {f"{year}{slot}" for year in CLIMATE_YEARS for slot in slots}
+    expected_dates = {native_initialization(year, slot) for year in CLIMATE_YEARS for slot in slots}
     if not expected_dates.issubset(dates):
         raise ValueError("native global archive lacks one or more selected initialization dates")
     archive_hash = str(attrs["archive_records_sha256"])
@@ -205,7 +208,7 @@ def climate_reference(
     slot_id = "_".join(slots)
     reference_id = (
         f"fuxi-mclim-2002_2021-slots{slot_id}-leads01_42-"
-        f"n{sample_count}-tp_sum7d-t2m_mean7d-qlinear-src{archive_hash[:12]}"
+        f"n{sample_count}-window{MAX_CALENDAR_OFFSET_DAYS}d-tp_sum7d-t2m_mean7d-qlinear-src{archive_hash[:12]}"
     )
     return reference_id, attrs
 
@@ -241,7 +244,7 @@ def build_cache(args: argparse.Namespace, slots: tuple[str, ...]) -> dict[str, A
     longitude: np.ndarray | None = None
     for year in CLIMATE_YEARS:
         for slot in slots:
-            path = args.reforecast_shards / f"{year}{slot}.nc"
+            path = args.reforecast_shards / f"{native_initialization(year, slot)}.nc"
             with xr.open_dataset(path) as dataset:
                 required = {"member": 51, "lead_day": 42, "latitude": 27, "longitude": 27}
                 if any(int(dataset.sizes.get(key, -1)) != size for key, size in required.items()):
@@ -358,6 +361,9 @@ def add_forecast_products(
         "reference_id": climate["reference_id"],
         "years": list(CLIMATE_YEARS),
         "initialization_dates": list(slots),
+        "reference_window_max_days": MAX_CALENDAR_OFFSET_DAYS,
+        "initialization_offsets_days": [calendar_offset_days(payload["issue"]["initialization"][:10].replace("-", ""), slot) for slot in slots],
+        "february_alignment": "Native last-day-of-February starts share slot 0228; leap-year source dates are 0229.",
         "lead_days": [1, 42],
         "forecast_member_count": 100,
         "climate_sample_count": int(climate_rainfall.shape[0]),

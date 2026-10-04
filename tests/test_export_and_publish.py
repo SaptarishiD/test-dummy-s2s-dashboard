@@ -220,6 +220,7 @@ def test_wind_postprocessing_requires_the_generated_issue_json(
     ("model_state_time", "status", "expected"),
     [
         ("2026-09-29T00:00:00Z", "available", True),
+        ("2026-10-03T00:00:00Z", "available", True),
         ("2026-10-02T00:00:00Z", "unavailable_outside_jjas", False),
     ],
 )
@@ -370,6 +371,7 @@ def test_wind_augmentation_and_pdf_rebuild_precede_publication(
     args = argparse.Namespace(
         source="gfs",
         issue="20260808",
+        model_climatology=tmp_path / "full-year-climatology.nc",
         config=config,
         operational_script=Path("/opt/s2s/operational.py"),
         operational_python="/opt/s2s/python",
@@ -410,6 +412,12 @@ def test_wind_augmentation_and_pdf_rebuild_precede_publication(
 
     def record_run(command: list[str], **_kwargs: object) -> None:
         calls.append(command)
+        if str(args.operational_script) in command:
+            environment = _kwargs["env"]
+            assert environment["S2S_FUXI_CLIMATOLOGY"] == str(
+                args.model_climatology.resolve()
+            )
+            assert environment["S2S_DASHBOARD_ROOT"] == str(export_dashboard)
         if str(args.publisher_script) in command:
             receipt.write_text(
                 json.dumps({"source": "gfs", "issue": "20260808"}),

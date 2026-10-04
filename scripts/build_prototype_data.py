@@ -29,6 +29,8 @@ from shapely.ops import transform, unary_union
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from science.calendar import calendar_bracket, full_year_slots
+
 from science.formulas import (  # noqa: E402
     FORMULA_DEFINITIONS,
     anomaly,
@@ -275,28 +277,11 @@ def validate_run_manifest(path: Path | None, forecast: Path, members: int, leads
         raise ValueError("run manifest output checksum does not match forecast")
 
 
-def climatology_bracket(
-    slots: np.ndarray, target_month_day: str
-) -> tuple[str, str, float]:
-    """Return surrounding MMDD slots and the right-slot linear weight."""
-
-    target_month = int(target_month_day[:2])
-    target_day = int(target_month_day[2:])
-    target = np.datetime64(f"2000-{target_month:02d}-{target_day:02d}")
-    labels = sorted(str(value) for value in slots)
-    dates = np.asarray(
-        [np.datetime64(f"2000-{value[:2]}-{value[2:]}") for value in labels]
-    )
-    matches = np.flatnonzero(dates == target)
-    if matches.size:
-        label = labels[int(matches[0])]
-        return label, label, 0.0
-    insertion = int(np.searchsorted(dates, target))
-    if insertion == 0 or insertion == len(dates):
-        raise ValueError(f"{target_month_day} is outside available climatology slots")
-    left_date, right_date = dates[insertion - 1], dates[insertion]
-    right_weight = float((target - left_date) / (right_date - left_date))
-    return labels[insertion - 1], labels[insertion], right_weight
+def climatology_bracket(slots: np.ndarray, target_month_day: str, *, year: int = 2000) -> tuple[str, str, float]:
+    """Bracket calendar dates, wrapping only a complete full-year baseline."""
+    full_year = full_year_slots(slots)
+    return calendar_bracket(slots, target_month_day, cyclic=full_year,
+                            year=year, native_february=full_year)
 
 
 def read_india_geometry(path: Path):
@@ -372,9 +357,9 @@ def build_fields(
 ]:
     """Calculate six-week fields solely through the locked formulas.
 
-    The native 2002–2021 climatology currently covers JJAS initialization
-    slots only.  Forecasts outside that window remain publishable, but only as
-    raw rainfall totals and mean temperature; anomaly fields are withheld.
+    The configured native 2002–2021 climatology supplies lead-matched yearly
+    means. Full-year baselines interpolate across the annual boundary; legacy
+    seasonal baselines withhold anomaly fields outside their validated slots.
     """
 
     with xr.open_dataset(forecast_path) as forecast:
@@ -409,7 +394,8 @@ def build_fields(
     with xr.open_dataset(climatology_path) as climatology:
         try:
             left, right, right_weight = climatology_bracket(
-                climatology.init_slot.values, target_month_day
+                climatology.init_slot.values, target_month_day,
+                year=int(np.datetime_as_string(model_state_day, unit='D')[:4]),
             )
         except ValueError:
             alignment = {

@@ -15,15 +15,16 @@
     },
     {
       "id": "fuxi_climatology_2002_2021",
-      "name": "Native reforecast model climatology",
+      "name": "Full-year native reforecast model climatology",
       "product": "20 equally weighted yearly ensemble means",
-      "period": "2002–2021; JJAS native initialization slots",
+      "period": "2002–2021; all 104 aligned initialization slots across January–December",
       "grid": "27 × 27, 1.5°, forecast grid",
       "units": {
         "tp": "mm day-1",
         "t2m": "K"
       },
-      "sha256": "e0bc3c4faf44a8f9d47b8dfc22cf3640cf7018dbacf9b9c876c1dd8cb8b93f2d"
+      "sha256": "1ce247f69201473dcca46cd38eb2408d80e1dbd49d440f2f518745c52b1e6a28",
+      "calendar_alignment": "Last-February starts share slot 0228; actual leap-year dates are 0229."
     },
     {
       "id": "imd_climatology_1991_2020",
@@ -46,6 +47,31 @@
         "rainfall": "mm day-1"
       },
       "sha256": "38e066a3d0efccb38977e9d2a6f243d94e548a6a7d5dd33f67592efc2d7247b8"
+    },
+    {
+      "id": "fuxi_climatology_jjas_2002_2021",
+      "name": "Historical JJAS reforecast model climatology",
+      "product": "20 equally weighted yearly ensemble means",
+      "period": "2002–2021; JJAS native initialization slots",
+      "grid": "27 × 27, 1.5°, forecast grid",
+      "units": {
+        "tp": "mm day-1",
+        "t2m": "K"
+      },
+      "sha256": "e0bc3c4faf44a8f9d47b8dfc22cf3640cf7018dbacf9b9c876c1dd8cb8b93f2d"
+    },
+    {
+      "id": "fuxi_wind850_climatology_2002_2021",
+      "name": "Full-year native 850 hPa wind climatology",
+      "product": "20 equally weighted yearly 51-member ensemble means",
+      "period": "2002–2021; all 104 aligned initialization slots across January–December",
+      "grid": "27 × 27, 1.5°, forecast grid",
+      "units": {
+        "u850": "m s-1",
+        "v850": "m s-1"
+      },
+      "sha256": "19bf4370c935c51771a0dbac09fb3555f83127649de3a5d9992ac3d327a545fc",
+      "calendar_alignment": "Last-February starts share slot 0228; actual leap-year dates are 0229."
     }
   ],
   "observation_identity": {

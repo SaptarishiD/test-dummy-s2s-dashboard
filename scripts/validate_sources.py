@@ -26,11 +26,7 @@ DEFAULT_FORECAST = Path(
     "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/"
     "fuxi_s2s_gfs_proxy_case_20260728_ens100/forecasts/annual2026/20260728.nc"
 )
-DEFAULT_FUXI_CLIMO = Path(
-    "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/"
-    "native_reforecast_jjas_2002_2021/"
-    "fuxi_s2s_jjas_model_climatology_2002_2021_loyo.nc"
-)
+from science.paths import DEFAULT_FUXI_CLIMO
 DEFAULT_IMD_CLIMO = Path(
     "/storage/raj.ayush/All_Model_Data/ground_truth/imd_rainfall/"
     "climatology/imd_rain_1991_2020_daily_climatology.nc"
@@ -42,7 +38,7 @@ DEFAULT_IMERG_CLIMO = (
 )
 SOURCE_DIGESTS = {
     "forecast": "59bf922f03159666603c38158b14f015fdd0d9c566249853e2cf90c96ffa3085",
-    "fuxi_climo": "e0bc3c4faf44a8f9d47b8dfc22cf3640cf7018dbacf9b9c876c1dd8cb8b93f2d",
+    "fuxi_climo": "1ce247f69201473dcca46cd38eb2408d80e1dbd49d440f2f518745c52b1e6a28",
     "imd_climo": "a7b7780ad46dc9bbd3127f74714e76c33559b98ce377c8d92a9002c1fa73d62d",
     "imerg_climo": "38e066a3d0efccb38977e9d2a6f243d94e548a6a7d5dd33f67592efc2d7247b8",
 }

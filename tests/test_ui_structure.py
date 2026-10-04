@@ -334,7 +334,7 @@ def test_skip_link_does_not_enter_the_hash_router() -> None:
     assert "ROUTE_FOCUS_STORAGE_KEY" in main
 
 
-def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
+def test_mean_and_anomalous_wind_are_available_on_the_website() -> None:
     catalog = read("src/lib/catalog.ts")
     archive = read("src/pages/archive.ts")
     types = read("src/types.ts")
@@ -344,11 +344,9 @@ def test_raw_wind_is_retained_in_data_but_hidden_from_the_website() -> None:
     product_keys = catalog[product_keys_start:product_keys_end]
     assert '"wind850_mean"' in product_keys
     assert '"wind850_anomaly"' in product_keys
-    assert 'Exclude<AvailableProductKey, "wind850_mean">' in catalog
-    assert 'return product !== "wind850_mean"' in catalog
+    assert 'export type WebsiteProductKey = AvailableProductKey' in catalog
     assert "return WEBSITE_PRODUCT_KEYS.filter(" in catalog
-    assert "productIsWebsiteVisible(product)" in archive
-    assert 'wind850_mean: "850 hPa wind"' not in archive
+    assert 'wind850_mean: "850 hPa wind"' in archive
     assert 'wind850_anomaly: "850 hPa wind anomaly"' in archive
     assert 'export type WindProductKey = "wind850_mean" | "wind850_anomaly"' in types
 

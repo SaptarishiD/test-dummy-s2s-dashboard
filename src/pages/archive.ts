@@ -6,7 +6,6 @@ import {
   issueInteractiveAvailable,
   issueIsCurrent,
   issuePdfAvailable,
-  productIsWebsiteVisible,
   productsForIssue,
   sourcesForDisplay,
   type CatalogIssue,
@@ -20,6 +19,7 @@ const PRODUCT_LABELS: Record<WebsiteProductKey, string> = {
   rainfall_anomaly: "Rainfall anomaly",
   temperature_mean: "Temperature",
   temperature_anomaly: "Temperature anomaly",
+  wind850_mean: "850 hPa wind",
   wind850_anomaly: "850 hPa wind anomaly",
   rainfall_spread: "Rainfall spread",
   temperature_spread: "Temperature spread",
@@ -212,7 +212,6 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
       const pdfPath = issue.pdf;
       const badges = [...products]
         .filter((product) =>
-          productIsWebsiteVisible(product) &&
           product !== "india_pdf" &&
           product !== "regional_probabilities"
         )

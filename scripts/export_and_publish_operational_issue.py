@@ -28,6 +28,7 @@ from scripts.publish_operational_site import (  # noqa: E402
     prepare_clone,
     remove_disposable_worktree,
 )
+from science.paths import DEFAULT_FUXI_CLIMO
 
 VALIDATED_JJAS_SLOT_START = "0602"
 VALIDATED_JJAS_SLOT_END = "0929"
@@ -38,6 +39,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", choices=("gfs", "era5", "ifs"), required=True)
     parser.add_argument("--issue", required=True, help="Initialization YYYYMMDD.")
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--model-climatology", type=Path, default=DEFAULT_FUXI_CLIMO,
+                        help="Validated full-year rainfall/temperature model climatology.")
     parser.add_argument(
         "--operational-script",
         type=Path,
@@ -295,9 +298,9 @@ def wind_augmentation_available(forecast_json: Path) -> bool:
     """Return whether the base export has a supported anomaly climatology.
 
     The native rainfall/temperature exporter is the authority for the
-    model-state calendar alignment. Outside its validated JJAS window it
-    deliberately emits a raw-only package; the optional wind bridge must
-    preserve that fallback instead of interpolating beyond the same boundary.
+    model-state calendar alignment. Full-year baselines support every date;
+    legacy seasonal baselines deliberately emit a raw-only package outside
+    their coverage, and the wind bridge preserves that fallback.
     """
 
     try:
@@ -430,6 +433,7 @@ def main() -> int:
             raise ValueError(f"dashboard is absent from export worktree: {export_dashboard}")
         environment = os.environ.copy()
         environment["S2S_DASHBOARD_ROOT"] = str(export_dashboard)
+        environment["S2S_FUXI_CLIMATOLOGY"] = str(Path(getattr(args, "model_climatology", DEFAULT_FUXI_CLIMO)).resolve())
         subprocess.run(
             [
                 args.operational_python,

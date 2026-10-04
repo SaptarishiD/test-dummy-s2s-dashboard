@@ -45,10 +45,12 @@
       "{issue}",
       "--config",
       "{config}",
+      "--model-climatology",
+      "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/native_reforecast_full_year_2002_2021/fuxi_s2s_full_year_model_climatology_2002_2021_loyo.nc",
       "--wind-forecast",
       "{private_forecast}",
       "--wind-climatology",
-      "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/native_reforecast_jjas_2002_2021/fuxi_s2s_wind850_climatology_jjas_allslots_2002_2021.nc",
+      "/storage/raj.ayush/s2s_final_data/final_iteration/model-runs/fuxi/native_reforecast_full_year_2002_2021/fuxi_s2s_full_year_wind850_climatology_2002_2021.nc",
       "--receipt",
       "{receipt}"
     ],

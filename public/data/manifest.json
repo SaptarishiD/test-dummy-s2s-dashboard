@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-04T15:37:37.052946+00:00",
-  "deployed_commit": "pending-ci",
+  "generated_at": "2026-10-04T17:22:30.732665+00:00",
+  "deployed_commit": "local-uncommitted",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
     {
@@ -911,13 +911,13 @@
     },
     {
       "path": "data/sources.json",
-      "size_bytes": 2397,
-      "sha256": "dee2d6cfe5852ff9d3d5aad80eb39f155be862bd32f55cc84d2822992c312126"
+      "size_bytes": 3278,
+      "sha256": "bc1af6d2b4f400dfc39fefd5ee0a3221df3efb49fb77afaf5bd230304df6c1f2"
     },
     {
       "path": "data/validation.json",
-      "size_bytes": 6005,
-      "sha256": "662b1cee08a63c3940410c7894036932fab02465dcff5b520f84af3401ad7970"
+      "size_bytes": 7991,
+      "sha256": "9af9720fd21f5c7092babdb7afe842c1f210ea2ba0140c7fb77978ac9da1e830"
     },
     {
       "path": "data/world-countries.geojson",

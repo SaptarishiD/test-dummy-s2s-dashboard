@@ -1380,7 +1380,7 @@ export function renderForecastPage(
         panelGrid.innerHTML = `
           <div class="probability-unavailable-state" role="note">
             <strong>Extreme products are unavailable for this issue</strong>
-            <p>No synthetic or substitute data are shown. Select IFS 26 September 2026 to inspect the first supported model-relative EFI/SOT package.</p>
+            <p>Select an IFS issue with a complete matching model-climate reference to view EFI, SOT, and ensemble spread.</p>
           </div>
         `;
         container.querySelector(".india-selected-product")!.textContent =

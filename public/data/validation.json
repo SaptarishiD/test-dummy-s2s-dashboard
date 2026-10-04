@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-29T23:11:12.240613+00:00",
+  "generated_at": "2026-10-04T17:22:30.351636+00:00",
   "overall_status": "warning",
   "presentation_allowed": true,
   "checks": [
@@ -32,13 +32,13 @@
     },
     {
       "id": "fuxi_climatology",
-      "label": "model climatology",
+      "label": "Model climatology",
       "group": "source",
-      "status": "warning",
-      "summary": "Validated for this JJAS issue; full-year model climatology is not yet available.",
+      "status": "green",
+      "summary": "Validated full-year native model climatology: 104 slots, 20 equally weighted years.",
       "details": {
-        "size_bytes": 251633007,
-        "sha256": "e0bc3c4faf44a8f9d47b8dfc22cf3640cf7018dbacf9b9c876c1dd8cb8b93f2d",
+        "size_bytes": 777819646,
+        "sha256": "1ce247f69201473dcca46cd38eb2408d80e1dbd49d440f2f518745c52b1e6a28",
         "hindcast_years": [
           2002,
           2003,
@@ -64,14 +64,65 @@
         "native_members_per_year": 51,
         "annual_weighting": "one native-member mean per year; 20 years equally weighted",
         "lead_days": 42,
-        "available_init_slots": 35,
+        "available_init_slots": 104,
         "prototype_alignment": {
           "left_slot": "0725",
           "right_slot": "0728",
           "right_weight": 0.6666666666666666
         },
-        "complete_sample_count_slots": 1470,
-        "calendar_scope": "JJAS only"
+        "complete_sample_count_slots": 4368,
+        "calendar_scope": "Full year",
+        "full_year_build_checks": {
+          "tp": {
+            "full_year_finite": true,
+            "seasonal_yearly_means_identical": true
+          },
+          "t2m": {
+            "full_year_finite": true,
+            "seasonal_yearly_means_identical": true
+          },
+          "u850": {
+            "full_year_finite": true,
+            "seasonal_yearly_means_identical": true
+          },
+          "v850": {
+            "full_year_finite": true,
+            "seasonal_yearly_means_identical": true
+          },
+          "tp_0103_precomputed_reference": {
+            "status": "rejected",
+            "reason": "Claims 20 years but matches only five yearly means",
+            "matching_years": [
+              2002,
+              2017,
+              2018,
+              2019,
+              2020
+            ],
+            "maximum_difference_from_full_twenty_year_mean": 11.727678298950195
+          },
+          "t2m_0103_precomputed_reference": {
+            "status": "rejected",
+            "reason": "Claims 20 years but matches only five yearly means",
+            "matching_years": [
+              2002,
+              2017,
+              2018,
+              2019,
+              2020
+            ],
+            "maximum_difference_from_full_twenty_year_mean": 5.240966796875
+          },
+          "tp_0103_original_1020_members_day1_max_difference": 2.1149130429165552e-06,
+          "t2m_0103_original_1020_members_day1_max_difference": 6.794649010544163e-05,
+          "u850_0103_original_1020_members_day1_max_difference": 1.2091561858440514e-06,
+          "v850_0103_original_1020_members_day1_max_difference": 9.282546882261045e-07,
+          "tp_1003_independent_mean_max_difference": 2.47955322265625e-05,
+          "t2m_1003_independent_mean_max_difference": 0.000823974609375,
+          "tp_1229_independent_mean_max_difference": 1.33514404296875e-05,
+          "t2m_1229_independent_mean_max_difference": 0.000823974609375
+        },
+        "february_alignment": "Last-February starts share slot 0228; actual leap-year dates are 0229."
       }
     },
     {
@@ -151,8 +202,8 @@
       "summary": "Main IFS, secondary GFS, and delayed ERA5 sources are separated with PDF-only public briefings.",
       "details": {
         "sources": 3,
-        "issues": 67,
-        "regional_outlooks": 54,
+        "issues": 73,
+        "regional_outlooks": 58,
         "matched_issue": "20260722"
       }
     },
@@ -163,13 +214,12 @@
       "status": "green",
       "summary": "Public JSON is finite and free of internal paths, credentials, and raw assets.",
       "details": {
-        "json_files_scanned": 147,
-        "bytes_scanned": 89531851
+        "json_files_scanned": 158,
+        "bytes_scanned": 104681182
       }
     }
   ],
   "warnings": [
-    "Validated for this JJAS issue; full-year model climatology is not yet available.",
     "Final V07B 2001\u20132022 baseline is validated for all 42 valid days; the audited file is seasonal.",
     "External 28 July research builder is not present in this standalone dashboard clone; checked-in formula, schema, and publication gates still ran."
   ],

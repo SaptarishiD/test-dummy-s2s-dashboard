@@ -53,9 +53,9 @@ prototype. The web interface itself retains the neutral S2S Research identity.
 
 The India anomalies use a calendar-interpolated, lead-matched 2002–2021 model
 native reforecast climatology. They are not IMD or IMERG anomalies. The
-validated native climatology currently covers JJAS initialization slots.
-Outside that window, year-round automation publishes only raw weekly rainfall
-and mean temperature; anomalies and regional probabilities are withheld. The
+validated native climatology covers all 104 initialization slots across the full year.
+The full-year baseline supports rainfall, temperature, and 850 hPa wind
+anomalies, including interpolation across December–January. The
 India climatology does not extend beyond its 27 × 27 grid. The global viewer
 uses a separate exact-28-July, lead-matched 2002–2021
 model climatology for
@@ -104,7 +104,7 @@ the compact map and selected-location summaries with:
 python scripts/build_regional_outlook.py \
   --forecast /private/path/to/completed-forecast.nc \
   --public-forecast public/data/forecasts/ifs/YYYYMMDD.json \
-  --climatology /private/path/to/fuxi_s2s_jjas_model_climatology_2002_2021_loyo.nc \
+  --climatology /private/path/to/fuxi_s2s_full_year_model_climatology_2002_2021_loyo.nc \
   --minimum-valid-members 100 \
   --output public/data/regional/ifs/YYYYMMDD.json
 npm run dev
@@ -134,8 +134,9 @@ explicit unavailable state until that issue is regenerated.
 IFS 26 September 2026 is the first schema-v3 extreme package. EFI and Shift of
 Tails compare each complete weekly 100-member forecast distribution with the
 native 2002–2021 FuXi model climate. The builder automatically selects the
-three native initialization calendar dates within ±4 days of an IFS issue; for
-26 September those are 22, 26, and 29 September, providing 3,060 reference
+three native initialization calendar dates within ±7 days of an IFS issue; for
+26 September those are 22, 26, and 29 September; for 4 October they are
+29 September, 3 October, and 6 October. Each set provides 3,060 reference
 samples per grid cell and lead week. Rainfall is accumulated as a seven-day
 total before comparison; temperature is averaged over the same complete week.
 Only derived fields and seven compact forecast/model-climate quantiles are
@@ -162,10 +163,22 @@ synthetic fields.
 
 The clean operational export bridge runs the extreme builder automatically for
 IFS when its validated private member file is available. If the archive does
-not provide three common 2002–2021 starts inside the ±4-day window, the step
+not provide three common 2002–2021 starts inside the ±7-day window, the step
 exits successfully without changing the issue package and the unavailable state
-remains explicit. This makes publication repeatable without weakening the
-model-climate matching contract.
+remains explicit. Incomplete model-climate references remain unpublished.
+
+The private full-year baseline lives under
+`native_reforecast_full_year_2002_2021`. Run `scripts/build_full_year_climatology.py`
+to extract resumable India subsets from the completed native global archive,
+then combine all 104 slots and 20 years. The matching CPU Slurm templates are
+in `automation/slurm/`. Validated JJAS yearly means are preserved unchanged.
+`scripts/validate_full_year_climatology.py` checks completeness, yearly weighting,
+seasonal overlap, and independent native members and climatology means before activation.
+The native calendar has 104 starts per year. Its last February start is 29 February
+in leap years and 28 February otherwise; these share the 0228 baseline label so
+every slot retains all 20 years. Both climatology files record the actual source
+date for each year and slot. Extraction visits all 105 distinct native date labels
+(Slurm array indices 0–104); combining produces 104 aligned climatology slots.
 
 ### Implementation presentation
 
@@ -218,9 +231,9 @@ briefing, and checksums. The website presents only compact derived fields and
 the PDF download. Raw initial conditions, NetCDF files, and ensemble-member
 fields are never published.
 
-Standard JJAS PDFs contain four rainfall/temperature pages; an issue with the
-850 hPa wind capability adds a fifth wind page. Raw-only out-of-season PDFs
-contain two pages.
+Standard anomaly-enabled PDFs contain four rainfall/temperature pages; an issue with the
+850 hPa wind capability adds a fifth wind page. Legacy seasonal-baseline PDFs
+outside their coverage contain two raw-field pages.
 Each page uses a 2 × 2 Weeks 1–4 map layout. The interactive website retains all
 six forecast weeks for exploratory research.
 

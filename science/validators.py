@@ -20,6 +20,7 @@ from .contracts import (
     IMERG_CLIMATOLOGY,
 )
 from .formulas import calendar_interpolation, climatology_spread
+from .calendar import full_year_slots
 
 Status = Literal["green", "warning", "failure"]
 
@@ -216,6 +217,9 @@ def validate_fuxi_climatology(
         if not np.all(dataset.hindcast_sample_count.values == 20):
             raise ValueError("one or more climatology slots is incomplete")
         slots = dataset.init_slot.values.astype(str)
+        full_year = full_year_slots(slots)
+        if dataset.attrs.get("calendar_scope") == "full_year" and not full_year:
+            raise ValueError("full-year climatology lacks its 104 native calendar slots")
         if not {"0725", "0728"}.issubset(slots):
             raise ValueError("required calendar interpolation slots are absent")
         tp_left = dataset.tp_ensemble_mean.sel(init_slot="0725").values.astype(
@@ -268,14 +272,15 @@ def validate_fuxi_climatology(
             "complete_sample_count_slots": int(
                 np.count_nonzero(dataset.hindcast_sample_count.values == 20)
             ),
-            "calendar_scope": "JJAS only",
+            "calendar_scope": "Full year" if full_year else "JJAS only",
         }
     return ValidationCheck(
         id="fuxi_climatology",
         label="Model climatology",
         group="source",
-        status="warning",
-        summary="Validated for this JJAS issue; a full-year model climatology is not yet available.",
+        status="green" if full_year else "warning",
+        summary=("Validated full-year native model climatology: 104 slots, 20 equally weighted years."
+                 if full_year else "Validated seasonal native model climatology; dates outside its slots are withheld."),
         details=details,
     )
 

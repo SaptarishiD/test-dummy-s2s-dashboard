@@ -7,12 +7,16 @@ import argparse
 import copy
 import hashlib
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import xarray as xr
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from science.calendar import calendar_bracket, full_year_slots
 
 
 RAW_PRODUCT_KEY = "wind850_mean"
@@ -109,22 +113,11 @@ def weekly_mean(values: np.ndarray) -> np.ndarray:
     return array.reshape(*array.shape[:-3], 6, 7, *array.shape[-2:]).mean(axis=-3)
 
 
-def bracket(slots: np.ndarray, target: str) -> tuple[str, str, float]:
-    labels = sorted(str(value) for value in slots)
-    target_date = np.datetime64(f"2000-{target[:2]}-{target[2:]}")
-    dates = np.asarray(
-        [np.datetime64(f"2000-{value[:2]}-{value[2:]}") for value in labels]
-    )
-    matches = np.flatnonzero(dates == target_date)
-    if matches.size:
-        label = labels[int(matches[0])]
-        return label, label, 0.0
-    insertion = int(np.searchsorted(dates, target_date))
-    if insertion == 0 or insertion == len(dates):
-        raise ValueError(f"{target} is outside the wind climatology")
-    left_date, right_date = dates[insertion - 1], dates[insertion]
-    weight = float((target_date - left_date) / (right_date - left_date))
-    return labels[insertion - 1], labels[insertion], weight
+def bracket(slots: np.ndarray, target: str, *, year: int = 2000) -> tuple[str, str, float]:
+    """Bracket calendar dates, wrapping only a complete full-year baseline."""
+    full_year = full_year_slots(slots)
+    return calendar_bracket(slots, target, cyclic=full_year,
+                            year=year, native_february=full_year)
 
 
 def flatten(values: np.ndarray) -> list[float]:
@@ -244,18 +237,20 @@ def augment_wind_products(
             raise ValueError("wind climatology must contain exactly 2002-2021")
         if climatology.sizes.get("lead_day") != 42:
             raise ValueError("wind climatology must contain 42 lead days")
-        left, right, right_weight = bracket(climatology.init_slot.values, target)
+        left, right, right_weight = bracket(climatology.init_slot.values, target,
+                                           year=int(issue['model_state_time'][:4]))
+        selected_climatology = climatology.sel(init_slot=list(dict.fromkeys((left, right))))
         u_climatology = ordered_values(
-            climatology.u850_ensemble_mean,
+            selected_climatology.u850_ensemble_mean,
             CLIMATOLOGY_DIMS,
             "climatology U850",
         )
         v_climatology = ordered_values(
-            climatology.v850_ensemble_mean,
+            selected_climatology.v850_ensemble_mean,
             CLIMATOLOGY_DIMS,
             "climatology V850",
         )
-        slot_labels = [str(value) for value in climatology.init_slot.values]
+        slot_labels = [str(value) for value in selected_climatology.init_slot.values]
         left_index = slot_labels.index(left)
         right_index = slot_labels.index(right)
         u_daily = (

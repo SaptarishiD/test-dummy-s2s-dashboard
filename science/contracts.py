@@ -72,7 +72,7 @@ FUXI_CLIMATOLOGY = ClimatologyContract(
     source_id="fuxi_native_reforecast_climatology",
     baseline="2002-2021",
     sample_count=20,
-    calendar_scope="JJAS native initialization slots",
+    calendar_scope="104 native initialization slots across the full year",
     units="TP: mm day-1; T2M: K",
 )
 
