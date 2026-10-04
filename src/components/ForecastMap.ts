@@ -553,7 +553,7 @@ export class ForecastMap {
     keyLabel.setAttribute("y", "43");
     keyLabel.textContent = productKey === "wind850_anomaly"
       ? "Anomaly flow direction"
-      : "Mean wind flow direction";
+      : "Mean flow direction";
     key.append(background, keyLine, keyLabel);
     plot.append(key);
   }
