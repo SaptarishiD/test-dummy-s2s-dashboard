@@ -163,6 +163,31 @@ def test_february_reference_keeps_all_twenty_native_years(tmp_path, monkeypatch)
     assert select_climate_slots(Path('/unused'), '20260228', tmp_path) == slots
 
 
+@pytest.mark.parametrize(('current_source','current_issue','matching'), [
+    ('ifs','20261004',True), ('ifs','20260930',False), ('era5','20261004',False),
+])
+def test_extreme_enrichment_refreshes_only_its_existing_current_pointer(
+    tmp_path, current_source, current_issue, matching
+):
+    forecast = tmp_path / 'forecast.json'
+    regional = tmp_path / 'regional.json'
+    catalog = tmp_path / 'index.json'
+    forecast.write_text(json.dumps({'issue':{'available_products':['rainfall_efi']}, 'products':{'rainfall_efi':{}}}))
+    regional.write_text('{}')
+    catalog.write_text(json.dumps({
+        'current': {'source_id':current_source,'issue_id':current_issue,'forecast_sha256':'old'},
+        'initial_condition_sources':[{'id':'ifs','issues':[{'id':'20261004'}]}],
+    }))
+    builder.update_catalog(catalog,'20261004',forecast,regional)
+    result = json.loads(catalog.read_text())
+    assert result['current']['source_id'] == current_source
+    assert result['current']['issue_id'] == current_issue
+    assert result['current']['forecast_sha256'] == (builder.sha256(forecast) if matching else 'old')
+    if matching:
+        assert result['current']['capabilities']['extreme_products'] is True
+        assert result['current']['available_products'] == ['rainfall_efi']
+
+
 def test_ineligible_october_issue_skips_without_regional_file(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

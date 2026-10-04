@@ -568,8 +568,13 @@ def update_catalog(
             "regional_sha256": sha256(regional_path),
         }
     )
-    # Preserve the operational current/default pointers; the base publisher is
-    # authoritative for issue selection and this step only adds capabilities.
+    # Keep issue selection intact while refreshing the checksum used to load
+    # the current asset after its extreme fields have changed.
+    pointer = catalog.get('current')
+    if isinstance(pointer, dict) and pointer.get('source_id') == 'ifs' and pointer.get('issue_id') == issue_id:
+        pointer['forecast_sha256'] = issue['checksums']['forecast_sha256']
+        pointer['available_products'] = available
+        pointer['capabilities'] = dict(issue['capabilities'])
     write_json(path, catalog)
 
 
