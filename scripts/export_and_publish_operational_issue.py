@@ -271,11 +271,13 @@ def extreme_postprocess_command(
     builder = export_dashboard / "scripts/build_extreme_products.py"
     for label, path in (
         ("published forecast JSON", forecast_json),
-        ("published regional JSON", regional_json),
         ("extreme product builder", builder),
     ):
         if not path.is_file():
             raise ValueError(f"{label} is not a file: {path}")
+    # The builder checks date eligibility before reading regional_json. Outside
+    # the validated climatology no regional package is exported, and the
+    # --skip-ineligible path must remain available for those raw-only issues.
     return [
         args.operational_python,
         str(builder),

@@ -156,16 +156,21 @@ def test_extreme_forecast_uses_validated_ifs_member_file(
     ) is None
 
 
+@pytest.mark.parametrize("with_regional", [True, False])
 def test_extreme_postprocess_is_issue_scoped_and_skips_ineligible_dates(
     tmp_path: Path,
+    with_regional: bool,
 ) -> None:
     dashboard = tmp_path / "dashboard"
     forecast_json = dashboard / "public/data/forecasts/ifs/20260930.json"
     regional_json = dashboard / "public/data/regional/ifs/20260930.json"
     builder_script = dashboard / "scripts/build_extreme_products.py"
-    for path in (forecast_json, regional_json, builder_script):
+    for path in (forecast_json, builder_script):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
+    if with_regional:
+        regional_json.parent.mkdir(parents=True, exist_ok=True)
+        regional_json.touch()
     private_forecast = tmp_path / "20260930.nc"
     private_forecast.touch()
     command = extreme_postprocess_command(

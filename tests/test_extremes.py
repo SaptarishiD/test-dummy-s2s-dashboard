@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from argparse import Namespace
 from pathlib import Path
 
 import numpy as np
@@ -132,6 +133,29 @@ def test_complete_week_enforcement_and_precipitation_total() -> None:
     assert np.isnan(weekly[0, 0, 0])
     with np.testing.assert_raises(ValueError):
         complete_weekly_samples(np.ones((2, 41)), aggregation="mean")
+
+
+def test_ineligible_october_issue_skips_without_regional_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    forecast = tmp_path / "forecast.json"
+    forecast.write_text(json.dumps({"issue": {
+        "initialization": "2026-10-04T00:00:00Z",
+        "initial_condition_source": {"id": "ifs"},
+    }}))
+    original = forecast.read_bytes()
+    regional = tmp_path / "absent-regional.json"
+    monkeypatch.setattr(builder, "select_climate_slots", lambda *_args: ())
+    assert builder.build(Namespace(
+        public_forecast=forecast,
+        regional=regional,
+        reforecast_zarr=tmp_path / "archive.zarr",
+        reforecast_shards=tmp_path / "shards",
+        skip_ineligible=True,
+    )) is False
+    assert forecast.read_bytes() == original
+    assert not regional.exists()
 
 
 def test_joint_matrix_uses_paired_valid_members_and_boundary_rule() -> None:
