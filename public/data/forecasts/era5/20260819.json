@@ -23,9 +23,7 @@
       "id": "era5"
     },
     "downloads": {
-      "compact_json": "data/forecasts/era5/20260819.json",
-      "india_pdf": "downloads/era5/20260819/S2S_Research_India_Weeks1-4_ERA5_20260819.pdf",
-      "india_pdf_sha256": "c71930ebe106c530919be06d2a9dea41b2a061914fe8401342a7ad84efcb2ca3"
+      "compact_json": "data/forecasts/era5/20260819.json"
     },
     "available_products": [
       "rainfall_total",
