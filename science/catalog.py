@@ -2,7 +2,9 @@
 
 The catalog is deliberately derived from files that are already safe for the
 website.  It never scans private forecast storage and it advances the Current
-pointer only when a complete 100-member IFS package is present.
+pointer only when a complete 100-member IFS package is present, or when an IFS
+issue record explicitly carries ``"limited_current": true`` (a manually
+reviewed limited-member release published while the cluster is unavailable).
 """
 
 from __future__ import annotations
@@ -145,6 +147,9 @@ def enrich_issue(
     published_at = str(forecast.get("generated_at") or result["initialization"])
     valid_through = str(forecast.get("weeks", [{}])[-1].get("valid_end", ""))
     production = int(result["members"]) == PRODUCTION_MEMBERS
+    limited_current = (
+        source_id == PRIMARY_SOURCE_ID and result.get("limited_current") is True
+    )
     member_class = "production" if production else "limited"
     if not production:
         label = "Limited experiment"
@@ -199,7 +204,7 @@ def enrich_issue(
         }
     )
     complete = bool(
-        production
+        (production or limited_current)
         and forecast_path.is_file()
         and retained_pdf
         and (not regional_relative or regional_available)
@@ -290,7 +295,11 @@ def build_catalog(
     current_issue["presentation"] = {
         "section": "current",
         "label": "Current guidance",
-        "member_class": "production",
+        "member_class": (
+            "production"
+            if int(current_issue["members"]) == PRODUCTION_MEMBERS
+            else "limited"
+        ),
     }
     reference_issue = (
         max(complete_by_source["era5"], key=lambda item: item["id"])

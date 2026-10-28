@@ -34,16 +34,28 @@ def on_cadence(issues: list[dict]) -> list[dict]:
     ]
 
 
+def current_eligible(item: dict) -> bool:
+    """100-member issues, or IFS issues explicitly released as limited Current."""
+
+    return item["members"] == 100 or item.get("limited_current") is True
+
+
 def test_current_is_latest_complete_on_cadence_production_ifs_issue() -> None:
     index = load(DATA / "index.json")
     ifs = next(
         source for source in index["initial_condition_sources"] if source["id"] == "ifs"
     )
-    production = on_cadence([item for item in ifs["issues"] if item["members"] == 100])
+    eligible = on_cadence([item for item in ifs["issues"] if current_eligible(item)])
+    current_record = next(
+        item for item in ifs["issues"] if item["id"] == index["current"]["issue_id"]
+    )
     assert index["default_source"] == "ifs"
     assert index["current"]["source_id"] == "ifs"
-    assert index["current"]["members"] == 100
-    assert index["current"]["issue_id"] == max(item["id"] for item in production)
+    assert current_eligible(current_record)
+    assert current_record["presentation"]["member_class"] == (
+        "production" if current_record["members"] == 100 else "limited"
+    )
+    assert index["current"]["issue_id"] == max(item["id"] for item in eligible)
     assert index["latest_successful_issue"] == index["current"]["issue_id"]
 
 
@@ -87,7 +99,7 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
     expected_issue = max(
         item["id"]
         for item in on_cadence(ifs_source["issues"])
-        if item["members"] == 100
+        if current_eligible(item)
     )
     rebuilt = build_catalog(
         index,
@@ -101,7 +113,7 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
         source for source in rebuilt["initial_condition_sources"] if source["id"] == "ifs"
     )
     expected_ifs_issue = max(
-        item["id"] for item in rebuilt_ifs["issues"] if item["members"] == 100
+        item["id"] for item in rebuilt_ifs["issues"] if current_eligible(item)
     )
     assert rebuilt_ifs["default_issue"] == expected_ifs_issue
     assert rebuilt["latest_reference"]["source_id"] == "era5"
@@ -111,6 +123,27 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
         if item["id"] == "20260802"
     )
     assert newer_limited["presentation"]["label"] == "Limited experiment"
+
+
+def test_limited_issue_needs_explicit_release_to_become_current() -> None:
+    index = load(DATA / "index.json")
+    unflagged = copy.deepcopy(index)
+    ifs_source = next(
+        source for source in unflagged["initial_condition_sources"] if source["id"] == "ifs"
+    )
+    for item in ifs_source["issues"]:
+        item.pop("limited_current", None)
+    rebuilt = build_catalog(
+        unflagged,
+        PUBLIC,
+        datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
+    )
+    assert rebuilt["current"]["members"] == 100
+    assert rebuilt["current"]["issue_id"] == max(
+        item["id"]
+        for item in on_cadence(ifs_source["issues"])
+        if item["members"] == 100
+    )
 
 
 def test_next_update_uses_wednesday_sunday_utc_cadence() -> None:

@@ -184,7 +184,11 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
         )
         if not record:
             raise ValueError(f"deployed pointer is not cataloged: {source_id}/{issue_id}")
-        if record.get("members") != 100:
+        limited_current = (
+            (source_id, issue_id) == (actual_current_source, actual_current_issue)
+            and record.get("limited_current") is True
+        )
+        if record.get("members") != 100 and not limited_current:
             raise ValueError(f"deployed pointer is not 100-member: {source_id}/{issue_id}")
         relative = f"data/{record['forecast']}"
         forecast_bytes = fetch(args.base_url, relative, 1, args.timeout)
@@ -197,7 +201,7 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
             issue.get("initial_condition_source", {}).get("id") != source_id
             or str(issue.get("initialization", ""))[:10].replace("-", "")
             != issue_id
-            or issue.get("members") != 100
+            or issue.get("members") != record.get("members")
         ):
             raise ValueError(f"deployed forecast metadata mismatch: {relative}")
         verified_assets.append(relative)

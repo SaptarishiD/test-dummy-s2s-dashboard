@@ -304,6 +304,41 @@ function friendlyDate(isoDate: string, includeYear = false): string {
   }).format(date);
 }
 
+const ERA5_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS: Partial<Record<ProductKey, string>> = {
+  rainfall_anomaly: "Shows where a week may be wetter or drier than the 2011–2025 ERA5 reanalysis average for the same calendar days.",
+  temperature_anomaly: "Shows where a week may be warmer or cooler than the 2011–2025 ERA5 reanalysis average for the same calendar days.",
+};
+
+function plainLanguageDescription(forecast: ForecastData, product: ProductKey): string {
+  const era5Baseline = forecast.issue.climatology_alignment?.status === "era5_reference";
+  return (era5Baseline && ERA5_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS[product]) ||
+    PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[product];
+}
+
+/** Hatch cells that an issue's source package does not cover. */
+function withCoverage(week: ForecastWeek, forecast: ForecastData): ForecastWeek {
+  const coverage = forecast.grid.coverage_mask;
+  if (!coverage) return week;
+  const fields = Object.fromEntries(
+    Object.entries(week.fields).map(([key, values]) => [
+      key,
+      values?.map((value, index) => coverage[index] ? value : null),
+    ]),
+  ) as ForecastWeek["fields"];
+  const vectors = week.vectors
+    ? Object.fromEntries(
+      Object.entries(week.vectors).map(([key, vector]) => [
+        key,
+        vector && {
+          u: vector.u.map((value, index) => coverage[index] ? value : Number.NaN),
+          v: vector.v.map((value, index) => coverage[index] ? value : Number.NaN),
+        },
+      ]),
+    ) as ForecastWeek["vectors"]
+    : week.vectors;
+  return { ...week, fields, vectors };
+}
+
 function displayWeek(week: ForecastWeek, product: ProductKey): ForecastWeek {
   if (product !== "rainfall_total") return week;
   const rainfall = week.fields.rainfall_total;
@@ -358,7 +393,10 @@ function renderInitializationComparison(
     sourceGrid.replaceChildren();
     sourceOrder.forEach((sourceId) => {
       const sourceForecast = forecasts[sourceId]!;
-      const week = displayWeek(sourceForecast.weeks[weekIndex], definition.sourceKey);
+      const week = displayWeek(
+        withCoverage(sourceForecast.weeks[weekIndex], sourceForecast),
+        definition.sourceKey,
+      );
       const panel = document.createElement("article");
       panel.className = "india-comparison-panel";
       panel.innerHTML = `<h4>${sourceForecast.issue.initial_condition_source.short_label}</h4><div class="india-map-frame"></div>`;
@@ -559,6 +597,16 @@ export function renderForecastPage(
       </aside>
     `
     : "";
+  const limitedCurrentBanner = isCurrent && forecast.issue.members < 100
+    ? `
+      <aside class="india-archive-banner" aria-label="Limited forecast notice">
+        <div>
+          <strong>Limited ${forecast.issue.members}-member forecast</strong>
+          <p>${forecast.issue.scientific_status}</p>
+        </div>
+      </aside>
+    `
+    : "";
   const comparisonCard = activeDomain?.id !== "india"
     ? ""
     : initializationComparison
@@ -612,6 +660,7 @@ export function renderForecastPage(
       </header>
 
       ${archiveBanner}
+      ${limitedCurrentBanner}
 
       <div class="india-map-workspace">
         <div class="india-view-selector" role="group" aria-label="Forecast view">
@@ -696,7 +745,7 @@ export function renderForecastPage(
               <section class="india-map-guide" aria-labelledby="india-map-guide-title">
                 <span>How to read these maps</span>
                 <h2 id="india-map-guide-title" class="india-selected-product">${PRESENTATION_PRODUCTS[defaultProduct].label}</h2>
-                <p><span id="india-product-explanation">${PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[defaultProduct]}</span> Hover, tap, or focus a map for local values. Click a supported cell for all-week detail.</p>
+                <p><span id="india-product-explanation">${plainLanguageDescription(forecast, defaultProduct)}</span> Hover, tap, or focus a map for local values. Click a supported cell for all-week detail.</p>
                 <p class="india-visual-note" id="india-visual-note"></p>
                 <details class="india-probability-definition" id="india-probability-definition" hidden>
                   <summary>How terciles are defined</summary>
@@ -1337,10 +1386,10 @@ export function renderForecastPage(
       positionProductIndicator();
       container.querySelector(".india-selected-product")!.textContent = product.label;
       container.querySelector("#india-product-explanation")!.textContent =
-        PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[selectedProduct];
+        plainLanguageDescription(activeForecast, selectedProduct);
       makeMapPanels(
         activeForecast.weeks.slice(rangeStart, rangeStart + 4)
-          .map((week) => displayWeek(week, selectedProduct)),
+          .map((week) => displayWeek(withCoverage(week, activeForecast), selectedProduct)),
         (frame, week) => {
           const map = new ForecastMap(
             frame,
@@ -1360,7 +1409,8 @@ export function renderForecastPage(
         ? `${product.description}. ${windRenderingMode === "streamlines" ? `Streamlines trace the interpolated ${selectedProduct === "wind850_anomaly" ? "anomaly " : ""}flow and include direction markers.` : "Arrows sample every third native grid point and use one product-specific scale across all weeks."} Shading is visually interpolated 1.5°→0.25°; hover values remain native-grid values.`
         : `${product.description.replace("100-member", `${activeForecast.issue.members}-member`)}. Visual-only bilinear interpolation from the ${activeForecast.grid.spacing_degrees}° native grid; hover values remain native-grid values.`;
       container.querySelector("#india-baseline-note")!.textContent = product.baseline
-        ? "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
+        ? activeForecast.issue.anomaly_baseline_note ??
+          "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
         : activeDomain?.id !== "india"
           ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
           : sourceId === "ifs"

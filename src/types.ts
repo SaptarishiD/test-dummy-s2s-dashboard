@@ -171,7 +171,7 @@ export interface ForecastData {
       domain_pdf_sha256?: string;
     };
     climatology_alignment?: {
-      status?: "available" | "unavailable_outside_jjas";
+      status?: "available" | "unavailable_outside_jjas" | "era5_reference";
       target_initialization_calendar_day?: string;
       model_state_calendar_day?: string;
       /** Legacy exports before initialization-slot alignment was corrected. */
@@ -185,6 +185,8 @@ export interface ForecastData {
       message?: string;
     };
     hindcast_years?: number[];
+    /** Replaces the default anomaly-baseline footnote, e.g. for an ERA5 baseline. */
+    anomaly_baseline_note?: string;
     observation_verification: {
       status: string;
       message: string;
@@ -203,6 +205,8 @@ export interface ForecastData {
     longitude: number[];
     india_mask?: boolean[];
     support_mask?: boolean[];
+    /** False where the issue's source package has no data; drawn as unavailable. */
+    coverage_mask?: boolean[];
     supported_cell_count: number;
     value_order: string;
   };

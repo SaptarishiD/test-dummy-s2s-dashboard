@@ -125,6 +125,19 @@ PRODUCTS = {
     },
 }
 
+# Issues whose catalog alignment is "era5_reference" use an observed-reanalysis
+# baseline instead of the native reforecast climatology.
+ERA5_ANOMALY_NOTES = {
+    "rainfall_anomaly": (
+        "Difference from the ERA5 2011–2025 average for the same calendar days; "
+        "includes model bias."
+    ),
+    "temperature_anomaly": (
+        "Difference from the ERA5 2011–2025 average for the same calendar days; "
+        "includes model bias."
+    ),
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -263,9 +276,19 @@ def build_pdf(
     source_label = forecast["issue"]["initial_condition_source"]["label"]
     members = forecast["issue"]["members"]
     warning = (
-        "Rapid 5-member experimental prototype"
+        f"Limited {members}-member experimental ensemble · not an operational warning"
         if members < 100
         else "Experimental research guidance · not an operational warning"
+    )
+    era5_baseline = (
+        forecast["issue"].get("climatology_alignment", {}).get("status")
+        == "era5_reference"
+    )
+    coverage_mask = forecast["grid"].get("coverage_mask")
+    uncovered = (
+        ~np.asarray(coverage_mask, dtype=bool).reshape(27, 27)
+        if coverage_mask is not None
+        else np.zeros((27, 27), dtype=bool)
     )
     ashoka_logo = plt.imread(BRAND_ASSETS / "ashoka-university.png")
     centre_logo = plt.imread(BRAND_ASSETS / "scdlds-centre.png")
@@ -356,6 +379,8 @@ def build_pdf(
                 values = np.asarray(week["fields"][product_key], dtype=np.float64).reshape(27, 27)
                 if definition["operation"] == "divide_by_seven":
                     values = values / 7.0
+                # Cells outside the source package stay blank rather than drawn.
+                values[uncovered] = np.nan
                 axes.set_facecolor("#edf5fb")
                 visual_values = bilinear_display(values)
                 image = axes.imshow(
@@ -378,6 +403,8 @@ def build_pdf(
                         )
                     u = np.asarray(vectors["u"], dtype=np.float64).reshape(27, 27)
                     v = np.asarray(vectors["v"], dtype=np.float64).reshape(27, 27)
+                    u[uncovered] = np.nan
+                    v[uncovered] = np.nan
                     latitude = np.asarray(forecast["grid"]["latitude"], dtype=np.float64)
                     longitude = np.asarray(forecast["grid"]["longitude"], dtype=np.float64)
                     stride = slice(1, None, 3)
@@ -441,10 +468,13 @@ def build_pdf(
             )
             colorbar.ax.tick_params(labelsize=7, length=2)
             colorbar.set_label(definition["units"], fontsize=9, fontweight="bold")
+            note = definition["note"]
+            if era5_baseline and product_key in ERA5_ANOMALY_NOTES:
+                note = ERA5_ANOMALY_NOTES[product_key]
             figure.text(
                 0.06,
                 0.035,
-                f"{definition['note']}  Visual-only bilinear interpolation 1.5°→0.25°; values remain native-grid.",
+                f"{note}  Visual-only bilinear interpolation 1.5°→0.25°; values remain native-grid.",
                 color="#52627a",
                 fontsize=7,
             )

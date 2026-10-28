@@ -115,7 +115,9 @@ def test_initial_condition_sources_are_never_conflated() -> None:
     assert ifs["category"] == "operational_initialization"
     ifs_issues = [(issue["id"], issue["members"]) for issue in ifs["issues"]]
     assert ifs["default_issue"] == max(
-        issue_id for issue_id, members in ifs_issues if members == 100
+        issue["id"]
+        for issue in ifs["issues"]
+        if issue["members"] == 100 or issue.get("limited_current") is True
     )
     assert {("20260819", 100), ("20260815", 100)} <= set(ifs_issues)
     assert "SST proxy" in ifs["description"]

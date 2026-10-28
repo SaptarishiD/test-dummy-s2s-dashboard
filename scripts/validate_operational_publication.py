@@ -671,8 +671,11 @@ def choose_scope(
         raise ValueError(f"latest GFS pointer is not cataloged: {gfs_id}")
     if ("era5", era5_id) not in records:
         raise ValueError(f"latest ERA5 pointer is not cataloged: {era5_id}")
-    if records[(primary_source_id, primary_id)].record.get("members") != 100:
-        raise ValueError("current issue must be a 100-member publication")
+    current_record = records[(primary_source_id, primary_id)].record
+    if current_record.get("members") != 100 and current_record.get("limited_current") is not True:
+        raise ValueError(
+            "current issue must be a 100-member publication or an approved limited_current release"
+        )
     if records[("gfs", gfs_id)].record.get("members") != 100:
         raise ValueError("latest GFS issue must be a 100-member publication")
     if records[("era5", era5_id)].record.get("members") != 100:
