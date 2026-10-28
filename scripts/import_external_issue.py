@@ -7,8 +7,10 @@ FuXi report package (any member count, any 1.5-degree sub-grid of the India
 grid), embeds them in the published 27x27 India grid, and writes a schema-v3
 forecast JSON carrying only what the package supports: raw weekly rainfall,
 temperature and 850 hPa wind, plus rainfall/temperature anomalies against the
-package's ERA5 calendar-day climatology.  Wind anomalies, extremes and regional
-probabilities are withheld because no model climatology is available.
+package's ERA5 calendar-day climatology.  With ``--wind850-climatology`` (yearly
+6-hourly ERA5 850 hPa U/V samples on the same domain, written by
+``scripts/fetch_era5_wind850.py``) an 850 hPa wind anomaly is added too.  Extremes and regional probabilities are withheld because no
+model climatology is available.
 
 Cells outside the package domain are written as finite placeholders and marked
 false in ``grid.coverage_mask``; the frontend hatches them as unavailable.
@@ -48,6 +50,7 @@ ERA5_BASELINE = (
     "ERA5 reanalysis, 2011–2025 calendar-day climatology (includes model bias)"
 )
 RAW_KEYS = ("rainfall_total", "temperature_mean", "wind850_mean")
+STEPS_PER_DAY = 4
 ANOMALY_KEYS = ("rainfall_anomaly", "temperature_anomaly")
 SOURCE_BLOCKS = {
     "ifs": {
@@ -118,9 +121,55 @@ def week_dates(dataset: xr.Dataset, initialization: date) -> list[tuple[str, str
     return dates
 
 
-def product_definitions(template: dict[str, Any], members: int) -> dict[str, Any]:
+def wind_climatology(
+    path: Path, initialization: date, latitude: np.ndarray, longitude: np.ndarray
+) -> dict[str, Any]:
+    """Weekly ERA5 U/V means per year and their equally weighted climatology.
+
+    The archive holds, for each year, 42 days x 4 synoptic times starting on the
+    initialization calendar day; the four 00/06/12/18 UTC samples approximate
+    each UTC daily mean, matching the model's daily lead convention.
+    """
+
+    archive = np.load(path)
+    if str(archive["start_mmdd"]) != initialization.strftime("%m%d"):
+        raise ValueError("wind climatology does not start on the initialization day")
+    if not (
+        np.allclose(archive["latitude"], latitude)
+        and np.allclose(archive["longitude"], longitude)
+    ):
+        raise ValueError("wind climatology grid differs from the forecast package")
+    years = [int(year) for year in archive["years"]]
+
+    def weekly(component: str) -> np.ndarray:
+        samples = np.stack([archive[f"{component}_{year}"] for year in years])
+        samples = np.asarray(samples, dtype=np.float64)
+        expected = (len(years), WEEKS * 7 * STEPS_PER_DAY, latitude.size, longitude.size)
+        if samples.shape != expected or not np.isfinite(samples).all():
+            raise ValueError(f"wind climatology {component} is incomplete")
+        return samples.reshape(
+            len(years), WEEKS, 7 * STEPS_PER_DAY, latitude.size, longitude.size
+        ).mean(axis=2)
+
+    u_yearly = weekly("u")
+    v_yearly = weekly("v")
+    return {
+        "years": years,
+        "u": u_yearly.mean(axis=0),
+        "v": v_yearly.mean(axis=0),
+        "speed": wind_speed(u_yearly, v_yearly).mean(axis=0),
+        "source": str(archive["source"]),
+    }
+
+
+def product_definitions(
+    template: dict[str, Any], members: int, wind_baseline: str | None
+) -> dict[str, Any]:
     products: dict[str, Any] = {}
-    for key in (*RAW_KEYS[:2], *ANOMALY_KEYS, RAW_KEYS[2]):
+    keys = (*RAW_KEYS[:2], *ANOMALY_KEYS, RAW_KEYS[2])
+    if wind_baseline:
+        keys = (*keys, "wind850_anomaly")
+    for key in keys:
         definition = copy.deepcopy(template["products"][key])
         definition["description"] = definition["description"].replace(
             "100-member", f"{members}-member"
@@ -130,6 +179,13 @@ def product_definitions(template: dict[str, Any], members: int) -> dict[str, Any
                 "Weekly-mean forecast minus the ERA5 calendar-day climatology"
             )
             definition["baseline"] = ERA5_BASELINE
+        if key == "wind850_anomaly":
+            definition["description"] = (
+                "Shading is the weekly ensemble-mean vector speed minus the ERA5 "
+                "mean of yearly vector speeds; arrows are the U/V anomaly from "
+                "the ERA5 mean"
+            )
+            definition["baseline"] = wind_baseline
         products[key] = definition
     return products
 
@@ -192,10 +248,32 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "wind850_mean": embed(wind_speed(u_mean, v_mean), rows, columns, shape),
     }
     vectors = {
-        "u": embed(u_mean, rows, columns, shape),
-        "v": embed(v_mean, rows, columns, shape),
+        "wind850_mean": {
+            "u": embed(u_mean, rows, columns, shape),
+            "v": embed(v_mean, rows, columns, shape),
+        }
     }
-    products = product_definitions(template, members)
+    wind_baseline = None
+    climate = None
+    if args.wind850_climatology:
+        climate = wind_climatology(
+            args.wind850_climatology,
+            initialization,
+            weekly["lat"].values,
+            weekly["lon"].values,
+        )
+        wind_baseline = (
+            f"ERA5 reanalysis, {climate['years'][0]}–{climate['years'][-1]} "
+            "calendar-week climatology (includes model bias)"
+        )
+        fields["wind850_anomaly"] = embed(
+            wind_speed(u_mean, v_mean) - climate["speed"], rows, columns, shape
+        )
+        vectors["wind850_anomaly"] = {
+            "u": embed(u_mean - climate["u"], rows, columns, shape),
+            "v": embed(v_mean - climate["v"], rows, columns, shape),
+        }
+    products = product_definitions(template, members, wind_baseline)
 
     weeks = []
     for index, (valid_start, valid_end) in enumerate(dates):
@@ -209,10 +287,11 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     key: summary(fields[key][index], mask, latitude) for key in products
                 },
                 "vectors": {
-                    "wind850_mean": {
-                        "u": flatten(vectors["u"][index]),
-                        "v": flatten(vectors["v"][index]),
+                    key: {
+                        "u": flatten(vector["u"][index]),
+                        "v": flatten(vector["v"][index]),
                     }
+                    for key, vector in vectors.items()
                 },
             }
         )
@@ -220,6 +299,34 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     model_state = initialization - timedelta(days=1)
     issue_path = f"forecasts/{args.source}/{args.issue}.json"
     speed = fields["wind850_mean"][:, coverage]
+    withheld = (
+        "extremes and regional probabilities"
+        if climate
+        else "wind anomalies, extremes and regional probabilities"
+    )
+    baseline_note = (
+        "Anomaly is the forecast minus the ERA5 reanalysis average for the same "
+        "calendar days (rainfall and temperature: 2011–2025"
+        + (
+            f"; 850 hPa wind: {climate['years'][0]}–{climate['years'][-1]}"
+            if climate
+            else ""
+        )
+        + "). It is not a model climatology, so it also contains the model's "
+        "systematic bias."
+    )
+    wind_diagnostics = (
+        {
+            "wind850_speed_anomaly_min_m_s": round(
+                float(fields["wind850_anomaly"][:, coverage].min()), 4
+            ),
+            "wind850_speed_anomaly_max_m_s": round(
+                float(fields["wind850_anomaly"][:, coverage].max()), 4
+            ),
+        }
+        if climate
+        else {}
+    )
     return {
         "schema_version": 3,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -245,8 +352,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "retrospectively outside the operational pipeline. Anomalies use an "
                 "ERA5 2011–2025 calendar-day climatology rather than lead-matched "
                 "model reforecasts, so they include systematic model bias. Data "
-                "cover 6–39°N, 66–99°E; wind anomalies, extremes and regional "
-                "probabilities are withheld."
+                f"cover 6–39°N, 66–99°E; {withheld} are withheld."
             ),
             "initial_condition_source": copy.deepcopy(SOURCE_BLOCKS[args.source]),
             "downloads": {"compact_json": f"data/{issue_path}"},
@@ -256,7 +362,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 "anomalies": True,
                 "regional_probabilities_eligible": False,
                 "wind850_mean": True,
-                "wind850_anomaly": False,
+                "wind850_anomaly": climate is not None,
                 "extreme_products": False,
                 "joint_outcomes": False,
                 "ensemble_spread": False,
@@ -274,10 +380,25 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     "anomalies include systematic model-versus-ERA5 bias."
                 ),
             },
-            "anomaly_baseline_note": (
-                "Anomaly is the forecast minus the ERA5 reanalysis average for the "
-                "same calendar days, 2011–2025. It is not a model climatology, so it "
-                "also contains the model's systematic bias."
+            "anomaly_baseline_note": baseline_note,
+            **(
+                {
+                    "wind850_climatology_alignment": {
+                        "status": "era5_reference",
+                        "target_initialization_calendar_day": initialization.strftime(
+                            "%m%d"
+                        ),
+                        "years": climate["years"],
+                        "source": climate["source"],
+                        "operation_order": (
+                            "average four 00/06/12/18 UTC samples per valid day over "
+                            "each seven-day week for every year, then equally "
+                            "average the yearly U/V and yearly vector speeds"
+                        ),
+                    }
+                }
+                if climate
+                else {}
             ),
             "observation_verification": {
                 "status": "not_available",
@@ -301,6 +422,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             ),
             "wind850_mean_speed_min_m_s": round(float(speed.min()), 4),
             "wind850_mean_speed_max_m_s": round(float(speed.max()), 4),
+            **wind_diagnostics,
         },
         "weeks": weeks,
     }
@@ -317,6 +439,11 @@ def main() -> int:
         type=Path,
         required=True,
         help="Published forecast JSON whose grid, India mask and legends are reused",
+    )
+    parser.add_argument(
+        "--wind850-climatology",
+        type=Path,
+        help="ERA5 850 hPa U/V samples from scripts/fetch_era5_wind850.py",
     )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()

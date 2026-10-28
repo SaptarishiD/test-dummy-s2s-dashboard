@@ -471,6 +471,14 @@ def build_pdf(
             note = definition["note"]
             if era5_baseline and product_key in ERA5_ANOMALY_NOTES:
                 note = ERA5_ANOMALY_NOTES[product_key]
+            wind_alignment = forecast["issue"].get("wind850_climatology_alignment", {})
+            if product_key == "wind850_anomaly" and wind_alignment.get("status") == "era5_reference":
+                years = wind_alignment["years"]
+                note = (
+                    "Shading: weekly wind-speed anomaly; arrows: weekly U/V "
+                    f"vector-component anomaly relative to the ERA5 {years[0]}–{years[-1]} "
+                    "average for the same calendar weeks; includes model bias."
+                )
             figure.text(
                 0.06,
                 0.035,
