@@ -290,6 +290,13 @@ def build_pdf(
         if coverage_mask is not None
         else np.zeros((27, 27), dtype=bool)
     )
+    # Crop the panels to the covered cells (grid is 39N->0N, 60E->99E at 1.5 deg).
+    covered_rows = np.flatnonzero((~uncovered).any(axis=1))
+    covered_columns = np.flatnonzero((~uncovered).any(axis=0))
+    west = 60.0 + 1.5 * covered_columns[0] - 0.75
+    east = 60.0 + 1.5 * covered_columns[-1] + 0.75
+    north = 39.0 - 1.5 * covered_rows[0] + 0.75
+    south = 39.0 - 1.5 * covered_rows[-1] - 0.75
     ashoka_logo = plt.imread(BRAND_ASSETS / "ashoka-university.png")
     centre_logo = plt.imread(BRAND_ASSETS / "scdlds-centre.png")
     metadata = {
@@ -379,8 +386,14 @@ def build_pdf(
                 values = np.asarray(week["fields"][product_key], dtype=np.float64).reshape(27, 27)
                 if definition["operation"] == "divide_by_seven":
                     values = values / 7.0
-                # Cells outside the source package stay blank rather than drawn.
-                values[uncovered] = np.nan
+                # Cells outside the source package are never drawn: clamp the
+                # display interpolation to the covered window, as at grid edges.
+                values = values[
+                    np.ix_(
+                        np.clip(np.arange(27), covered_rows[0], covered_rows[-1]),
+                        np.clip(np.arange(27), covered_columns[0], covered_columns[-1]),
+                    )
+                ]
                 axes.set_facecolor("#edf5fb")
                 visual_values = bilinear_display(values)
                 image = axes.imshow(
@@ -436,11 +449,18 @@ def build_pdf(
                     )
                 draw_geometry(axes, outline_segments, "#161616", 1.0)
                 draw_geometry(axes, admin_segments, "#333333", 0.38)
-                axes.set_xlim(59.25, 99.75)
-                axes.set_ylim(-0.75, 39.75)
+                axes.set_xlim(west, east)
+                axes.set_ylim(south, north)
                 axes.set_aspect("equal", adjustable="box")
-                axes.set_xticks([60, 70, 80, 90, 100])
-                axes.set_yticks([0, 10, 20, 30, 40])
+                cropped = bool(uncovered.any())
+                axes.set_xticks(
+                    [tick for tick in (60, 70, 80, 90, 100) if not cropped or west <= tick <= east]
+                )
+                axes.set_yticks(
+                    [tick for tick in (0, 10, 20, 30, 40) if not cropped or south <= tick <= north]
+                )
+                axes.set_xlim(west, east)
+                axes.set_ylim(south, north)
                 axes.tick_params(labelsize=7, length=2, colors="#455064")
                 axes.grid(color="#a7b7c8", linewidth=0.35, alpha=0.45, linestyle=":")
                 axes.set_title(

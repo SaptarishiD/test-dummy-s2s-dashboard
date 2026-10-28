@@ -227,7 +227,7 @@
     "initialization": "2026-10-28T00:00:00Z",
     "members": 11,
     "forecast": "forecasts/ifs/20261028.json",
-    "forecast_sha256": "5dfff38627a2456b9066dc12ea68177cf55aec773c57056f3666743cab902125",
+    "forecast_sha256": "5be71b37c6c5e4d391950724c44068c4503adaf9790f6dfd2a662b67cad0fa56",
     "valid_through": "2026-12-08",
     "published_at": "2026-10-28T23:30:47.311712+00:00",
     "available_products": [
@@ -250,7 +250,7 @@
   },
   "default_source": "ifs",
   "default_view": "india",
-  "generated_at": "2026-10-28T23:31:04Z",
+  "generated_at": "2026-10-28T23:58:59Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -3153,8 +3153,8 @@
             "member_class": "limited"
           },
           "checksums": {
-            "forecast_sha256": "5dfff38627a2456b9066dc12ea68177cf55aec773c57056f3666743cab902125",
-            "pdf_sha256": "f24179e2416e972503a0983ec27174d6f50e41063f73a1a418050166864dca0d"
+            "forecast_sha256": "5be71b37c6c5e4d391950724c44068c4503adaf9790f6dfd2a662b67cad0fa56",
+            "pdf_sha256": "0f56eb7830b488cbc386a1256fc507329403e9c6fb4ad31468419a5eabbcdb31"
           },
           "valid_through": "2026-12-08",
           "published_at": "2026-10-28T23:30:47.311712+00:00",

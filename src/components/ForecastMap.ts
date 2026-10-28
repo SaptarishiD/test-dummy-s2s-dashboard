@@ -99,6 +99,74 @@ function interpolateGridValue(
   return top * (1 - rowWeight) + bottom * rowWeight;
 }
 
+interface GridWindow {
+  rowStart: number;
+  rowEnd: number;
+  columnStart: number;
+  columnEnd: number;
+}
+
+function coverageWindow(grid: ForecastData["grid"]): GridWindow {
+  const rows = grid.latitude.length;
+  const columns = grid.longitude.length;
+  const full = { rowStart: 0, rowEnd: rows - 1, columnStart: 0, columnEnd: columns - 1 };
+  const coverage = grid.coverage_mask;
+  if (!coverage || coverage.length !== rows * columns) return full;
+  const coveredRows: number[] = [];
+  const coveredColumns: number[] = [];
+  coverage.forEach((covered, index) => {
+    if (!covered) return;
+    coveredRows.push(Math.floor(index / columns));
+    coveredColumns.push(index % columns);
+  });
+  if (!coveredRows.length) return full;
+  return {
+    rowStart: Math.min(...coveredRows),
+    rowEnd: Math.max(...coveredRows),
+    columnStart: Math.min(...coveredColumns),
+    columnEnd: Math.max(...coveredColumns),
+  };
+}
+
+/**
+ * The India geography paths are pre-projected onto the full published grid
+ * extent. When the view is cropped, rescale them onto the cropped frame.
+ */
+function geographyTransform(
+  grid: ForecastData["grid"],
+  longitudeMinimum: number,
+  longitudeMaximum: number,
+  latitudeMinimum: number,
+  latitudeMaximum: number,
+  mapHeight: number,
+): string | undefined {
+  const spacing = grid.spacing_degrees;
+  const fullWest = grid.longitude[0] - spacing / 2;
+  const fullEast = grid.longitude.at(-1)! + spacing / 2;
+  const fullNorth = grid.latitude[0] + spacing / 2;
+  const fullSouth = grid.latitude.at(-1)! - spacing / 2;
+  if (
+    fullWest === longitudeMinimum &&
+    fullEast === longitudeMaximum &&
+    fullNorth === latitudeMaximum &&
+    fullSouth === latitudeMinimum
+  ) {
+    return undefined;
+  }
+  const fullHeight = Math.max(
+    260,
+    Math.min(760, Math.round(MAP_WIDTH * (fullNorth - fullSouth) / (fullEast - fullWest))),
+  );
+  const scaleX = (fullEast - fullWest) / (longitudeMaximum - longitudeMinimum);
+  const scaleY = ((fullNorth - fullSouth) / (latitudeMaximum - latitudeMinimum)) *
+    (mapHeight / fullHeight);
+  const translateX = ((fullWest - longitudeMinimum) / (longitudeMaximum - longitudeMinimum)) *
+    MAP_WIDTH;
+  const translateY = ((latitudeMaximum - fullNorth) / (latitudeMaximum - latitudeMinimum)) *
+    mapHeight;
+  return `translate(${translateX} ${translateY}) scale(${scaleX} ${scaleY})`;
+}
+
 function sampleWindVector(
   grid: WindVectorGrid,
   point: Point,
@@ -304,6 +372,8 @@ export class ForecastMap {
   private readonly latitudeMinimum: number;
   private readonly latitudeMaximum: number;
   private readonly mapHeight: number;
+  private readonly window: GridWindow;
+  private readonly geographyTransform: string | undefined;
   private readonly instanceId: number;
   private readonly onSelect?: (selection: ForecastGridSelection) => void;
   private readonly selected?: ForecastGridSelection;
@@ -321,14 +391,25 @@ export class ForecastMap {
     this.onSelect = onSelect;
     this.selected = selected;
     const { latitude, longitude, spacing_degrees: spacing } = forecast.grid;
-    this.longitudeMinimum = longitude[0] - spacing / 2;
-    this.longitudeMaximum = longitude.at(-1)! + spacing / 2;
-    this.latitudeMaximum = latitude[0] + spacing / 2;
-    this.latitudeMinimum = latitude.at(-1)! - spacing / 2;
+    // Issues imported from a smaller source package crop the view to the cells
+    // their coverage mask marks as real data, so no empty band is drawn.
+    this.window = coverageWindow(forecast.grid);
+    this.longitudeMinimum = longitude[this.window.columnStart] - spacing / 2;
+    this.longitudeMaximum = longitude[this.window.columnEnd] + spacing / 2;
+    this.latitudeMaximum = latitude[this.window.rowStart] + spacing / 2;
+    this.latitudeMinimum = latitude[this.window.rowEnd] - spacing / 2;
     const aspect =
       (this.latitudeMaximum - this.latitudeMinimum) /
       (this.longitudeMaximum - this.longitudeMinimum);
     this.mapHeight = Math.max(260, Math.min(760, Math.round(MAP_WIDTH * aspect)));
+    this.geographyTransform = geographyTransform(
+      forecast.grid,
+      this.longitudeMinimum,
+      this.longitudeMaximum,
+      this.latitudeMinimum,
+      this.latitudeMaximum,
+      this.mapHeight,
+    );
     this.instanceId = ++forecastMapSequence;
     this.tooltip = document.createElement("div");
     this.tooltip.className = "map-tooltip";
@@ -574,8 +655,11 @@ export class ForecastMap {
     if (!context) throw new Error("Canvas rendering is unavailable");
 
     const sample = (row: number, column: number): number | null => {
-      const safeRow = Math.max(0, Math.min(latitude.length - 1, row));
-      const safeColumn = Math.max(0, Math.min(longitude.length - 1, column));
+      const safeRow = Math.max(this.window.rowStart, Math.min(this.window.rowEnd, row));
+      const safeColumn = Math.max(
+        this.window.columnStart,
+        Math.min(this.window.columnEnd, column),
+      );
       return values[safeRow * longitude.length + safeColumn];
     };
 
@@ -952,8 +1036,11 @@ export class ForecastMap {
       if (delta) {
         event.preventDefault();
         pinnedSelection = false;
-        latIndex = Math.max(0, Math.min(latitude.length - 1, latIndex + delta[0]));
-        lonIndex = Math.max(0, Math.min(longitude.length - 1, lonIndex + delta[1]));
+        latIndex = Math.max(this.window.rowStart, Math.min(this.window.rowEnd, latIndex + delta[0]));
+        lonIndex = Math.max(
+          this.window.columnStart,
+          Math.min(this.window.columnEnd, lonIndex + delta[1]),
+        );
         show();
         return;
       }
@@ -987,12 +1074,17 @@ export class ForecastMap {
     );
   }
 
+  private applyGeographyTransform(path: SVGPathElement): void {
+    if (this.geographyTransform) path.setAttribute("transform", this.geographyTransform);
+  }
+
   private addWorldBoundaries(plot: SVGGElement): void {
     if (!this.geography.world_path) return;
     const path = svgElement("path");
     path.setAttribute("d", this.geography.world_path);
     path.setAttribute("class", "map-world-outline");
     path.setAttribute("fill-rule", "evenodd");
+    this.applyGeographyTransform(path);
     plot.append(path);
   }
 
@@ -1002,6 +1094,7 @@ export class ForecastMap {
     path.setAttribute("d", this.geography.india_outline_path);
     path.setAttribute("class", "map-outline");
     path.setAttribute("fill-rule", "evenodd");
+    this.applyGeographyTransform(path);
     plot.append(path);
   }
 
@@ -1011,6 +1104,7 @@ export class ForecastMap {
     path.setAttribute("d", this.geography.india_admin_path);
     path.setAttribute("class", "map-india-admin");
     path.setAttribute("fill-rule", "evenodd");
+    this.applyGeographyTransform(path);
     plot.append(path);
   }
 }
