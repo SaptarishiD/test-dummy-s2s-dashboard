@@ -168,10 +168,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "lead_days": WEEKS * 7,
             "status": "warning",
             "scientific_status": (
-                "AI S2S multi-model ensemble mean for weeks 1–4: ensemble-mean fields "
-                "only. Anomalies are relative to a seasonally matched 2011–2025 "
-                "calendar-day climatology rather than a model climatology, so they "
-                "include systematic forecast-system bias. This issue has no "
+                "Ensemble-mean fields only. This issue has no "
                 "probability, spread or extreme products."
             ),
             "initial_condition_source": {

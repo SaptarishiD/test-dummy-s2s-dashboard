@@ -11,7 +11,7 @@
     "ensemble_representation": "multi_model_ensemble_mean",
     "lead_days": 28,
     "status": "warning",
-    "scientific_status": "AI S2S multi-model ensemble mean for weeks 1\u20134: ensemble-mean fields only. Anomalies are relative to a seasonally matched 2011\u20132025 calendar-day climatology rather than a model climatology, so they include systematic forecast-system bias. This issue has no probability, spread or extreme products.",
+    "scientific_status": "Ensemble-mean fields only. This issue has no probability, spread or extreme products.",
     "initial_condition_source": {
       "label": "AI S2S multi-model ensemble mean",
       "short_label": "Multi-model",

@@ -233,7 +233,7 @@
     "initialization": "2026-11-08T00:00:00Z",
     "members": null,
     "forecast": "forecasts/mme/20261108.json",
-    "forecast_sha256": "bae2af54711a15081fd674fa94652823aaed9638cd15b721cf7b53d98428cf54",
+    "forecast_sha256": "7a19e8162abf0048ff4a4359ab8ac94e52fb3bad7f33741f6e5ba7182d0cd175",
     "valid_through": "2026-12-05",
     "published_at": "2026-11-09T07:54:44.913940+00:00",
     "available_products": [
@@ -4232,7 +4232,7 @@
             "member_class": "ensemble_mean"
           },
           "checksums": {
-            "forecast_sha256": "bae2af54711a15081fd674fa94652823aaed9638cd15b721cf7b53d98428cf54",
+            "forecast_sha256": "7a19e8162abf0048ff4a4359ab8ac94e52fb3bad7f33741f6e5ba7182d0cd175",
             "pdf_sha256": "ccd85e1b28c818795853052bb4c40b17b078966a56ff46687313e41a94c2379a"
           },
           "valid_through": "2026-12-05",
