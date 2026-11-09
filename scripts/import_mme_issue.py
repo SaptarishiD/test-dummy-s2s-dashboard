@@ -205,10 +205,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                 ),
                 "message": "Anomalies are relative to the 2011–2025 average for the same calendar days.",
             },
-            "anomaly_baseline_note": (
-                "Anomaly is the forecast minus the 2011–2025 average for the same "
-                "calendar days (rainfall, temperature and 850 hPa wind)."
-            ),
+            "anomaly_baseline_note": "Anomaly taken against climatology data for the respective variables",
             "multi_model_composition": [
                 {
                     "week": row["week"],

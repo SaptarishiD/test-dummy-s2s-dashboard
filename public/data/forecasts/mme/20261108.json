@@ -49,7 +49,7 @@
       "operation_order": "for each forecast system, subtract the 2011\u20132025 mean for each exact valid calendar day and aggregate seven days of the ensemble mean; then average the systems",
       "message": "Anomalies are relative to the 2011\u20132025 average for the same calendar days."
     },
-    "anomaly_baseline_note": "Anomaly is the forecast minus the 2011\u20132025 average for the same calendar days (rainfall, temperature and 850 hPa wind).",
+    "anomaly_baseline_note": "Anomaly taken against climatology data for the respective variables",
     "multi_model_composition": [
       {
         "week": 1,
