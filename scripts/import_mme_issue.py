@@ -42,7 +42,7 @@ DESCRIPTION = (
     "AI-based multi-model ensemble combining several AI and physics-based S2S "
     "forecast systems"
 )
-BASELINE = "Seasonally matched 2011–2025 calendar-day climatology (includes forecast-system bias)"
+BASELINE = "2011–2025 average for the same calendar days"
 KEYS = (
     "rainfall_total",
     "temperature_mean",
@@ -203,16 +203,11 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
                     "exact valid calendar day and aggregate seven days of the "
                     "ensemble mean; then average the systems"
                 ),
-                "message": (
-                    "Observed-reanalysis baseline, not a model climatology; anomalies "
-                    "include systematic forecast-system bias."
-                ),
+                "message": "Anomalies are relative to the 2011–2025 average for the same calendar days.",
             },
             "anomaly_baseline_note": (
-                "Anomaly is the forecast minus the 2011–2025 reanalysis average for "
-                "the same calendar days (rainfall, temperature and 850 hPa wind). It "
-                "is not a model climatology, so it also contains the forecast "
-                "systems' systematic bias."
+                "Anomaly is the forecast minus the 2011–2025 average for the same "
+                "calendar days (rainfall, temperature and 850 hPa wind)."
             ),
             "multi_model_composition": [
                 {

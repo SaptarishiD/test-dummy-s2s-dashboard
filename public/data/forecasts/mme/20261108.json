@@ -47,9 +47,9 @@
       "status": "calendar_day_reference",
       "target_initialization_calendar_day": "1108",
       "operation_order": "for each forecast system, subtract the 2011\u20132025 mean for each exact valid calendar day and aggregate seven days of the ensemble mean; then average the systems",
-      "message": "Observed-reanalysis baseline, not a model climatology; anomalies include systematic forecast-system bias."
+      "message": "Anomalies are relative to the 2011\u20132025 average for the same calendar days."
     },
-    "anomaly_baseline_note": "Anomaly is the forecast minus the 2011\u20132025 reanalysis average for the same calendar days (rainfall, temperature and 850 hPa wind). It is not a model climatology, so it also contains the forecast systems' systematic bias.",
+    "anomaly_baseline_note": "Anomaly is the forecast minus the 2011\u20132025 average for the same calendar days (rainfall, temperature and 850 hPa wind).",
     "multi_model_composition": [
       {
         "week": 1,
@@ -957,7 +957,7 @@
       "short_label": "Rain anomaly",
       "description": "Weekly-mean forecast minus a seasonally matched calendar-day climatology",
       "units": "mm / day",
-      "baseline": "Seasonally matched 2011\u20132025 calendar-day climatology (includes forecast-system bias)",
+      "baseline": "2011\u20132025 average for the same calendar days",
       "legend": {
         "boundaries": [
           -20,
@@ -991,7 +991,7 @@
       "short_label": "Temp anomaly",
       "description": "Weekly-mean forecast minus a seasonally matched calendar-day climatology",
       "units": "\u00b0C",
-      "baseline": "Seasonally matched 2011\u20132025 calendar-day climatology (includes forecast-system bias)",
+      "baseline": "2011\u20132025 average for the same calendar days",
       "legend": {
         "boundaries": [
           -6,
@@ -1061,7 +1061,7 @@
       "short_label": "850 hPa wind anomaly",
       "description": "Shading is the weekly ensemble-mean vector speed minus the climatological mean of yearly vector speeds; arrows are the U/V anomaly from the climatological mean",
       "units": "m s-1",
-      "baseline": "Seasonally matched 2011\u20132025 calendar-day climatology (includes forecast-system bias)",
+      "baseline": "2011\u20132025 average for the same calendar days",
       "legend": {
         "boundaries": [
           -8,
