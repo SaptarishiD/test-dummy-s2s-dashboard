@@ -124,12 +124,12 @@ def test_forecast_exposes_active_product_for_presentation_theming() -> None:
 
 def test_forecast_hero_presents_the_title_and_timing_cleanly() -> None:
     forecast = read("src/pages/forecast.ts")
-    assert '<h1>India six-week forecast maps</h1>' in forecast
+    assert '<h1>India ${forecast.weeks.length === 4 ? "four" : "six"}-week forecast maps</h1>' in forecast
     assert 'class="india-forecast-window" aria-label="Forecast timing"' in forecast
     assert "<dt>Forecast run</dt>" in forecast
     assert "· 00 UTC</dd>" in forecast
     assert "<dt>Maps cover</dt>" in forecast
-    assert "<dt>Available</dt><dd>Weeks 1–6</dd>" in forecast
+    assert "<dt>Available</dt><dd>Weeks 1–${forecast.weeks.length}</dd>" in forecast
     assert '<h1 class="ops-visually-hidden">India six-week forecast maps</h1>' not in forecast
 
 
@@ -445,7 +445,7 @@ def test_implementation_presentation_is_a_keyboard_operable_vite_entry() -> None
 def test_probabilistic_data_is_lazy_versioned_and_stale_safe() -> None:
     forecast = read("src/pages/forecast.ts")
     assert "async function loadRegionalOutlook()" in forecast
-    assert 'issueChecksum(catalogIssue!, "regional_outlook")' in forecast
+    assert 'issueChecksum(outlookIssue, "regional_outlook")' in forecast
     assert "checksumVersionedPath(" in forecast
     assert "const requestController = new AbortController()" in forecast
     assert "generation !== requestGeneration" in forecast
@@ -526,3 +526,13 @@ def test_member_derived_percentiles_and_category_margin_are_exposed() -> None:
     assert "const CATEGORY_MARGIN_STOPS" in probability_map
     assert "categoryMargin(" in probability_map
     assert "Not confidence or forecast skill" in probability_map
+
+
+def test_missing_views_fall_back_to_a_dated_latest_available_issue() -> None:
+    forecast = read("src/pages/forecast.ts")
+    assert 'mme: ["mme", "ifs"],' in forecast
+    assert "candidate.issue.initialization <= selectedIssue.initialization" in forecast
+    assert "Showing latest available: ${longDate(candidate.issue.initialization)} issue" in forecast
+    assert 'id="india-fallback-note"' in forecast
+    assert "showFallbackNote(probabilityFallback);" in forecast
+    assert "prependPanelFallbackNote(extremeFallback);" in forecast

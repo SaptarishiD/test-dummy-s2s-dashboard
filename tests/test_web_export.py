@@ -108,9 +108,13 @@ def test_only_compact_json_is_present_in_public_data() -> None:
 def test_initial_condition_sources_are_never_conflated() -> None:
     index = load(PUBLIC_DATA / "index.json")
     assert index["default_view"] == "india"
-    assert index["default_source"] == "ifs"
+    assert index["default_source"] in ("ifs", "mme")
+    assert index["current"]["source_id"] == index["default_source"]
     sources = index["initial_condition_sources"]
-    assert [source["id"] for source in sources] == ["gfs", "era5", "ifs"]
+    assert [source["id"] for source in sources] in (
+        ["gfs", "era5", "ifs"],
+        ["gfs", "era5", "ifs", "mme"],
+    )
     ifs = next(source for source in sources if source["id"] == "ifs")
     assert ifs["category"] == "operational_initialization"
     ifs_issues = [(issue["id"], issue["members"]) for issue in ifs["issues"]]
@@ -284,7 +288,10 @@ def test_each_pdf_capable_issue_has_one_verified_download() -> None:
             pdf_bytes = pdf_path.read_bytes()
             assert pdf_bytes.startswith(b"%PDF-")
             page_count = len(re.findall(rb"/Type /Page\b", pdf_bytes))
-            if forecast.get("schema_version", 1) >= 3:
+            if source["id"] == "mme":
+                # The multi-model issue links its full written guidance report.
+                assert page_count >= 1
+            elif forecast.get("schema_version", 1) >= 3:
                 assert 4 <= page_count <= len(forecast["products"])
             else:
                 assert page_count == len(forecast["products"])

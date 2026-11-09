@@ -1,9 +1,10 @@
 export type ValidationStatus = "green" | "warning" | "failure";
-export type InitialConditionSourceId = "gfs" | "era5" | "ifs";
+export type InitialConditionSourceId = "gfs" | "era5" | "ifs" | "mme";
 export type InitialConditionCategory =
   | "operational_proxy"
   | "operational_initialization"
-  | "reanalysis_reference";
+  | "reanalysis_reference"
+  | "multi_model_ensemble";
 
 export type WindProductKey = "wind850_mean" | "wind850_anomaly";
 
@@ -44,7 +45,8 @@ export interface IssuePointer {
   source_id: InitialConditionSourceId;
   issue_id: string;
   initialization: string;
-  members: number;
+  /** Null for a multi-model ensemble-mean issue, which has no member count. */
+  members: number | null;
   forecast: string;
   forecast_sha256?: string;
   valid_through?: string;
@@ -149,7 +151,9 @@ export interface ForecastData {
     model_state_time: string;
     input_days: string[];
     input_source: string;
-    members: number;
+    /** Null for a multi-model ensemble-mean issue, which has no member count. */
+    members: number | null;
+    ensemble_representation?: "multi_model_ensemble_mean";
     lead_days: number;
     status: "green" | "warning";
     scientific_status: string;
@@ -171,7 +175,11 @@ export interface ForecastData {
       domain_pdf_sha256?: string;
     };
     climatology_alignment?: {
-      status?: "available" | "unavailable_outside_jjas" | "era5_reference";
+      status?:
+        | "available"
+        | "unavailable_outside_jjas"
+        | "era5_reference"
+        | "calendar_day_reference";
       target_initialization_calendar_day?: string;
       model_state_calendar_day?: string;
       /** Legacy exports before initialization-slot alignment was corrected. */
@@ -212,8 +220,9 @@ export interface ForecastData {
   };
   products: Partial<Record<ProductKey, ProductDefinition>>;
   diagnostics: {
-    rainfall_weekly_mean_max_mm_day: number;
-    temperature_weekly_mean_max_deg_c: number;
+    /** Member-spread diagnostics; absent for ensemble-mean-only issues. */
+    rainfall_weekly_mean_max_mm_day?: number;
+    temperature_weekly_mean_max_deg_c?: number;
   };
   extreme_definition?: ExtremeDefinition;
   weeks: ForecastWeek[];
@@ -716,7 +725,7 @@ export interface IssueIndexData {
     issues: Array<{
       id: string;
       initialization: string;
-      members: number;
+      members: number | null;
       status: "green" | "warning";
       role: "operational_experimental" | "reference" | "rapid_prototype";
       forecast: string;
@@ -734,7 +743,7 @@ export interface IssueIndexData {
         | {
           section: "current" | "archive";
           label: string;
-          member_class: "production" | "limited";
+          member_class: "production" | "limited" | "ensemble_mean";
         };
       archive_available?: boolean;
       archive?: {

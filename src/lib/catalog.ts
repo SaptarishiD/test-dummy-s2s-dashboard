@@ -11,6 +11,7 @@ export type CatalogIssue = CatalogSource["issues"][number];
 export type WebsiteProductKey = AvailableProductKey;
 
 export const INITIAL_CONDITION_SOURCE_DISPLAY_ORDER = [
+  "mme",
   "ifs",
   "era5",
   "gfs",
@@ -295,7 +296,7 @@ export function issueIsCurrent(
 
 export function issueClass(issue: CatalogIssue): "complete" | "limited" {
   if (typeof issue.presentation === "object") {
-    return issue.presentation.member_class === "production" ? "complete" : "limited";
+    return issue.presentation.member_class === "limited" ? "limited" : "complete";
   }
   return issue.members === 100 ? "complete" : "limited";
 }

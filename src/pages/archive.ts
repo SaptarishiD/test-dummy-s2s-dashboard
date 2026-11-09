@@ -236,12 +236,14 @@ export function renderArchivePage(container: HTMLElement, data: AppData): void {
                 ? "Reanalysis · normally 5–7 days delayed"
                 : source.id === "ifs"
                 ? "Experimental operational initialization"
+                : source.id === "mme"
+                ? "Multi-model ensemble mean"
                 : "Operational-input proxy"
             }</small>
           </div>
           <div class="archive-card__summary">
             <span class="archive-card__role">${presentation}</span>
-            <strong>42-day forecast guidance</strong>
+            <strong>${source.id === "mme" ? "Weeks 1–4 ensemble-mean guidance" : "42-day forecast guidance"}</strong>
             <div class="archive-product-list">
               ${badges || "<span>Product metadata only</span>"}
             </div>

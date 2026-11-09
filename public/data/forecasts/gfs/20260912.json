@@ -23,9 +23,7 @@
       "id": "gfs"
     },
     "downloads": {
-      "compact_json": "data/forecasts/gfs/20260912.json",
-      "india_pdf": "downloads/gfs/20260912/S2S_Research_India_Weeks1-4_GFS_20260912.pdf",
-      "india_pdf_sha256": "ee5b083a11e527ab6bf23620d7bcf71ec0f1c417fa976447cea568d6cdf7e764"
+      "compact_json": "data/forecasts/gfs/20260912.json"
     },
     "available_products": [
       "rainfall_total",

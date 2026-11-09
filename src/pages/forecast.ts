@@ -14,9 +14,12 @@ import {
   INITIAL_CONDITION_SOURCE_DISPLAY_ORDER,
   issueChecksum,
   issueHasRegionalOutlook,
+  issueInteractiveAvailable,
   issueIsCurrent,
   productKeysForForecast,
+  sourceById,
   sourcesForDisplay,
+  type CatalogIssue,
 } from "../lib/catalog";
 import type {
   AppData,
@@ -304,6 +307,38 @@ function friendlyDate(isoDate: string, includeYear = false): string {
   }).format(date);
 }
 
+/** Full date for notes, e.g. "4 November 2026". */
+function longDate(isoDate: string): string {
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${isoDate.slice(0, 10)}T12:00:00Z`));
+}
+
+/**
+ * Sources whose issues show, for a view they do not publish, the newest issue
+ * (not newer than the selected one) of these sources that has it. Every such
+ * panel carries a dated "latest available" note; nothing is copied into the
+ * selected issue.
+ */
+const LATEST_AVAILABLE_FALLBACK_SOURCES: Partial<
+  Record<InitialConditionSourceId, InitialConditionSourceId[]>
+> = {
+  mme: ["mme", "ifs"],
+};
+
+interface FallbackCandidate {
+  sourceId: InitialConditionSourceId;
+  issue: CatalogIssue;
+}
+
+const CALENDAR_DAY_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS: Partial<Record<ProductKey, string>> = {
+  rainfall_anomaly: "Shows where a week may be wetter or drier than the 2011–2025 average for the same calendar days.",
+  temperature_anomaly: "Shows where a week may be warmer or cooler than the 2011–2025 average for the same calendar days.",
+};
+
 const ERA5_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS: Partial<Record<ProductKey, string>> = {
   rainfall_anomaly: "Shows where a week may be wetter or drier than the 2011–2025 ERA5 reanalysis average for the same calendar days.",
   temperature_anomaly: "Shows where a week may be warmer or cooler than the 2011–2025 ERA5 reanalysis average for the same calendar days.",
@@ -311,7 +346,10 @@ const ERA5_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS: Partial<Record<ProductKey, strin
 
 function plainLanguageDescription(forecast: ForecastData, product: ProductKey): string {
   const era5Baseline = forecast.issue.climatology_alignment?.status === "era5_reference";
+  const calendarDayBaseline =
+    forecast.issue.climatology_alignment?.status === "calendar_day_reference";
   return (era5Baseline && ERA5_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS[product]) ||
+    (calendarDayBaseline && CALENDAR_DAY_PLAIN_LANGUAGE_ANOMALY_DESCRIPTIONS[product]) ||
     PLAIN_LANGUAGE_PRODUCT_DESCRIPTIONS[product];
 }
 
@@ -574,18 +612,27 @@ export function renderForecastPage(
         ? "Latest delayed reference"
         : "Latest validated source issue"
       : "Selected archive issue";
+  const multiModelMain = index.default_source === "mme";
   const archiveTitle = sourceId === "era5" && isSourceLatest
     ? "Latest delayed reference—not the main forecast"
     : sourceId === "gfs" && isSourceLatest
       ? "Latest GFS proxy—not the main forecast"
-      : "You are viewing an archived issue";
+      : sourceId === "ifs" && isSourceLatest && multiModelMain
+        ? "Latest single-model IFS run—not the main forecast"
+        : "You are viewing an archived issue";
   const archiveMessage = sourceId === "era5" && isSourceLatest
     ? "This is ERA5's latest validated delayed reference. Source initialization dates are independent, and ERA5 normally arrives 5–7 days after real time."
     : sourceId === "gfs" && isSourceLatest
-      ? "This is the latest secondary GFS-proxy issue. IFS initialization is the dashboard's main experimental forecast; source initialization dates can differ."
-      : catalogIssue.members < 100
-        ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
-        : "This older issue is retained in the archive. The main page points to the latest validated IFS-initialized issue.";
+      ? multiModelMain
+        ? "This is the latest secondary GFS-proxy issue. The multi-model ensemble mean is the dashboard's main forecast; source initialization dates can differ."
+        : "This is the latest secondary GFS-proxy issue. IFS initialization is the dashboard's main experimental forecast; source initialization dates can differ."
+      : sourceId === "ifs" && isSourceLatest && multiModelMain
+        ? "This is the latest IFS-initialized run of the single experimental AI ensemble. The main forecast is the multi-model ensemble mean; source initialization dates can differ."
+        : catalogIssue.members !== null && catalogIssue.members < 100
+          ? "This limited-member experiment is preserved for research transparency and must not be compared as a full operational ensemble."
+          : multiModelMain
+            ? "This older issue is retained in the archive. The main page points to the latest main forecast issue."
+            : "This older issue is retained in the archive. The main page points to the latest validated IFS-initialized issue.";
   const archiveBanner = !isCurrent
     ? `
       <aside class="india-archive-banner" aria-label="Non-current forecast notice">
@@ -597,7 +644,8 @@ export function renderForecastPage(
       </aside>
     `
     : "";
-  const limitedCurrentBanner = isCurrent && forecast.issue.members < 100
+  const limitedCurrentBanner = isCurrent && forecast.issue.members !== null &&
+    forecast.issue.members < 100
     ? `
       <aside class="india-archive-banner" aria-label="Limited forecast notice">
         <div>
@@ -606,7 +654,16 @@ export function renderForecastPage(
         </div>
       </aside>
     `
-    : "";
+    : isCurrent && forecast.issue.members === null
+      ? `
+      <aside class="india-archive-banner" aria-label="Multi-model forecast notice">
+        <div>
+          <strong>${forecast.issue.initial_condition_source.label} · Weeks 1–${forecast.weeks.length}</strong>
+          <p>${forecast.issue.scientific_status}</p>
+        </div>
+      </aside>
+    `
+      : "";
   const comparisonCard = activeDomain?.id !== "india"
     ? ""
     : initializationComparison
@@ -642,11 +699,11 @@ export function renderForecastPage(
       <header class="india-sheet__header">
         <div class="india-hero-copy">
           <span class="india-sheet__brand">INDIA SUBSEASONAL FORECAST</span>
-          <h1>India six-week forecast maps</h1>
+          <h1>India ${forecast.weeks.length === 4 ? "four" : "six"}-week forecast maps</h1>
           <dl class="india-forecast-window" aria-label="Forecast timing">
             <div><dt>Forecast run</dt><dd><time datetime="${forecast.issue.initialization.slice(0, 10)}">${friendlyDate(forecast.issue.initialization.slice(0, 10), true)}</time> · 00 UTC</dd></div>
             <div><dt>Maps cover</dt><dd><time datetime="${validFrom}">${friendlyDate(validFrom)}</time> – <time datetime="${validThrough}">${friendlyDate(validThrough, true)}</time></dd></div>
-            <div><dt>Available</dt><dd>Weeks 1–6</dd></div>
+            <div><dt>Available</dt><dd>Weeks 1–${forecast.weeks.length}</dd></div>
           </dl>
         </div>
         <a class="india-hero-briefing" href="./#briefing">
@@ -739,6 +796,7 @@ export function renderForecastPage(
 
         <div class="india-visualization" id="india-visualization">
           <div class="india-visualization__main">
+            <aside class="india-archive-banner india-fallback-note" id="india-fallback-note" aria-label="Latest available product notice" hidden></aside>
             <div class="india-panel-grid" id="india-panel-grid" aria-label="${activeDomain?.label ?? "India"} forecast maps"></div>
             <div class="india-map-key">
               <div class="india-shared-legend" id="india-shared-legend"></div>
@@ -761,7 +819,9 @@ export function renderForecastPage(
       <section class="india-forecast-details" aria-labelledby="india-forecast-details-title">
         <header class="india-forecast-details__header">
           <h2 id="india-forecast-details-title">Sources and downloads</h2>
-          <p>This experimental AI ensemble can start from different datasets. IFS is the main forecast, GFS is a secondary proxy, and ERA5 is a delayed research reference.</p>
+          <p>${multiModelMain
+            ? "The main forecast is an AI-based multi-model ensemble mean for weeks 1–4. The other sources are runs of a single experimental AI ensemble started from different datasets."
+            : "This experimental AI ensemble can start from different datasets. IFS is the main forecast, GFS is a secondary proxy, and ERA5 is a delayed research reference."}</p>
         </header>
         ${domainCatalog && domainCatalog.domains.length > 1 ? `
           <label class="india-domain-select">Forecast domain
@@ -786,10 +846,13 @@ export function renderForecastPage(
               <span>About sources</span>
             </summary>
             <div class="india-source-guide__panel" id="india-source-guide">
-              <strong>One forecast system, three input sources</strong>
-              <p>These labels describe how the same experimental forecasting system is initialized.</p>
+              <strong>${multiModelMain ? "Main forecast and input sources" : "One forecast system, three input sources"}</strong>
+              <p>${multiModelMain
+                ? "The multi-model entry combines several forecast systems; the other labels describe how one experimental forecasting system is initialized."
+                : "These labels describe how the same experimental forecasting system is initialized."}</p>
               <dl>
-                <div><dt>IFS</dt><dd>ECMWF Integrated Forecasting System inputs; main experimental guidance.</dd></div>
+                ${sourceById(index, "mme") ? `<div><dt>Multi-model</dt><dd>AI-based multi-model ensemble combining several AI and physics-based S2S forecast systems; ensemble mean for weeks 1–4.</dd></div>` : ""}
+                <div><dt>IFS</dt><dd>ECMWF Integrated Forecasting System inputs; ${multiModelMain ? "single-model" : "main"} experimental guidance.</dd></div>
                 <div><dt>GFS</dt><dd>Global Forecast System inputs; secondary near-real-time proxy.</dd></div>
                 <div><dt>ERA5</dt><dd>Delayed ECMWF reanalysis reference for controlled comparisons, not current guidance.</dd></div>
               </dl>
@@ -804,7 +867,7 @@ export function renderForecastPage(
               return `
               <a href="${sourceLink(candidate.id, preferred.id)}" class="${candidate.id === sourceId ? "is-active" : ""}" ${candidate.id === sourceId ? "aria-current=\"page\"" : ""}>
                 <span>${candidate.short_label}</span>
-                <small>${candidate.id === index.default_source ? "Main forecast" : candidate.category === "operational_proxy" ? "Secondary proxy" : "Delayed reference"}</small>
+                <small>${candidate.id === index.default_source ? "Main forecast" : candidate.category === "operational_proxy" ? "Secondary proxy" : candidate.category === "operational_initialization" ? "Single-model run" : "Delayed reference"}</small>
               </a>
             `;}).join("")}
           </div>
@@ -889,9 +952,34 @@ export function renderForecastPage(
   )!;
   const productStatus = container.querySelector<HTMLElement>("#india-product-status")!;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const selectedIssue = catalogIssue;
+  const fallbackCandidates: FallbackCandidate[] = activeDomain?.id !== "india"
+    ? []
+    : (LATEST_AVAILABLE_FALLBACK_SOURCES[sourceId] ?? [])
+      .flatMap((id) =>
+        (sourceById(index, id)?.issues ?? []).map((issue) => ({ sourceId: id, issue })))
+      .filter((candidate) =>
+        !(candidate.sourceId === sourceId && candidate.issue.id === selectedIssue.id) &&
+        candidate.issue.initialization <= selectedIssue.initialization &&
+        issueInteractiveAvailable(candidate.issue))
+      .sort((left, right) =>
+        right.issue.initialization.localeCompare(left.issue.initialization));
+  const ownRegionalOutlook = issueHasRegionalOutlook(index, catalogIssue, forecast);
+  const probabilityFallback = ownRegionalOutlook
+    ? undefined
+    : fallbackCandidates.find((candidate) =>
+      issueHasRegionalOutlook(index, candidate.issue));
   const probabilisticAvailable =
     activeDomain?.id === "india" &&
-    issueHasRegionalOutlook(index, catalogIssue, forecast);
+    (ownRegionalOutlook || probabilityFallback !== undefined);
+  // Forecasts whose weeks and grid accompany the probability and extreme views.
+  let probabilityForecast: ForecastData = activeForecast;
+  let extremeForecast: ForecastData = activeForecast;
+  let extremeFallback: FallbackCandidate | undefined;
+  const fallbackForecasts = new Map<string, Promise<ForecastData>>();
+  const loadedFallbackForecasts = new Map<string, ForecastData>();
+  const failedFallbacks = new Set<string>();
+  const fallbackNote = container.querySelector<HTMLElement>("#india-fallback-note")!;
   let panelAnimationTimer: number | undefined;
   let productIndicatorFrame: number | undefined;
 
@@ -1058,30 +1146,114 @@ export function renderForecastPage(
   }
 
   async function loadRegionalOutlook(): Promise<RegionalOutlookData> {
-    if (!catalogIssue!.regional_outlook) {
+    const outlookIssue = probabilityFallback?.issue ?? catalogIssue!;
+    const outlookSourceId = probabilityFallback?.sourceId ?? sourceId;
+    if (!outlookIssue.regional_outlook) {
       throw new Error("No member-derived summary package is published for this issue.");
     }
     if (!regionalOutlookPromise) {
       const path = checksumVersionedPath(
-        `./data/${catalogIssue!.regional_outlook}`,
-        issueChecksum(catalogIssue!, "regional_outlook"),
+        `./data/${outlookIssue.regional_outlook}`,
+        issueChecksum(outlookIssue, "regional_outlook"),
       );
+      const matchedForecast = probabilityFallback
+        ? loadFallbackForecast(probabilityFallback)
+        : Promise.resolve(activeForecast);
       regionalOutlookPromise = fetch(path, { signal: requestController.signal })
         .then(async (response) => {
           if (!response.ok) {
             throw new Error(`Member-derived summary returned ${response.status}.`);
           }
           const outlook = await response.json() as RegionalOutlookData;
+          const outlookForecast = await matchedForecast;
           if (
-            outlook.issue.initialization !== activeForecast.issue.initialization ||
-            outlook.issue.source_id !== sourceId
+            outlook.issue.initialization !== outlookForecast.issue.initialization ||
+            outlook.issue.source_id !== outlookSourceId
           ) {
             throw new Error("Member-derived summary does not match this forecast issue.");
           }
+          probabilityForecast = outlookForecast;
           return outlook;
         });
     }
     return regionalOutlookPromise;
+  }
+
+  function fallbackKey(candidate: FallbackCandidate): string {
+    return `${candidate.sourceId}/${candidate.issue.id}`;
+  }
+
+  function loadFallbackForecast(candidate: FallbackCandidate): Promise<ForecastData> {
+    const key = fallbackKey(candidate);
+    let pending = fallbackForecasts.get(key);
+    if (!pending) {
+      const path = checksumVersionedPath(
+        `./data/${candidate.issue.forecast}`,
+        issueChecksum(candidate.issue, "forecast"),
+      );
+      pending = fetch(path, { signal: requestController.signal })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Latest available issue returned ${response.status}.`);
+          }
+          const loaded = await response.json() as ForecastData;
+          if (
+            loaded.issue.initial_condition_source.id !== candidate.sourceId ||
+            loaded.issue.initialization !== candidate.issue.initialization
+          ) {
+            throw new Error("Latest available issue does not match the catalogue.");
+          }
+          loadedFallbackForecasts.set(key, loaded);
+          return loaded;
+        });
+      fallbackForecasts.set(key, pending);
+    }
+    return pending;
+  }
+
+  function extremeFallbackFor(key: ProductKey): FallbackCandidate | undefined {
+    if (
+      activeForecast.extreme_definition &&
+      availableExtremeProducts.includes(key) &&
+      activeForecast.weeks[0]?.fields[key]
+    ) {
+      return undefined;
+    }
+    return fallbackCandidates.find((candidate) =>
+      candidate.issue.available_products?.includes(key) &&
+      !failedFallbacks.has(fallbackKey(candidate)));
+  }
+
+  function fallbackNoteContent(candidate: FallbackCandidate): string {
+    return `
+      <div>
+        <strong>Showing latest available: ${longDate(candidate.issue.initialization)} issue</strong>
+        <p>This product is not part of the ${longDate(activeForecast.issue.initialization)} issue, so the most recent issue that includes it is shown. Week dates refer to that issue.</p>
+      </div>
+    `;
+  }
+
+  function showFallbackNote(candidate: FallbackCandidate | undefined): void {
+    fallbackNote.hidden = !candidate;
+    fallbackNote.innerHTML = candidate ? fallbackNoteContent(candidate) : "";
+  }
+
+  function prependPanelFallbackNote(candidate: FallbackCandidate | undefined): void {
+    if (!candidate || panelHost.hidden) return;
+    const note = document.createElement("aside");
+    note.className = "india-archive-banner india-fallback-note";
+    note.setAttribute("aria-label", "Latest available product notice");
+    note.innerHTML = fallbackNoteContent(candidate);
+    panelHost.prepend(note);
+  }
+
+  /** "Weeks 3–6" needs six weeks; ensemble-mean issues may carry only four. */
+  function limitRange(viewForecast: ForecastData): void {
+    const lateWeeks = rangeSelect.querySelector<HTMLOptionElement>('option[value="2"]');
+    if (!lateWeeks) return;
+    lateWeeks.disabled = viewForecast.weeks.length < 6;
+    if (lateWeeks.disabled) rangeStart = 0;
+    rangeSelect.value = String(rangeStart);
   }
 
   function extremeProductKey(
@@ -1104,6 +1276,7 @@ export function renderForecastPage(
       return;
     }
     if (!regionalOutlook) {
+      showFallbackNote(undefined);
       panelGrid.innerHTML = `
         <div class="probability-loading-state" role="status">
           <span class="probability-loading-state__spinner" aria-hidden="true"></span>
@@ -1187,10 +1360,10 @@ export function renderForecastPage(
       panelHost.replaceChildren();
       return;
     }
-    if (selectedView === "extremes" && activeForecast.extreme_definition) {
+    if (selectedView === "extremes" && extremeForecast.extreme_definition) {
       renderExtremeForecastPanel(
         panelHost,
-        activeForecast,
+        extremeForecast,
         selectedProbabilityVariable,
         selectedLocation,
         (week) => {
@@ -1199,6 +1372,7 @@ export function renderForecastPage(
         },
         closePanel,
       );
+      prependPanelFallbackNote(extremeFallback);
       return;
     }
     if (!regionalOutlook) {
@@ -1226,6 +1400,7 @@ export function renderForecastPage(
       selectedLocation,
       closePanel,
     );
+    prependPanelFallbackNote(probabilityFallback);
   }
 
   function closePanel(): void {
@@ -1373,6 +1548,8 @@ export function renderForecastPage(
       });
 
     if (selectedView === "mean") {
+      showFallbackNote(undefined);
+      limitRange(activeForecast);
       const product = PRESENTATION_PRODUCTS[selectedProduct];
       container.querySelector<HTMLElement>(".india-sheet")!.dataset.product =
       selectedProduct;
@@ -1413,6 +1590,8 @@ export function renderForecastPage(
           "Anomaly is the forecast minus the model's typical value for the same season and forecast lead, estimated from 2002–2021 reforecasts."
         : activeDomain?.id !== "india"
           ? "Configured-domain v1 provides raw rainfall and temperature maps only; anomalies, probabilities, regional summaries, and verification are withheld."
+          : sourceId === "mme"
+          ? "AI-based multi-model ensemble combining several AI and physics-based S2S forecast systems; ensemble-mean fields for weeks 1–4."
           : sourceId === "ifs"
           ? "Main experimental IFS initialization using ECMWF Open Data; IFS skin temperature over ocean is the disclosed SST proxy."
           : sourceId === "gfs"
@@ -1421,11 +1600,45 @@ export function renderForecastPage(
       renderPanel();
     } else if (selectedView === "extremes") {
       const key = extremeProductKey();
+      extremeFallback = extremeFallbackFor(key);
+      const fallbackForecast = extremeFallback
+        ? loadedFallbackForecasts.get(fallbackKey(extremeFallback))
+        : undefined;
+      if (extremeFallback && !fallbackForecast) {
+        const pendingFallback = extremeFallback;
+        const generation = requestGeneration;
+        showFallbackNote(undefined);
+        panelGrid.innerHTML = `
+          <div class="probability-loading-state" role="status">
+            <span class="probability-loading-state__spinner" aria-hidden="true"></span>
+            <strong>Loading latest available extreme products…</strong>
+          </div>
+        `;
+        void loadFallbackForecast(pendingFallback)
+          .catch(() => {
+            failedFallbacks.add(fallbackKey(pendingFallback));
+          })
+          .then(() => {
+            if (
+              !requestController.signal.aborted &&
+              generation === requestGeneration &&
+              selectedView === "extremes"
+            ) {
+              update(false);
+            }
+          });
+        return;
+      }
+      extremeForecast = fallbackForecast ?? activeForecast;
+      limitRange(extremeForecast);
       const supported = Boolean(
-        activeForecast.extreme_definition &&
-        availableExtremeProducts.includes(key) &&
-        activeForecast.weeks[0]?.fields[key],
+        extremeForecast.extreme_definition &&
+        (extremeFallback
+          ? extremeFallback.issue.available_products?.includes(key)
+          : availableExtremeProducts.includes(key)) &&
+        extremeForecast.weeks[0]?.fields[key],
       );
+      showFallbackNote(supported ? extremeFallback : undefined);
       if (!supported) {
         panelGrid.innerHTML = `
           <div class="probability-unavailable-state" role="note">
@@ -1446,17 +1659,17 @@ export function renderForecastPage(
         panelHost.hidden = true;
         panelHost.replaceChildren();
       } else {
-        const product = activeForecast.products[key]!;
+        const product = extremeForecast.products[key]!;
         container.querySelector<HTMLElement>(".india-sheet")!.dataset.product = key;
         container.querySelector(".india-selected-product")!.textContent = product.label;
         container.querySelector("#india-product-explanation")!.textContent =
           product.description;
         makeMapPanels(
-          activeForecast.weeks.slice(rangeStart, rangeStart + 4),
+          extremeForecast.weeks.slice(rangeStart, rangeStart + 4),
           (frame, week) => {
             const map = new ForecastMap(
               frame,
-              activeForecast,
+              extremeForecast,
               activeGeography,
               handleLocationSelection,
               selectedLocation,
@@ -1473,10 +1686,12 @@ export function renderForecastPage(
             ? "Fixed −1 to +1 scale across all weeks; reference levels are marked at −0.8, −0.5, 0, +0.5, and +0.8. Hatched cells are unavailable, not zero."
             : "Fixed SOT bins across all weeks. Values above +2 are retained in the data and shown with the >2 legend bin; hatched cells are unavailable, not zero.";
         container.querySelector("#india-baseline-note")!.textContent =
-          activeForecast.extreme_definition!.warning;
+          extremeForecast.extreme_definition!.warning;
         renderPanel();
       }
     } else if (regionalOutlook) {
+      limitRange(probabilityForecast);
+      showFallbackNote(probabilityFallback);
       const hasSummary = regionalOutlook.weeks.every(
         (week) => Boolean(week.summary_fields?.[selectedProbabilityVariable]),
       );
@@ -1495,7 +1710,7 @@ export function renderForecastPage(
           </div>
         `;
       } else {
-        const probabilisticWeeks = activeForecast.weeks.slice(
+        const probabilisticWeeks = probabilityForecast.weeks.slice(
           rangeStart,
           rangeStart + 4,
         );
@@ -1506,7 +1721,7 @@ export function renderForecastPage(
           if (!week) return;
           const map = new ProbabilisticForecastMap(
             frame,
-            activeForecast,
+            probabilityForecast,
             regionalOutlook!,
             activeGeography,
             handleLocationSelection,

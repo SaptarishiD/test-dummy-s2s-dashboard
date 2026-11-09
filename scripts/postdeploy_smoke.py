@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--expected-gfs-issue")
     parser.add_argument("--expected-era5-issue")
-    parser.add_argument("--expected-source", choices=("gfs", "era5", "ifs"))
+    parser.add_argument("--expected-source", choices=("gfs", "era5", "ifs", "mme"))
     parser.add_argument("--expected-issue")
     parser.add_argument("--attempts", type=int, default=6)
     parser.add_argument("--timeout", type=float, default=15.0)
@@ -124,8 +124,8 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("deployed index.html has no application root")
     index_bytes = fetch(args.base_url, "data/index.json", 1, args.timeout)
     index = decode_json(index_bytes, "deployed data/index.json")
-    if index.get("default_source") != "ifs":
-        raise ValueError("deployed default source is not IFS")
+    if index.get("default_source") not in ("ifs", "mme"):
+        raise ValueError("deployed default source is not IFS or MME")
     manifest = decode_json(
         fetch(args.base_url, "data/manifest.json", 1, args.timeout),
         "deployed data/manifest.json",
@@ -188,7 +188,9 @@ def smoke_once(args: argparse.Namespace) -> dict[str, Any]:
             (source_id, issue_id) == (actual_current_source, actual_current_issue)
             and record.get("limited_current") is True
         )
-        if record.get("members") != 100 and not limited_current:
+        # Multi-model ensemble-mean issues carry members: null by design.
+        ensemble_mean = source_id == "mme" and record.get("members") is None
+        if record.get("members") != 100 and not limited_current and not ensemble_mean:
             raise ValueError(f"deployed pointer is not 100-member: {source_id}/{issue_id}")
         relative = f"data/{record['forecast']}"
         forecast_bytes = fetch(args.base_url, relative, 1, args.timeout)

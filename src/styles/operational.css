@@ -1405,6 +1405,14 @@ select:focus-visible {
   border-radius: 12px;
 }
 
+.india-fallback-note {
+  margin: 0 0 12px;
+}
+
+.india-fallback-note[hidden] {
+  display: none;
+}
+
 .india-ic-comparison,
 .india-ic-comparison--pending {
   max-width: var(--india-workspace-width);

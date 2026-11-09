@@ -5,6 +5,11 @@ website.  It never scans private forecast storage and it advances the Current
 pointer only when a complete 100-member IFS package is present, or when an IFS
 issue record explicitly carries ``"limited_current": true`` (a manually
 reviewed limited-member release published while the cluster is unavailable).
+
+An optional ``mme`` source holds multi-model ensemble-mean issues.  They have
+no member count (``members: null``) and are complete when their forecast and
+PDF are present.  Current is the newest complete on-cadence issue of IFS or
+MME (MME wins a same-day tie), and ``default_source`` follows Current.
 """
 
 from __future__ import annotations
@@ -26,6 +31,8 @@ ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
 CADENCE_WEEKDAYS = (2, 6)  # Wednesday and Sunday, datetime.weekday().
 TARGET_HOUR_UTC = 12
 PRIMARY_SOURCE_ID = "ifs"
+MME_SOURCE_ID = "mme"
+CURRENT_SOURCE_IDS = (PRIMARY_SOURCE_ID, MME_SOURCE_ID)
 
 
 def sha256(path: Path) -> str:
@@ -113,7 +120,10 @@ def enrich_issue(
     forecast_issue = forecast.get("issue", {})
     if forecast_issue.get("initial_condition_source", {}).get("id") != source_id:
         raise ValueError(f"source mismatch for {source_id}/{result['id']}")
-    if int(forecast_issue.get("members", -1)) != int(result["members"]):
+    if source_id == MME_SOURCE_ID:
+        if result["members"] is not None or forecast_issue.get("members", -1) is not None:
+            raise ValueError(f"ensemble-mean issue must have members: null: {result['id']}")
+    elif int(forecast_issue.get("members", -1)) != int(result["members"]):
         raise ValueError(f"member mismatch for {source_id}/{result['id']}")
 
     products = list(forecast.get("products", {}))
@@ -146,12 +156,17 @@ def enrich_issue(
     initialization = parse_datetime(str(result["initialization"]))
     published_at = str(forecast.get("generated_at") or result["initialization"])
     valid_through = str(forecast.get("weeks", [{}])[-1].get("valid_end", ""))
-    production = int(result["members"]) == PRODUCTION_MEMBERS
+    ensemble_mean = source_id == MME_SOURCE_ID
+    production = ensemble_mean or int(result["members"]) == PRODUCTION_MEMBERS
     limited_current = (
         source_id == PRIMARY_SOURCE_ID and result.get("limited_current") is True
     )
-    member_class = "production" if production else "limited"
-    if not production:
+    member_class = (
+        "ensemble_mean" if ensemble_mean else "production" if production else "limited"
+    )
+    if ensemble_mean:
+        label = "Multi-model ensemble mean"
+    elif not production:
         label = "Limited experiment"
     elif source_id == "era5":
         label = (
@@ -242,8 +257,14 @@ def build_catalog(
     payload = deepcopy(existing)
     sources = payload.get("initial_condition_sources", [])
     source_ids = [source.get("id") for source in sources]
-    if source_ids not in (["gfs", "era5"], ["gfs", "era5", "ifs"]):
-        raise ValueError("catalog sources must be ordered GFS, ERA5, then optional IFS")
+    if source_ids not in (
+        ["gfs", "era5"],
+        ["gfs", "era5", "ifs"],
+        ["gfs", "era5", "ifs", "mme"],
+    ):
+        raise ValueError(
+            "catalog sources must be ordered GFS, ERA5, then optional IFS and MME"
+        )
 
     complete_by_source: dict[str, list[dict[str, Any]]] = {
         source_id: [] for source_id in source_ids
@@ -283,23 +304,23 @@ def build_catalog(
     # ad-hoc off-cadence run never becomes the pointer that publication validation
     # then rejects.
     on_cadence = [
-        item
-        for item in complete_by_source[PRIMARY_SOURCE_ID]
+        (item, source_id)
+        for source_id in CURRENT_SOURCE_IDS
+        for item in complete_by_source.get(source_id, [])
         if parse_datetime(str(item["initialization"])).weekday() in CADENCE_WEEKDAYS
     ]
     if not on_cadence:
         raise ValueError(
             "no complete 100-member Wednesday/Sunday IFS issue; Current is unchanged"
         )
-    current_issue = max(on_cadence, key=lambda item: item["id"])
+    current_issue, current_source_id = max(
+        on_cadence,
+        key=lambda pair: (pair[0]["id"], CURRENT_SOURCE_IDS.index(pair[1])),
+    )
     current_issue["presentation"] = {
         "section": "current",
         "label": "Current guidance",
-        "member_class": (
-            "production"
-            if int(current_issue["members"]) == PRODUCTION_MEMBERS
-            else "limited"
-        ),
+        "member_class": current_issue["presentation"]["member_class"],
     }
     reference_issue = (
         max(complete_by_source["era5"], key=lambda item: item["id"])
@@ -307,7 +328,7 @@ def build_catalog(
         else None
     )
 
-    current = _pointer(current_issue, PRIMARY_SOURCE_ID)
+    current = _pointer(current_issue, current_source_id)
     reference = _pointer(reference_issue, "era5") if reference_issue else None
     current_schedule_target = parse_datetime(
         str(current_issue["initialization"])
@@ -319,7 +340,7 @@ def build_catalog(
     payload.update(
         {
             "schema_version": 3,
-            "default_source": PRIMARY_SOURCE_ID,
+            "default_source": current_source_id,
             "generated_at": iso_z(now),
             "latest_successful_issue": current_issue["id"],
             "current": current,

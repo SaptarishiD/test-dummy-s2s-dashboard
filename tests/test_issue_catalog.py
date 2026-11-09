@@ -35,27 +35,53 @@ def on_cadence(issues: list[dict]) -> list[dict]:
 
 
 def current_eligible(item: dict) -> bool:
-    """100-member issues, or IFS issues explicitly released as limited Current."""
+    """100-member issues, IFS issues explicitly released as limited Current, or
+    multi-model ensemble-mean issues (members: null)."""
 
-    return item["members"] == 100 or item.get("limited_current") is True
+    return (
+        item["members"] == 100
+        or item.get("limited_current") is True
+        or item["members"] is None
+    )
+
+
+def member_class(source_id: str, item: dict) -> str:
+    if source_id == "mme":
+        return "ensemble_mean"
+    return "production" if item["members"] == 100 else "limited"
+
+
+def newest_current(index: dict) -> tuple[str, str]:
+    """Newest eligible on-cadence (issue, source) over IFS and MME; MME wins ties."""
+
+    priority = ("ifs", "mme")
+    return max(
+        (
+            (item["id"], priority.index(source["id"]), source["id"])
+            for source in index["initial_condition_sources"]
+            if source["id"] in priority
+            for item in on_cadence(source["issues"])
+            if current_eligible(item)
+        )
+    )[0::2]
 
 
 def test_current_is_latest_complete_on_cadence_production_ifs_issue() -> None:
     index = load(DATA / "index.json")
-    ifs = next(
-        source for source in index["initial_condition_sources"] if source["id"] == "ifs"
+    issue_id, source_id = newest_current(index)
+    source = next(
+        item for item in index["initial_condition_sources"] if item["id"] == source_id
     )
-    eligible = on_cadence([item for item in ifs["issues"] if current_eligible(item)])
     current_record = next(
-        item for item in ifs["issues"] if item["id"] == index["current"]["issue_id"]
+        item for item in source["issues"] if item["id"] == index["current"]["issue_id"]
     )
-    assert index["default_source"] == "ifs"
-    assert index["current"]["source_id"] == "ifs"
+    assert index["default_source"] == source_id
+    assert index["current"]["source_id"] == source_id
     assert current_eligible(current_record)
-    assert current_record["presentation"]["member_class"] == (
-        "production" if current_record["members"] == 100 else "limited"
+    assert current_record["presentation"]["member_class"] == member_class(
+        source_id, current_record
     )
-    assert index["current"]["issue_id"] == max(item["id"] for item in eligible)
+    assert index["current"]["issue_id"] == issue_id
     assert index["latest_successful_issue"] == index["current"]["issue_id"]
 
 
@@ -85,8 +111,8 @@ def test_catalog_assets_are_checksum_versioned_and_capability_scoped() -> None:
                 issue["available_products"]
             )
             assert issue["capabilities"]["raw_fields"] is True
-            assert issue["presentation"]["member_class"] == (
-                "production" if issue["members"] == 100 else "limited"
+            assert issue["presentation"]["member_class"] == member_class(
+                source["id"], issue
             )
             assert issue["archive"]["metadata"] == "indefinite"
 
@@ -96,18 +122,14 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
     ifs_source = next(
         source for source in index["initial_condition_sources"] if source["id"] == "ifs"
     )
-    expected_issue = max(
-        item["id"]
-        for item in on_cadence(ifs_source["issues"])
-        if current_eligible(item)
-    )
+    expected_issue, expected_source = newest_current(index)
     rebuilt = build_catalog(
         index,
         PUBLIC,
         datetime(2026, 8, 9, 0, tzinfo=timezone.utc),
     )
-    assert rebuilt["default_source"] == "ifs"
-    assert rebuilt["current"]["source_id"] == "ifs"
+    assert rebuilt["default_source"] == expected_source
+    assert rebuilt["current"]["source_id"] == expected_source
     assert rebuilt["current"]["issue_id"] == expected_issue
     rebuilt_ifs = next(
         source for source in rebuilt["initial_condition_sources"] if source["id"] == "ifs"
@@ -128,6 +150,10 @@ def test_catalog_rebuild_keeps_current_pointer_on_latest_on_cadence_ifs_issue() 
 def test_limited_issue_needs_explicit_release_to_become_current() -> None:
     index = load(DATA / "index.json")
     unflagged = copy.deepcopy(index)
+    # Isolate the IFS rule: a multi-model issue would otherwise be Current.
+    unflagged["initial_condition_sources"] = [
+        source for source in unflagged["initial_condition_sources"] if source["id"] != "mme"
+    ]
     ifs_source = next(
         source for source in unflagged["initial_condition_sources"] if source["id"] == "ifs"
     )

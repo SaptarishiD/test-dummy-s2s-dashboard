@@ -27,6 +27,9 @@ RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
 WIND_PRODUCTS = {"wind850_mean", "wind850_anomaly"}
 PRIVATE_TOKENS = ("/home/", "/storage/", "private key", "password", "secret")
+# Multi-model ensemble-mean issues: no member count, weeks 1-4 only.
+MME_SOURCE_ID = "mme"
+MME_WEEKS = 4
 
 
 @dataclass(frozen=True)
@@ -50,7 +53,7 @@ def parse_args() -> argparse.Namespace:
         default="current",
         help="Validate current pointers, the complete archive, or one issue.",
     )
-    parser.add_argument("--source", choices=("gfs", "era5", "ifs"))
+    parser.add_argument("--source", choices=("gfs", "era5", "ifs", "mme"))
     parser.add_argument("--issue", help="YYYYMMDD issue id for --scope issue.")
     parser.add_argument("--expected-gfs-issue")
     parser.add_argument("--expected-era5-issue")
@@ -158,8 +161,12 @@ def source_map(index: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if source_id in result:
             raise ValueError(f"duplicate source id: {source_id}")
         result[str(source_id)] = source
-    if set(result) not in ({"gfs", "era5"}, {"gfs", "era5", "ifs"}):
-        raise ValueError("catalog must expose GFS, ERA5, and optional IFS")
+    if set(result) not in (
+        {"gfs", "era5"},
+        {"gfs", "era5", "ifs"},
+        {"gfs", "era5", "ifs", "mme"},
+    ):
+        raise ValueError("catalog must expose GFS, ERA5, and optional IFS and MME")
     return result
 
 
@@ -184,7 +191,12 @@ def issue_records(sources: dict[str, dict[str, Any]]) -> dict[tuple[str, str], I
             if initialization[:10].replace("-", "") != issue_id:
                 raise ValueError(f"initialization/id mismatch: {source_id}/{issue_id}")
             members = record.get("members")
-            if not isinstance(members, int) or members <= 0:
+            if source_id == MME_SOURCE_ID:
+                if members is not None:
+                    raise ValueError(
+                        f"ensemble-mean issue must have members: null: {source_id}/{issue_id}"
+                    )
+            elif not isinstance(members, int) or members <= 0:
                 raise ValueError(f"invalid member count: {source_id}/{issue_id}")
             forecast = str(record.get("forecast", ""))
             expected = f"forecasts/{source_id}/{issue_id}.json"
@@ -530,8 +542,11 @@ def validate_forecast(
         raise ValueError(f"forecast support mask is invalid: {ref.source_id}/{ref.issue_id}")
 
     weeks = forecast.get("weeks")
-    if not isinstance(weeks, list) or len(weeks) != 6:
-        raise ValueError(f"forecast must contain six weeks: {ref.source_id}/{ref.issue_id}")
+    expected_weeks = MME_WEEKS if ref.source_id == MME_SOURCE_ID else 6
+    if not isinstance(weeks, list) or len(weeks) != expected_weeks:
+        raise ValueError(
+            f"forecast must contain {expected_weeks} weeks: {ref.source_id}/{ref.issue_id}"
+        )
     for expected_week, week in enumerate(weeks, start=1):
         if week.get("week") != expected_week:
             raise ValueError(f"forecast week order mismatch: {ref.source_id}/{ref.issue_id}")
@@ -672,7 +687,11 @@ def choose_scope(
     if ("era5", era5_id) not in records:
         raise ValueError(f"latest ERA5 pointer is not cataloged: {era5_id}")
     current_record = records[(primary_source_id, primary_id)].record
-    if current_record.get("members") != 100 and current_record.get("limited_current") is not True:
+    if (
+        current_record.get("members") != 100
+        and current_record.get("limited_current") is not True
+        and primary_source_id != MME_SOURCE_ID
+    ):
         raise ValueError(
             "current issue must be a 100-member publication or an approved limited_current release"
         )
@@ -820,8 +839,8 @@ def validate(args: argparse.Namespace) -> dict[str, Any]:
     public_root = args.public_root.resolve()
     index_path = public_root / "data/index.json"
     index = load_json(index_path)
-    if index.get("default_source") != "ifs":
-        raise ValueError("default source must be IFS")
+    if index.get("default_source") not in ("ifs", MME_SOURCE_ID):
+        raise ValueError("default source must be IFS or MME")
     if not isinstance(index.get("schema_version"), int):
         raise ValueError("catalog has no integer schema_version")
     serialized_index = json.dumps(index).lower()
