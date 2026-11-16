@@ -23,9 +23,7 @@
       "id": "ifs"
     },
     "downloads": {
-      "compact_json": "data/forecasts/ifs/20260919.json",
-      "india_pdf": "downloads/ifs/20260919/S2S_Research_India_Weeks1-4_IFS_20260919.pdf",
-      "india_pdf_sha256": "2f99f4d3b34222bb72b78564f321932afa03d586eca4a80603126a34b0b23077"
+      "compact_json": "data/forecasts/ifs/20260919.json"
     },
     "available_products": [
       "rainfall_total",
