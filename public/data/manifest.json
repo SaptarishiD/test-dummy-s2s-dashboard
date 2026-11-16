@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-16T05:53:40.657747+00:00",
+  "generated_at": "2026-11-16T06:44:48.433027+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -582,7 +582,7 @@
     {
       "path": "data/forecasts/mme/20261115.json",
       "size_bytes": 583560,
-      "sha256": "963bc48d6511fbb5c54bd44efdff2fd88833e2a770a35feb60703751bf89cade"
+      "sha256": "f630707fd7988130536202fc4db5d831831d77fb5ae503ccfbbe4d7fba2cb23d"
     },
     {
       "path": "data/formulas.json",
@@ -707,7 +707,7 @@
     {
       "path": "data/index.json",
       "size_bytes": 154439,
-      "sha256": "3fecc60cd77f5da64d837e650f7f29595561641140c29fa055067e875c459021"
+      "sha256": "13648f8793b0b1c413e84f6fb100cb565e7879ce9213ade0de11af601591e2e2"
     },
     {
       "path": "data/india-admin.json",
@@ -1256,8 +1256,8 @@
     },
     {
       "path": "downloads/mme/20261115/S2S_Research_India_Weeks1-4_MME_20261115.pdf",
-      "size_bytes": 4507945,
-      "sha256": "4a80a2da3051e894f0f0704567cdfae45abf461fa84cda254c3df248f402c80b"
+      "size_bytes": 4309268,
+      "sha256": "20a301973a5555ba33eadf7025447e5b59ce25c682e4b42826f89fbf867077f4"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
