@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-11-16T06:44:43.095226+00:00",
+  "generated_at": "2026-11-18T14:34:07.183564+00:00",
   "issue": {
     "initialization": "2026-11-15T00:00:00Z",
     "information_cutoff": "2026-11-15T00:00:00Z",
@@ -23,7 +23,7 @@
     "downloads": {
       "compact_json": "data/forecasts/mme/20261115.json",
       "india_pdf": "downloads/mme/20261115/S2S_Research_India_Weeks1-4_MME_20261115.pdf",
-      "india_pdf_sha256": "20a301973a5555ba33eadf7025447e5b59ce25c682e4b42826f89fbf867077f4"
+      "india_pdf_sha256": "4f78203139d939711f409287cb04d338b65cee0863a41c2692791304feeaf7fc"
     },
     "available_products": [
       "rainfall_total",

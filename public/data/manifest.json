@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-16T06:44:48.433027+00:00",
+  "generated_at": "2026-11-18T14:35:36.295323+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -261,8 +261,8 @@
     },
     {
       "path": "data/forecasts/era5/20260923.json",
-      "size_bytes": 866656,
-      "sha256": "e3a7d55fa794a5aad4cfdce95faf25e1556016f54aa270131e940a4dada88338"
+      "size_bytes": 866470,
+      "sha256": "47c52dbc6f94503d663c5bc09333822e275a60061bce375b8cd5e87e3dfc3e2b"
     },
     {
       "path": "data/forecasts/era5/20260927.json",
@@ -416,8 +416,8 @@
     },
     {
       "path": "data/forecasts/gfs/20260923.json",
-      "size_bytes": 867759,
-      "sha256": "bcbc1d35ab1e88ad2510575a2932be13ad21a2d3ebf8d351cbd87dd5dea9bd8f"
+      "size_bytes": 867575,
+      "sha256": "5df85ae09ee394a94e106fa2ced73fa6c3438d62c93eb80be27cc72d18c34aaa"
     },
     {
       "path": "data/forecasts/gfs/20260926.json",
@@ -516,8 +516,8 @@
     },
     {
       "path": "data/forecasts/ifs/20260923.json",
-      "size_bytes": 866457,
-      "sha256": "14090827c1383d77bfd882a2f47bf082a6d4f345fb43ae22396e3376d7ce9865"
+      "size_bytes": 866273,
+      "sha256": "1586df9eb420b1d3e2fd4738d30f2723f895a902b31e113a65a009c792d08b97"
     },
     {
       "path": "data/forecasts/ifs/20260926.json",
@@ -582,7 +582,7 @@
     {
       "path": "data/forecasts/mme/20261115.json",
       "size_bytes": 583560,
-      "sha256": "f630707fd7988130536202fc4db5d831831d77fb5ae503ccfbbe4d7fba2cb23d"
+      "sha256": "d2525619c53ee59ea2bc158a878c8881321ebb095a2f5361d76bcc6f234f7ef2"
     },
     {
       "path": "data/formulas.json",
@@ -706,8 +706,8 @@
     },
     {
       "path": "data/index.json",
-      "size_bytes": 154439,
-      "sha256": "13648f8793b0b1c413e84f6fb100cb565e7879ce9213ade0de11af601591e2e2"
+      "size_bytes": 153897,
+      "sha256": "b8db3ef5d6ed896441a3f41625ce53102bcb9094c0776e548dec9d2958459dea"
     },
     {
       "path": "data/india-admin.json",
@@ -1115,11 +1115,6 @@
       "sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f"
     },
     {
-      "path": "downloads/era5/20260923/S2S_Research_India_Weeks1-4_ERA5_20260923.pdf",
-      "size_bytes": 4334441,
-      "sha256": "c82092e5fd6e011f6264b9d999c780723925cf369f48489093b0f738a3e8e617"
-    },
-    {
       "path": "downloads/era5/20260927/S2S_Research_India_Weeks1-4_ERA5_20260927.pdf",
       "size_bytes": 4332912,
       "sha256": "4db49cb3f1d1882dcfc58a719ed1e37e58dda704084721097e0f1f4c89f552c2"
@@ -1138,11 +1133,6 @@
       "path": "downloads/era5/20261007/S2S_Research_India_Weeks1-4_ERA5_20261007.pdf",
       "size_bytes": 4331921,
       "sha256": "2a862291ef15443d8e1be65ddcef22538e6222a979d6aae9076f29802741a997"
-    },
-    {
-      "path": "downloads/gfs/20260923/S2S_Research_India_Weeks1-4_GFS_20260923.pdf",
-      "size_bytes": 4345979,
-      "sha256": "a8784bfe941af57acbc1f7b046580558606754bc3a5422d1b9f15cb4d1c86280"
     },
     {
       "path": "downloads/gfs/20260926/S2S_Research_India_Weeks1-4_GFS_20260926.pdf",
@@ -1188,11 +1178,6 @@
       "path": "downloads/gfs/20261104/S2S_Research_India_Weeks1-4_GFS_20261104.pdf",
       "size_bytes": 4336872,
       "sha256": "2cea7960b81f900e46b251b1dbb2011c0d5edb56b5409ffbc6e4a7c6b84cd6ca"
-    },
-    {
-      "path": "downloads/ifs/20260923/S2S_Research_India_Weeks1-4_IFS_20260923.pdf",
-      "size_bytes": 4341922,
-      "sha256": "89ae14aadb028d06fe1dc84d46de65a56af57cb5d5a4fc466e343cb747190fbf"
     },
     {
       "path": "downloads/ifs/20260926/S2S_Research_India_Weeks1-4_IFS_20260926.pdf",
@@ -1256,8 +1241,8 @@
     },
     {
       "path": "downloads/mme/20261115/S2S_Research_India_Weeks1-4_MME_20261115.pdf",
-      "size_bytes": 4309268,
-      "sha256": "20a301973a5555ba33eadf7025447e5b59ce25c682e4b42826f89fbf867077f4"
+      "size_bytes": 4309432,
+      "sha256": "4f78203139d939711f409287cb04d338b65cee0863a41c2692791304feeaf7fc"
     },
     {
       "path": "meeting/20260731/rainfall-anomaly.png",
