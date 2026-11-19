@@ -1,16 +1,16 @@
 /** The dated report promoted on the briefing page. */
 export const FEATURED_REPORT = {
-  href: "./reports/s2s-summary-india-2026-09-09.pdf",
-  cover: "./reports/s2s-summary-india-2026-09-09-cover.png",
-  shortDate: "9 Sep",
-  date: "9 September 2026",
+  href: "./reports/s2s-summary-india-2026-11-19.pdf",
+  cover: "./reports/s2s-summary-india-2026-11-19-cover.png",
+  shortDate: "19 Nov",
+  date: "19 November 2026",
   title: "India S2S Thursday report",
-  details: "8-page PDF · 2.3 MB",
-  validPeriod: "9 September – 6 October 2026",
+  details: "12-page PDF · 4.3 MB",
+  validPeriod: "19 November – 16 December 2026",
   forecastRange: "Weeks 1–4",
-  ensemble: "100-member ensemble mean",
+  ensemble: "Multi-model ensemble mean",
   outlook:
-    "Week 1 favors wetter conditions over Gujarat and adjoining western India. Rainfall weakens across much of northern and central India in Week 2 before reorganizing over parts of central and southern India in Week 3.",
+    "Week 1 favors wetter conditions over the head of the Bay of Bengal, the Odisha–West Bengal coast and parts of Northeast India. A southern dry spell follows, strongest over Tamil Nadu and the southwest Bay in Week 2, before easing over land in Weeks 3–4.",
   accessibleLabel:
-    "Open the India S2S summary for 9 September 2026 (PDF, 2.3 MB)",
+    "Open the India S2S summary for 19 November 2026 (PDF, 4.3 MB)",
 } as const;
