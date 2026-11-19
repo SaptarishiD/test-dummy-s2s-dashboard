@@ -29,6 +29,9 @@ PRODUCTION_MEMBERS = 100
 RAW_PRODUCTS = {"rainfall_total", "temperature_mean"}
 ANOMALY_PRODUCTS = {"rainfall_anomaly", "temperature_anomaly"}
 CADENCE_WEEKDAYS = (2, 6)  # Wednesday and Sunday, datetime.weekday().
+# Days whose issues may become Current: the Wednesday/Sunday cadence plus the Thursday
+# multi-model issue. CADENCE_WEEKDAYS still drives the ERA5 reference labels.
+CURRENT_WEEKDAYS = (2, 3, 6)  # Wednesday, Thursday and Sunday.
 TARGET_HOUR_UTC = 12
 PRIMARY_SOURCE_ID = "ifs"
 MME_SOURCE_ID = "mme"
@@ -63,7 +66,7 @@ def iso_z(value: datetime) -> str:
 
 
 def next_expected_update(now: datetime) -> datetime:
-    """Return the next Wednesday/Sunday publication target at 12:00 UTC."""
+    """Return the next Wednesday/Thursday/Sunday publication target at 12:00 UTC."""
 
     normalized = now.astimezone(UTC)
     for offset in range(8):
@@ -73,7 +76,7 @@ def next_expected_update(now: datetime) -> datetime:
             datetime.min.time(),
             tzinfo=UTC,
         ).replace(hour=TARGET_HOUR_UTC)
-        if candidate.weekday() in CADENCE_WEEKDAYS and candidate > normalized:
+        if candidate.weekday() in CURRENT_WEEKDAYS and candidate > normalized:
             return candidate
     raise AssertionError("a twice-weekly update must exist within eight days")
 
@@ -300,18 +303,18 @@ def build_catalog(
 
     if not complete_by_source.get(PRIMARY_SOURCE_ID):
         raise ValueError("no complete 100-member IFS issue; Current is unchanged")
-    # Current guidance must sit on the published Wednesday/Sunday cadence, so an
+    # Current guidance must sit on the published Wednesday/Thursday/Sunday cadence, so an
     # ad-hoc off-cadence run never becomes the pointer that publication validation
     # then rejects.
     on_cadence = [
         (item, source_id)
         for source_id in CURRENT_SOURCE_IDS
         for item in complete_by_source.get(source_id, [])
-        if parse_datetime(str(item["initialization"])).weekday() in CADENCE_WEEKDAYS
+        if parse_datetime(str(item["initialization"])).weekday() in CURRENT_WEEKDAYS
     ]
     if not on_cadence:
         raise ValueError(
-            "no complete 100-member Wednesday/Sunday IFS issue; Current is unchanged"
+            "no complete 100-member Wednesday/Thursday/Sunday IFS issue; Current is unchanged"
         )
     current_issue, current_source_id = max(
         on_cadence,
@@ -346,7 +349,7 @@ def build_catalog(
             "current": current,
             "latest_reference": reference,
             "publication": {
-                "cadence_days_utc": ["Wednesday", "Sunday"],
+                "cadence_days_utc": ["Wednesday", "Thursday", "Sunday"],
                 "target_time_utc": "12:00",
                 "last_successful_at": last_successful_at,
                 "next_expected_at": iso_z(next_expected),

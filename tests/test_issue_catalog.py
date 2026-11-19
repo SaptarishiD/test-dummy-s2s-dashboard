@@ -11,7 +11,7 @@ from pathlib import Path
 import jsonschema
 
 from science.catalog import (
-    CADENCE_WEEKDAYS,
+    CURRENT_WEEKDAYS,
     build_catalog,
     enrich_issue,
     next_expected_update,
@@ -30,7 +30,7 @@ def on_cadence(issues: list[dict]) -> list[dict]:
     return [
         item
         for item in issues
-        if datetime.strptime(item["id"], "%Y%m%d").weekday() in CADENCE_WEEKDAYS
+        if datetime.strptime(item["id"], "%Y%m%d").weekday() in CURRENT_WEEKDAYS
     ]
 
 
@@ -172,9 +172,12 @@ def test_limited_issue_needs_explicit_release_to_become_current() -> None:
     )
 
 
-def test_next_update_uses_wednesday_sunday_utc_cadence() -> None:
+def test_next_update_uses_wednesday_thursday_sunday_utc_cadence() -> None:
     assert next_expected_update(
         datetime(2026, 8, 5, 13, tzinfo=timezone.utc)
+    ) == datetime(2026, 8, 6, 12, tzinfo=timezone.utc)
+    assert next_expected_update(
+        datetime(2026, 8, 6, 13, tzinfo=timezone.utc)
     ) == datetime(2026, 8, 9, 12, tzinfo=timezone.utc)
     assert next_expected_update(
         datetime(2026, 8, 9, 11, 59, tzinfo=timezone.utc)

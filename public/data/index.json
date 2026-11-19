@@ -229,13 +229,13 @@
   },
   "current": {
     "source_id": "mme",
-    "issue_id": "20261115",
-    "initialization": "2026-11-15T00:00:00Z",
+    "issue_id": "20261119",
+    "initialization": "2026-11-19T00:00:00Z",
     "members": null,
-    "forecast": "forecasts/mme/20261115.json",
-    "forecast_sha256": "d2525619c53ee59ea2bc158a878c8881321ebb095a2f5361d76bcc6f234f7ef2",
-    "valid_through": "2026-12-12",
-    "published_at": "2026-11-18T14:34:07.183564+00:00",
+    "forecast": "forecasts/mme/20261119.json",
+    "forecast_sha256": "f90fbff169c994115284c1aacdff2c64f1da5b895ebf67baab23ce513de784f2",
+    "valid_through": "2026-12-16",
+    "published_at": "2026-11-19T08:39:56.522944+00:00",
     "available_products": [
       "rainfall_total",
       "temperature_mean",
@@ -252,11 +252,11 @@
       "regional_probabilities": false,
       "pdf": true
     },
-    "pdf": "downloads/mme/20261115/S2S_Research_India_Weeks1-4_MME_20261115.pdf"
+    "pdf": "downloads/mme/20261119/S2S_Research_India_Weeks1-4_MME_20261119.pdf"
   },
   "default_source": "mme",
   "default_view": "india",
-  "generated_at": "2026-11-18T14:35:35Z",
+  "generated_at": "2026-11-19T08:40:03Z",
   "global_viewer": {
     "anomaly_variables": [
       "precipitation",
@@ -4170,13 +4170,56 @@
     },
     {
       "category": "multi_model_ensemble",
-      "default_issue": "20261115",
+      "default_issue": "20261119",
       "description": "AI-based multi-model ensemble combining several AI and physics-based S2S forecast systems. Ensemble-mean fields for weeks 1\u20134.",
       "id": "mme",
       "label": "AI S2S multi-model ensemble mean",
       "short_label": "Multi-model",
       "status": "experimental",
       "issues": [
+        {
+          "forecast": "forecasts/mme/20261119.json",
+          "id": "20261119",
+          "initialization": "2026-11-19T00:00:00Z",
+          "members": null,
+          "role": "operational_experimental",
+          "status": "warning",
+          "available_products": [
+            "rainfall_total",
+            "temperature_mean",
+            "rainfall_anomaly",
+            "temperature_anomaly",
+            "wind850_mean",
+            "wind850_anomaly"
+          ],
+          "capabilities": {
+            "raw_fields": true,
+            "anomalies": true,
+            "wind850_mean": true,
+            "wind850_anomaly": true,
+            "regional_probabilities": false,
+            "pdf": true
+          },
+          "presentation": {
+            "section": "current",
+            "label": "Current guidance",
+            "member_class": "ensemble_mean"
+          },
+          "checksums": {
+            "forecast_sha256": "f90fbff169c994115284c1aacdff2c64f1da5b895ebf67baab23ce513de784f2",
+            "pdf_sha256": "667a6a7dea40e371f1a8351ac0c6b561e50eec6ee4f17db35ddf74bbd3d3d333"
+          },
+          "valid_through": "2026-12-16",
+          "published_at": "2026-11-19T08:39:56.522944+00:00",
+          "pdf": "downloads/mme/20261119/S2S_Research_India_Weeks1-4_MME_20261119.pdf",
+          "archive": {
+            "interactive_available": true,
+            "pdf_available": true,
+            "interactive_until": "2027-11-19T00:00:00Z",
+            "pdf_until": "2027-01-14T00:00:00Z",
+            "metadata": "indefinite"
+          }
+        },
         {
           "forecast": "forecasts/mme/20261115.json",
           "id": "20261115",
@@ -4201,8 +4244,8 @@
             "pdf": true
           },
           "presentation": {
-            "section": "current",
-            "label": "Current guidance",
+            "section": "archive",
+            "label": "Multi-model ensemble mean",
             "member_class": "ensemble_mean"
           },
           "checksums": {
@@ -4294,21 +4337,22 @@
     "regional_outlook": "regional/era5/20261007.json",
     "pdf": "downloads/era5/20261007/S2S_Research_India_Weeks1-4_ERA5_20261007.pdf"
   },
-  "latest_successful_issue": "20261115",
+  "latest_successful_issue": "20261119",
   "operations": {
     "status": "on_schedule",
-    "last_successful_at": "2026-11-18T14:34:07.183564+00:00",
-    "next_expected_at": "2026-11-18T12:00:00Z",
-    "stale_after": "2026-11-19T00:00:00Z"
+    "last_successful_at": "2026-11-19T08:39:56.522944+00:00",
+    "next_expected_at": "2026-11-22T12:00:00Z",
+    "stale_after": "2026-11-23T00:00:00Z"
   },
   "publication": {
     "cadence_days_utc": [
       "Wednesday",
+      "Thursday",
       "Sunday"
     ],
     "target_time_utc": "12:00",
-    "last_successful_at": "2026-11-18T14:34:07.183564+00:00",
-    "next_expected_at": "2026-11-18T12:00:00Z"
+    "last_successful_at": "2026-11-19T08:39:56.522944+00:00",
+    "next_expected_at": "2026-11-22T12:00:00Z"
   },
   "retention": {
     "interactive_days": 365,
