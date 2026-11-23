@@ -23,7 +23,7 @@
     "downloads": {
       "compact_json": "data/forecasts/mme/20261115.json",
       "india_pdf": "downloads/mme/20261115/S2S_Research_India_Weeks1-4_MME_20261115.pdf",
-      "india_pdf_sha256": "4f78203139d939711f409287cb04d338b65cee0863a41c2692791304feeaf7fc"
+      "india_pdf_sha256": "da9ad617fa2f0601974c08f3501d3aaedec94ad0175bce132344741481d93c64"
     },
     "available_products": [
       "rainfall_total",
