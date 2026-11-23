@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-23T03:20:00.291678+00:00",
+  "generated_at": "2026-11-23T03:20:11.593091+00:00",
   "deployed_commit": "pending-ci",
   "inventory_scope": "Every deployed public file except data/manifest.json itself, whose self-checksum would be recursive.",
   "files": [
@@ -1318,6 +1318,16 @@
       "path": "reports/s2s-summary-india-2026-11-19.pdf",
       "size_bytes": 4319702,
       "sha256": "6af7078357e579dcb017b50d7399e9d0781a11fe3e962053dccd68b39128f24d"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-11-22-cover.png",
+      "size_bytes": 418701,
+      "sha256": "83f44542c91cb5090c2e2139e8d144dda1dce300237c4d738d5cf287d24c1e46"
+    },
+    {
+      "path": "reports/s2s-summary-india-2026-11-22.pdf",
+      "size_bytes": 4316514,
+      "sha256": "d4883c1b10c91a4e78c8a44230bac377f51367fea0902c2055e2a344af16c924"
     },
     {
       "path": "team/ayush-raj.webp",
