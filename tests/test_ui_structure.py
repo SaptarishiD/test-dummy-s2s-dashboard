@@ -379,7 +379,7 @@ def test_shared_header_uses_the_page_rail_and_purpose_labeled_navigation() -> No
     assert ".site-nav a[aria-current=\"page\"]::after" in stylesheet
     assert ".site-nav a:focus-visible" in stylesheet
     assert ".site-nav a::after," in stylesheet
-    assert 'headerUtility.hidden = route === "team"' in main
+    assert 'headerStatus.hidden = route === "team"' in main
     assert "Latest run ·" in main
     assert "Latest briefing · ${FEATURED_REPORT.date}" in main
     assert "Catalogue through ·" in main

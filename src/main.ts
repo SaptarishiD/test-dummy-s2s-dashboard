@@ -211,6 +211,7 @@ function shell(): string {
             <span class="live-dot" aria-hidden="true"></span>
             <span class="header-status__label">Loading latest issue</span>
           </div>
+          <a class="header-subscribe" href="./#subscribe">Subscribe</a>
         </div>
       </div>
     </header>
@@ -271,9 +272,9 @@ async function renderRoute(data: AppData): Promise<void> {
         : formattedStatusDate
           ? `Latest run · ${formattedStatusDate}`
           : "Loading latest issue";
-  const headerUtility = document.querySelector<HTMLElement>(".header-utility")!;
   const headerStatus = document.querySelector<HTMLElement>(".header-status")!;
-  headerUtility.hidden = route === "team" || route === "subscribe";
+  headerStatus.hidden = route === "team" || route === "subscribe";
+  document.querySelector<HTMLElement>(".header-subscribe")!.hidden = route === "subscribe";
   headerStatus.dataset.state = route === "india" || route === "archive"
     ? "validated"
     : "context";
