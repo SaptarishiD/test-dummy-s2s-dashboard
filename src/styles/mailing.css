@@ -1,0 +1,146 @@
+/*
+ * Email subscription: the "Get the forecast by email" box on the Subscribe page.
+ * Colours come from the --mb-* tokens, which default to the dashboard's --ops-* tokens.
+ */
+
+.mailing-box {
+  --mb-ink: var(--ops-ink, #162033);
+  --mb-soft: var(--ops-ink-soft, #526174);
+  --mb-surface: var(--ops-surface, #ffffff);
+  --mb-field: #ffffff;
+  --mb-line: var(--ops-line, #dfe5ed);
+  --mb-line-strong: var(--ops-line-strong, #cbd4df);
+  --mb-accent: var(--ops-teal, #117c7e);
+  --mb-on-accent: #ffffff;
+  --mb-ok: #0b6b45;
+  --mb-error: #a42626;
+}
+
+/* Subscribe box */
+
+.mailing-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 20px 32px;
+  align-items: start;
+  color: var(--mb-ink);
+}
+
+.mailing-box__title {
+  display: block;
+  margin: 0;
+  color: var(--mb-ink);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 720;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.mailing-box__intro p {
+  margin: 6px 0 0;
+  color: var(--mb-soft);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.mailing-box__row {
+  display: flex;
+  gap: 8px;
+}
+
+.mailing-box__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--mb-ink);
+  background: var(--mb-field);
+  border: 1px solid var(--mb-line-strong);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.mailing-box__input::placeholder {
+  color: var(--mb-soft);
+  opacity: 0.8;
+}
+
+.mailing-box__button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 10px 18px;
+  color: var(--mb-on-accent);
+  background: var(--mb-accent);
+  border: 1px solid var(--mb-accent);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.mailing-box__button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.mailing-box__turnstile {
+  margin-top: 12px;
+  min-height: 65px;
+}
+
+.mailing-box__message {
+  margin: 10px 0 0;
+  color: var(--mb-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mailing-box__message:empty {
+  display: none;
+}
+
+.mailing-box__message[data-kind="ok"] {
+  color: var(--mb-ok);
+  font-weight: 650;
+}
+
+.mailing-box__message[data-kind="error"] {
+  color: var(--mb-error);
+  font-weight: 650;
+}
+
+/* Subscribe page */
+
+.subscribe-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.subscribe-card {
+  padding: 22px 24px;
+  background: var(--ops-surface, #fff);
+  border: 1px solid var(--ops-line, #dfe5ed);
+  border-radius: var(--ops-radius-lg, 12px);
+  box-shadow: var(--ops-shadow-sm, none);
+}
+
+@media (max-width: 800px) {
+  .mailing-box {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .subscribe-card {
+    padding: 18px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mailing-box__row {
+    flex-direction: column;
+  }
+}

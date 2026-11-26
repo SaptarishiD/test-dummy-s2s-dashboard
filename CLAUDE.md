@@ -109,7 +109,9 @@ catalog, not from hardcoded frontend assumptions.
 - `types.ts` mirrors the Python-produced JSON by hand — change it in lockstep with
   the exporters in `scripts/`.
 - `index.html` sets a strict CSP (`default-src 'self'`, no inline or remote scripts).
-  Nothing may be loaded from a CDN.
+  Nothing may be loaded from a CDN. The one exception is the Subscribe page (`#subscribe`, `src/components/SubscribeBox.ts`),
+  which loads Cloudflare Turnstile on first focus and POSTs to the mailing-list Worker; both origins are allow-listed
+  in the CSP (config in `src/lib/mailing-config.ts`).
 
 ### Tests are contract tests, not unit tests
 

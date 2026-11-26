@@ -1,6 +1,7 @@
 import "./styles/main.css";
 import "./styles/operational.css";
 import "./styles/probabilistic.css";
+import "./styles/mailing.css";
 import type {
   AppData,
   ForecastData,
@@ -19,13 +20,14 @@ import {
 } from "./lib/catalog";
 import { FEATURED_REPORT } from "./lib/reports";
 
-type Route = "india" | "archive" | "briefing" | "team";
+type Route = "india" | "archive" | "briefing" | "team" | "subscribe";
 
 const ROUTES = new Set<Route>([
   "india",
   "archive",
   "briefing",
   "team",
+  "subscribe",
 ]);
 const ROUTE_FOCUS_STORAGE_KEY = "fuxi-dashboard-focus-content";
 
@@ -80,7 +82,7 @@ async function loadData(): Promise<AppData> {
   );
   if (!activeDomain) throw new Error("No forecast domain is configured");
 
-  if (route === "briefing" || route === "team") {
+  if (route === "briefing" || route === "team" || route === "subscribe") {
     return { domainCatalog, activeDomain };
   }
 
@@ -250,6 +252,7 @@ async function renderRoute(data: AppData): Promise<void> {
   document.body.classList.toggle("archive-route", route === "archive");
   document.body.classList.toggle("briefing-route", route === "briefing");
   document.body.classList.toggle("team-route", route === "team");
+  document.body.classList.toggle("subscribe-route", route === "subscribe");
   const statusDate = data.forecast?.issue.initialization ??
     (data.index ? currentForecast(data.index)?.issue.initialization : undefined);
   const formattedStatusDate = statusDate
@@ -259,7 +262,7 @@ async function renderRoute(data: AppData): Promise<void> {
     : undefined;
   const statusLabel = route === "briefing"
     ? `Latest briefing · ${FEATURED_REPORT.date}`
-    : route === "team"
+    : route === "team" || route === "subscribe"
       ? ""
       : route === "archive"
         ? formattedStatusDate
@@ -270,7 +273,7 @@ async function renderRoute(data: AppData): Promise<void> {
           : "Loading latest issue";
   const headerUtility = document.querySelector<HTMLElement>(".header-utility")!;
   const headerStatus = document.querySelector<HTMLElement>(".header-status")!;
-  headerUtility.hidden = route === "team";
+  headerUtility.hidden = route === "team" || route === "subscribe";
   headerStatus.dataset.state = route === "india" || route === "archive"
     ? "validated"
     : "context";
@@ -301,6 +304,10 @@ async function renderRoute(data: AppData): Promise<void> {
   if (route === "team") {
     const { renderTeamPage } = await import("./pages/team");
     renderTeamPage(content);
+  }
+  if (route === "subscribe") {
+    const { renderSubscribePage } = await import("./pages/subscribe");
+    renderSubscribePage(content);
   }
   if (hasRenderedRoute || focusContentAfterRoute) {
     content.focus({ preventScroll: true });
